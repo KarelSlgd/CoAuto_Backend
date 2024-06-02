@@ -22,6 +22,10 @@ jobs:
         run: |
           cd get_data_user
           pip install -r requirements.txt
+      - name: Install dependencies for insert_data_user
+        run: |
+          cd insert_data_user
+          pip install -r requirements.txt
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
@@ -48,6 +52,10 @@ jobs:
       - name: Install dependencies for get_data_user
         run: |
           cd get_data_user
+          pip install -r requirements.txt
+      - name: Install dependencies for insert_data_user
+        run: |
+          cd insert_data_user
           pip install -r requirements.txt
       - name: Install AWS CLI
         run: |

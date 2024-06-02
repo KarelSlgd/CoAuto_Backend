@@ -56,7 +56,27 @@ Resources:
             Path: /get_data
             Method: get
 
+  InsertDataUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: insert_data_user/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UserApi
+            Path: /insert_data
+            Method: post
+
 Outputs:
   GetDataUserApiUrl:
-    Description: "API Gateway endpoint URL with path get_data for Prod stage to Student Model"
+    Description: "API Gateway endpoint URL with path get_data for Prod stage to User Model"
     Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data"
+  InsertDataUserApiUrl:
+    Description: "API Gateway endpoint URL with path insert_data for Prod stage to User Model"
+    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
