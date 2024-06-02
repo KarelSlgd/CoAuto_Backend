@@ -1,6 +1,5 @@
 import json
 import pymysql
-import bcrypt
 
 rds_host = 'integradora-desarrollo.cd4gi2og06nk.us-east-2.rds.amazonaws.com'
 rds_user = 'root'
@@ -21,18 +20,14 @@ def lambda_handler(event, __):
             'body': 'Missing parameters.'
         }
 
-    #hashed_password = hash_password(password)
     insert_into_user(name, email, phone_number, profile_image_url, role, password)
 
     return {
-        'statusCode': 200,
-        'body': 'User inserted successfully.'
+        "statusCode": 200,
+        "body": json.dumps({
+            "message": "user created"
+        }),
     }
-
-def hash_password(password):
-    salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed
 
 def insert_into_user(name, email, phone_number, profile_image_url, role, password):
     connection = pymysql.connect(
@@ -45,7 +40,8 @@ def insert_into_user(name, email, phone_number, profile_image_url, role, passwor
     try:
         with connection.cursor() as cursor:
             insert_query = """
-            INSERT INTO user (name, email, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, %s)
+                INSERT INTO user (name, email, phone_number, profile_image_url, role, password) 
+                VALUES (%s, %s, %s, %s, %s, SHA2(%s, 256))
             """
             cursor.execute(insert_query, (name, email, phone_number, profile_image_url, role, password))
             connection.commit()
