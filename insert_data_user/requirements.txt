@@ -1,3 +1,3 @@
 requests
 pymysql
-dotenv
+load_dotenv
