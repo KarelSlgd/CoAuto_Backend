@@ -39,7 +39,7 @@ def insert_into_user(name, email, phone_number, profile_image_url, role, passwor
     try:
         with connection.cursor() as cursor:
             insert_query = """
-            INSERT INTO user (name, email, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, SHA2(%s, 256))
+            INSERT INTO user (name, email, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, %s)
             """
             cursor.execute(insert_query, (name, email, phone_number, profile_image_url, role, password))
             connection.commit()
