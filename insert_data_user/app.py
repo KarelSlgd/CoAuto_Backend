@@ -1,10 +1,9 @@
 import pymysql
 
 rds_host = 'integradora-desarrollo.cd4gi2og06nk.us-east-2.rds.amazonaws.com'
-name2 = 'root'
-password2 = 'superroot'
-db_name = 'coauto'
-
+rds_user = 'root'
+rds_password = "superroot"
+rds_db = "coauto"
 
 def lambda_handler(event, __):
     email = event['pathParameters'].get('email')
@@ -14,28 +13,23 @@ def lambda_handler(event, __):
     role = event['pathParameters'].get('role')
     password = event['pathParameters'].get('password')
 
-    insert_into_user(name, email, phone_number, profile_image_url, role, password)
+    insert_into_user(email, name, phone_number, profile_image_url, role, password)
 
     return {
-        "statusCode": 200,
-        "body": "User inserted successfully."
+        'statusCode': 200,
+        'body': 'Record inserted successfully.'
     }
 
 
-def insert_into_user(name, email, phone_number, profile_image_url, role, password):
-    connection = pymysql.connect(
-        host=rds_host,
-        user=name2,
-        password=password2,
-        database=db_name
-    )
+def insert_into_user(email, name, phone_number, profile_image_url, role, password):
+    connection = pymysql.connect(host=rds_host, user=rds_user, password=rds_password, db=rds_db)
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("INSERT INTO user (name, email, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, %s)",
-                           (name, email, phone_number, profile_image_url, role, password))
+            insert_query = """
+            INSERT INTO user (email, name, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(insert_query, (email, name, phone_number, profile_image_url, role, password))
             connection.commit()
-    except Exception as e:
-        raise e
     finally:
         connection.close()
