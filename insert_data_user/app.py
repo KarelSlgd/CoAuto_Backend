@@ -25,9 +25,10 @@ def lambda_handler(event, __):
     return {
         "statusCode": 200,
         "body": json.dumps({
-            "message": "user created"
+            "message": "User inserted successfully.",
         }),
     }
+
 
 def insert_into_user(name, email, phone_number, profile_image_url, role, password):
     connection = pymysql.connect(
@@ -40,8 +41,7 @@ def insert_into_user(name, email, phone_number, profile_image_url, role, passwor
     try:
         with connection.cursor() as cursor:
             insert_query = """
-                INSERT INTO user (name, email, phone_number, profile_image_url, role, password) 
-                VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO user (name, email, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, SHA2(%s, 256))
             """
             cursor.execute(insert_query, (name, email, phone_number, profile_image_url, role, password))
             connection.commit()
