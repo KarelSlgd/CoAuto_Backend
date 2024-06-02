@@ -1,11 +1,12 @@
 import pymysql
+import os
 
-rds_host = 'integradora-desarrollo.cd4gi2og06nk.us-east-2.rds.amazonaws.com'
-rds_user = 'root'
-rds_password = "superroot"
-rds_db = "coauto"
+rds_host = os.environ['RDS_HOST']
+rds_user = os.environ['DB_USERNAME']
+rds_password = os.environ['DB_PASSWORD']
+rds_db = os.environ['DB_NAME']
 
-def lambda_handler(event, __):
+def lambda_handler(event, context):
     email = event['pathParameters'].get('email')
     name = event['pathParameters'].get('name')
     phone_number = event['pathParameters'].get('phone_number')
@@ -28,13 +29,11 @@ def lambda_handler(event, __):
 
 
 def insert_into_user(email, name, phone_number, profile_image_url, role, password):
-    connection = pymysql.connect(host=rds_host, user=rds_user, password=rds_password, db=rds_db)
+    connection = pymysql.connect(host=rds_host, user=rds_user, passwd=rds_password, db=rds_db)
 
     try:
         with connection.cursor() as cursor:
-            insert_query = """
-            INSERT INTO user (email, name, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, %s)
-            """
+            insert_query = "INSERT INTO user (email, name, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, %s)"
             cursor.execute(insert_query, (email, name, phone_number, profile_image_url, role, password))
             connection.commit()
     finally:
