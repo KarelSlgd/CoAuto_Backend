@@ -24,9 +24,7 @@ def lambda_handler(event, __):
 
     return {
         "statusCode": 200,
-        "body": json.dumps({
-            "message": "User inserted successfully.",
-        }),
+        "body": "User inserted successfully.",
     }
 
 
