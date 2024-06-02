@@ -3,9 +3,9 @@ import pymysql
 import bcrypt
 
 rds_host = 'integradora-desarrollo.cd4gi2og06nk.us-east-2.rds.amazonaws.com'
-user_name = 'root'
-db_password = 'superroot'
-db_name = 'coauto'
+rds_user = 'root'
+rds_password = 'superroot'
+rds_db = 'coauto'
 
 def lambda_handler(event, __):
     email = event['pathParameters'].get('email')
@@ -15,7 +15,7 @@ def lambda_handler(event, __):
     role = event['pathParameters'].get('role')
     password = event['pathParameters'].get('password')
 
-    if not email or not phone_number or not role or not password or not name:
+    if email is None or phone_number is None or name is None or role is None or password is None:
         return {
             'statusCode': 400,
             'body': 'Missing parameters.'
@@ -37,9 +37,9 @@ def hash_password(password):
 def insert_into_user(name, email, phone_number, profile_image_url, role, password):
     connection = pymysql.connect(
         host=rds_host,
-        user=user_name,
-        password=db_password,
-        database=db_name
+        user=rds_user,
+        password=rds_password,
+        db=rds_db
     )
 
     try:
