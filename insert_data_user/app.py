@@ -28,21 +28,14 @@ def lambda_handler(event, __):
 
 
 def insert_into_user(name, email, phone_number, profile_image_url, role, password):
-    connection = pymysql.connect(
-        host=rds_host,
-        user=rds_user,
-        password=rds_password,
-        db=rds_db
-    )
+    connection = pymysql.connect(host=rds_host, user=rds_user, password=rds_password, db=rds_db)
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute(
-                "INSERT INTO user (name, email, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, %s)",
-                (name, email, phone_number, profile_image_url, role, password)
-            )
+            insert_query = """
+                INSERT INTO user (name, email, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, %s)
+                """
+            cursor.execute(insert_query, (name, email, phone_number, profile_image_url, role, password))
             connection.commit()
-    except Exception as e:
-        raise e
     finally:
         connection.close()
