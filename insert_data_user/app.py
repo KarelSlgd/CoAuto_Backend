@@ -3,27 +3,26 @@ import pymysql
 import bcrypt
 
 rds_host = 'integradora-desarrollo.cd4gi2og06nk.us-east-2.rds.amazonaws.com'
-name = 'root'
+user_name = 'root'
 db_password = 'superroot'
 db_name = 'coauto'
 
 def lambda_handler(event, __):
-    body = json.loads(event["body"])
+    email = event['pathParameters'].get('email')
+    name = event['pathParameters'].get('name')
+    phone_number = event['pathParameters'].get('phone_number')
+    profile_image_url = event['pathParameters'].get('profile_image_url')
+    role = event['pathParameters'].get('role')
+    password = event['pathParameters'].get('password')
 
-    email = body.get("email")
-    phone_number = body.get("phone_number")
-    profile_image_url = body.get("profile_image_url")
-    role = body.get("role")
-    password = body.get("password")
-
-    if not email or not phone_number or not role or not password:
+    if not email or not phone_number or not role or not password or not name:
         return {
             'statusCode': 400,
             'body': 'Missing parameters.'
         }
 
     hashed_password = hash_password(password)
-    insert_into_user(email, phone_number, profile_image_url, role, hashed_password)
+    insert_into_user(name, email, phone_number, profile_image_url, role, hashed_password)
 
     return {
         'statusCode': 200,
@@ -35,10 +34,10 @@ def hash_password(password):
     hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed
 
-def insert_into_user(email, phone_number, profile_image_url, role, password):
+def insert_into_user(name, email, phone_number, profile_image_url, role, password):
     connection = pymysql.connect(
         host=rds_host,
-        user=name,
+        user=user_name,
         password=db_password,
         database=db_name
     )
@@ -46,9 +45,9 @@ def insert_into_user(email, phone_number, profile_image_url, role, password):
     try:
         with connection.cursor() as cursor:
             insert_query = """
-            INSERT INTO user (email, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO user (name, email, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, %s)
             """
-            cursor.execute(insert_query, (email, phone_number, profile_image_url, role, password))
+            cursor.execute(insert_query, (name, email, phone_number, profile_image_url, role, password))
             connection.commit()
     finally:
         connection.close()
