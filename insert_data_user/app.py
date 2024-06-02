@@ -1,7 +1,7 @@
 import pymysql
 
 rds_host = 'integradora-desarrollo.cd4gi2og06nk.us-east-2.rds.amazonaws.com'
-name = 'root'
+name2 = 'root'
 password2 = 'superroot'
 db_name = 'coauto'
 
@@ -25,16 +25,17 @@ def lambda_handler(event, __):
 def insert_into_user(name, email, phone_number, profile_image_url, role, password):
     connection = pymysql.connect(
         host=rds_host,
-        user=name,
+        user=name2,
         password=password2,
         database=db_name
     )
+
     try:
         with connection.cursor() as cursor:
-            insert_query = """
-                INSERT INTO user (name, email, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, %s)
-                """
-            cursor.execute(insert_query, (name, email, phone_number, profile_image_url, role, password))
+            cursor.execute("INSERT INTO user (name, email, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, %s)",
+                           (name, email, phone_number, profile_image_url, role, password))
             connection.commit()
+    except Exception as e:
+        raise e
     finally:
         connection.close()
