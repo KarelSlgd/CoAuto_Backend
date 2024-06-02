@@ -1,9 +1,10 @@
 import pymysql
 
 rds_host = 'integradora-desarrollo.cd4gi2og06nk.us-east-2.rds.amazonaws.com'
-rds_user = 'root'
-rds_password = 'superroot'
-rds_db = 'coauto'
+name = 'root'
+password2 = 'superroot'
+db_name = 'coauto'
+
 
 def lambda_handler(event, __):
     email = event['pathParameters'].get('email')
@@ -12,12 +13,6 @@ def lambda_handler(event, __):
     profile_image_url = event['pathParameters'].get('profile_image_url')
     role = event['pathParameters'].get('role')
     password = event['pathParameters'].get('password')
-
-    if not email or not name or not phone_number or not phone_number or not role or not password:
-        return {
-            'statusCode': 400,
-            'body': 'Missing parameters.'
-        }
 
     insert_into_user(name, email, phone_number, profile_image_url, role, password)
 
@@ -28,8 +23,12 @@ def lambda_handler(event, __):
 
 
 def insert_into_user(name, email, phone_number, profile_image_url, role, password):
-    connection = pymysql.connect(host=rds_host, user=rds_user, password=rds_password, db=rds_db)
-
+    connection = pymysql.connect(
+        host=rds_host,
+        user=name,
+        password=password2,
+        database=db_name
+    )
     try:
         with connection.cursor() as cursor:
             insert_query = """
