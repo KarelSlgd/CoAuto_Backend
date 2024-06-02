@@ -14,7 +14,7 @@ def lambda_handler(event, __):
     role = event['pathParameters'].get('role')
     password = event['pathParameters'].get('password')
 
-    if email is None or phone_number is None or name is None or role is None or password is None:
+    if not email or not name or not phone_number or not phone_number or not role or not password:
         return {
             'statusCode': 400,
             'body': 'Missing parameters.'
