@@ -13,6 +13,12 @@ def lambda_handler(event, __):
     role = event['pathParameters'].get('role')
     password = event['pathParameters'].get('password')
 
+    if not email or not name or not phone_number or not role or not password:
+        return {
+            'statusCode': 400,
+            'body': 'Missing parameters.'
+        }
+
     insert_into_user(email, name, phone_number, profile_image_url, role, password)
 
     return {
