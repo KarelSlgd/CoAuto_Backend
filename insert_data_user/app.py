@@ -1,4 +1,3 @@
-import json
 import pymysql
 
 rds_host = 'integradora-desarrollo.cd4gi2og06nk.us-east-2.rds.amazonaws.com'
@@ -24,7 +23,7 @@ def lambda_handler(event, __):
 
     return {
         "statusCode": 200,
-        "body": "User inserted successfully.",
+        "body": "User inserted successfully."
     }
 
 
@@ -38,9 +37,7 @@ def insert_into_user(name, email, phone_number, profile_image_url, role, passwor
 
     try:
         with connection.cursor() as cursor:
-            insert_query = """
-            INSERT INTO user (name, email, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, %s)
-            """
+            insert_query = """INSERT INTO user (name, email, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, %s)"""
             cursor.execute(insert_query, (name, email, phone_number, profile_image_url, role, password))
             connection.commit()
     finally:
