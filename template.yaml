@@ -70,7 +70,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref UserApi
-            Path: /insert_data/{email}/{name}/{phone_number}/{profile_image_url}/{role}/{password}
+            Path: /insert_data
             Method: post
 
 Outputs:
@@ -79,4 +79,4 @@ Outputs:
     Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data"
   InsertDataUserApiUrl:
     Description: "API Gateway endpoint URL with path insert_data for Prod stage to User Model"
-    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data/{email}/{name}/{phone_number}/{profile_image_url}/{role}/{password}"
+    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"

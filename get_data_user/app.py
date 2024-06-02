@@ -1,18 +1,17 @@
 import json
 import pymysql
 
-rds_host = 'integradora-desarrollo.cd4gi2og06nk.us-east-2.rds.amazonaws.com'
-name = 'root'
-password = 'superroot'
-db_name = 'coauto'
-
+rds_host = os.environ['RDS_HOST']
+rds_user = os.environ['DB_USERNAME']
+rds_password = os.environ['DB_PASSWORD']
+rds_db = os.environ['DB_NAME']
 
 def lambda_handler(event, context):
     connection = pymysql.connect(
         host=rds_host,
-        user=name,
-        password=password,
-        database=db_name
+        user=rds_user,
+        password=rds_password,
+        database=rds_db
     )
 
     users = []

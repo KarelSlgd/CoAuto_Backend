@@ -7,12 +7,12 @@ rds_password = os.environ['DB_PASSWORD']
 rds_db = os.environ['DB_NAME']
 
 def lambda_handler(event, context):
-    email = event['pathParameters'].get('email')
-    name = event['pathParameters'].get('name')
-    phone_number = event['pathParameters'].get('phone_number')
-    profile_image_url = event['pathParameters'].get('profile_image_url')
-    role = event['pathParameters'].get('role')
-    password = event['pathParameters'].get('password')
+    email = event['email']
+    name = event['name']
+    phone_number = event['phone_number']
+    profile_image_url = event['profile_image_url']
+    role = event['role']
+    password = event['password']
 
     if not email or not name or not phone_number or not role or not password:
         return {
@@ -33,7 +33,7 @@ def insert_into_user(email, name, phone_number, profile_image_url, role, passwor
 
     try:
         with connection.cursor() as cursor:
-            insert_query = "INSERT INTO user (email, name, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, %s)"
+            insert_query = "INSERT INTO user (email, name, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, SHA2(%s, 256))"
             cursor.execute(insert_query, (email, name, phone_number, profile_image_url, role, password))
             connection.commit()
     finally:
