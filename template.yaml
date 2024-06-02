@@ -80,3 +80,12 @@ Outputs:
   InsertDataUserApiUrl:
     Description: "API Gateway endpoint URL with path insert_data for Prod stage to User Model"
     Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
+  GetDataUserFunctionArn:
+    Description: "Get data user Lambda Function ARN"
+    Value: !GetAtt GetDataUserFunction.Arn
+  InsertDataUserFunctionArn:
+    Description: "Insert data user Lambda Function ARN"
+    Value: !GetAtt InsertDataUserFunction.Arn
+  LambdaExecutionRoleArn:
+    Description: "Lambda Execution Role ARN"
+    Value: !GetAtt LambdaExecutionRole.Arn
