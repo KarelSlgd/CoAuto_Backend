@@ -21,8 +21,8 @@ def lambda_handler(event, __):
             'body': 'Missing parameters.'
         }
 
-    hashed_password = hash_password(password)
-    insert_into_user(name, email, phone_number, profile_image_url, role, hashed_password)
+    #hashed_password = hash_password(password)
+    insert_into_user(name, email, phone_number, profile_image_url, role, password)
 
     return {
         'statusCode': 200,
