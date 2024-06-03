@@ -34,10 +34,10 @@ def lambda_handler(event, context):
             'body': 'Email exceeds 50 characters.'
         }
 
-    if not phone_number.isdigit():
+    if not re.match(r'^[0-9]+$', phone_number):
         return {
             'statusCode': 400,
-            'body': 'Invalid phone number format'
+            'body': 'Phone number must be numeric.'
         }
 
     if len(phone_number) >= 10:
