@@ -52,6 +52,12 @@ def lambda_handler(event, context):
             'body': 'Name exceeds 50 characters.'
         }
 
+    if verify_role(role):
+        return {
+            'statusCode': 400,
+            'body': 'Role does not exist.'
+        }
+
     response = insert_into_user(email, name, phone_number, profile_image_url, role, password)
 
     return response
@@ -79,3 +85,17 @@ def insert_into_user(email, name, phone_number, profile_image_url, role, passwor
         'statusCode': 200,
         'body': 'Record inserted successfully.'
     }
+
+def verify_role(role):
+    connection = pymysql.connect(host=rds_host, user=rds_user, passwd=rds_password, db=rds_db)
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id FROM role WHERE name = %s", (role))
+            result = cursor.fetchone()
+            if not result:
+                return True
+    except Exception as e:
+        return False
+    finally:
+        connection.close()
