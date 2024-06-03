@@ -1,5 +1,6 @@
 import pymysql
 import os
+import re
 
 rds_host = os.environ['RDS_HOST']
 rds_user = os.environ['DB_USERNAME']
@@ -20,12 +21,40 @@ def lambda_handler(event, context):
             'body': 'Missing parameters.'
         }
 
-    insert_into_user(email, name, phone_number, profile_image_url, role, password)
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(email_regex, email):
+        return {
+            'statusCode': 400,
+            'body': 'Invalid email format.'
+        }
 
-    return {
-        'statusCode': 200,
-        'body': 'Record inserted successfully.'
-    }
+    if len(email) >= 30:
+        return {
+            'statusCode': 400,
+            'body': 'Email exceeds 50 characters.'
+        }
+
+    if not phone_number.isdigit():
+        return {
+            'statusCode': 400,
+            'body': 'Invalid phone number format'
+        }
+
+    if len(phone_number) >= 10:
+        return {
+            'statusCode': 400,
+            'body': 'Phone number exceeds 10 characters.'
+        }
+
+    if len(name) > 50:
+        return {
+            'statusCode': 400,
+            'body': 'Name exceeds 50 characters.'
+        }
+
+    response = insert_into_user(email, name, phone_number, profile_image_url, role, password)
+
+    return response
 
 
 def insert_into_user(email, name, phone_number, profile_image_url, role, password):
@@ -36,5 +65,17 @@ def insert_into_user(email, name, phone_number, profile_image_url, role, passwor
             insert_query = "INSERT INTO user (email, name, phone_number, profile_image_url, role, password) VALUES (%s, %s, %s, %s, %s, SHA2(%s, 256))"
             cursor.execute(insert_query, (email, name, phone_number, profile_image_url, role, password))
             connection.commit()
+
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred: {}'.format(e)
+        }
+
     finally:
         connection.close()
+
+    return {
+        'statusCode': 200,
+        'body': 'Record inserted successfully.'
+    }
