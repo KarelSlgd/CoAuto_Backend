@@ -26,6 +26,14 @@ jobs:
         run: |
           cd insert_data_user
           pip install -r requirements.txt
+      - name: Install dependencies for update_data_user
+        run: |
+          cd update_data_user
+          pip install -r requirements.txt
+      - name: Install dependencies for delete_data_user
+        run: |
+          cd delete_data_user
+          pip install -r requirements.txt
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
@@ -53,8 +61,14 @@ jobs:
         run: |
           cd insert_data_user
           pip install -r requirements.txt
-        env:
-            RDS_HOST: ${{ secrets.RDS_HOST }}
+      - name: Install dependencies for update_data_user
+        run: |
+          cd update_data_user
+          pip install -r requirements.txt
+      - name: Install dependencies for delete_data_user
+        run: |
+          cd delete_data_user
+          pip install -r requirements.txt
       - name: Install AWS CLI
         run: |
           sudo apt-get update

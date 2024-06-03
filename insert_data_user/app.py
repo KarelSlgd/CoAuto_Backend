@@ -64,7 +64,12 @@ def lambda_handler(event, context):
 
 
 def insert_into_user(email, name, phone_number, profile_image_url, role, password):
-    connection = pymysql.connect(host=rds_host, user=rds_user, passwd=rds_password, db=rds_db)
+    connection = pymysql.connect(
+        host=rds_host,
+        user=rds_user,
+        password=rds_password,
+        database=rds_db
+    )
 
     try:
         with connection.cursor() as cursor:

@@ -75,6 +75,40 @@ Resources:
             Path: /insert_data
             Method: post
 
+  UpdateDataUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: update_data_user/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UserApi
+            Path: /update_data
+            Method: put
+
+  DeleteDataUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: delete_data_user/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UserApi
+            Path: /delete_data
+            Method: delete
+
 Outputs:
   GetDataUserApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to User Model"
@@ -82,12 +116,24 @@ Outputs:
   InsertDataUserApiUrl:
     Description: "API Gateway endpoint URL with path insert_data for Prod stage to User Model"
     Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
+  UpdateDataUserApiUrl:
+    Description: "API Gateway endpoint URL with path update_data for Prod stage to User Model"
+    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_data"
+  DeleteDataUserApiUrl:
+    Description: "API Gateway endpoint URL with path delete_data for Prod stage to User Model"
+    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_data"
   GetDataUserFunctionArn:
     Description: "Get data user Lambda Function ARN"
     Value: !GetAtt GetDataUserFunction.Arn
   InsertDataUserFunctionArn:
     Description: "Insert data user Lambda Function ARN"
     Value: !GetAtt InsertDataUserFunction.Arn
+  UpdateDataUserFunctionArn:
+    Description: "Update data user Lambda Function ARN"
+    Value: !GetAtt UpdateDataUserFunction.Arn
+  DeleteDataUserFunctionArn:
+    Description: "Delete data user Lambda Function ARN"
+    Value: !GetAtt DeleteDataUserFunction.Arn
   LambdaExecutionRoleArn:
     Description: "Lambda Execution Role ARN"
     Value: !GetAtt LambdaExecutionRole.Arn
