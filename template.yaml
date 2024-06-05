@@ -38,8 +38,6 @@ Resources:
     Properties:
       Name: UserApi
       StageName: Prod
-      Auth:
-        ApiKeyRequired: true
 
   GetDataUserFunction:
     Type: AWS::Serverless::Function
