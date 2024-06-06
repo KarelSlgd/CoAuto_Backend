@@ -30,6 +30,7 @@ def lambda_handler(event, context):
     weight = body.get('weight')
     details = body.get('details')
     id_status = body.get('id_status')
+    image_urls = body.get('image_urls', [])
 
     # Validate mandatory parameters
     if not model or not brand or not year or not price or not category or not fuel or not doors or not motor or not height or not width or not length or not weight or not id_status:
