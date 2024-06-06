@@ -122,7 +122,7 @@ def insert_into_car(model, brand, year, price, category, fuel, doors, motor, hei
 
     try:
         with connection.cursor() as cursor:
-            insert_query = """INSERT INTO car (model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status)  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,3)"""
+            insert_query = """INSERT INTO auto (model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status)  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)"""
             cursor.execute(insert_query, (model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status))
             connection.commit()
 
