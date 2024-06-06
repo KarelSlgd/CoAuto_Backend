@@ -7,6 +7,7 @@ rds_user = os.environ['DB_USERNAME']
 rds_password = os.environ['DB_PASSWORD']
 rds_db = os.environ['DB_NAME']
 
+
 def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
@@ -16,14 +17,14 @@ def lambda_handler(event, context):
             'body': 'Invalid request body.'
         }
 
-    id = body.get('id')
+    id_user = body.get('id')
     name = body.get('name')
     phone_number = body.get('phone_number')
-    profile_image_url = body.get('profile_image_url')
+    profile_image = body.get('profile_image')
     role = body.get('role')
     password = body.get('password')
 
-    if not id or not name or not phone_number or not role or not password:
+    if not id_user or not name or not phone_number or not role or not password:
         return {
             'statusCode': 400,
             'body': 'Missing parameters.'
@@ -35,10 +36,10 @@ def lambda_handler(event, context):
             'body': 'Name exceeds 50 characters.'
         }
 
-    if not re.match(r'^[0-9]+$', phone_number):
+    if len(phone_number) < 10:
         return {
             'statusCode': 400,
-            'body': 'Phone number must be numeric.'
+            'body': 'Phone number must be 10 characters.'
         }
 
     if len(phone_number) > 10:
@@ -53,12 +54,12 @@ def lambda_handler(event, context):
             'body': 'Role does not exist.'
         }
 
-    response = update_user(id, name, phone_number, profile_image_url, role, password)
+    response = update_user(id_user, name, profile_image, role, password)
 
     return response
 
 
-def update_user(id, name, phone_number, profile_image_url, role, password):
+def update_user(id_user, name, profile_image, role, password):
     connection = pymysql.connect(
         host=rds_host,
         user=rds_user,
@@ -69,8 +70,8 @@ def update_user(id, name, phone_number, profile_image_url, role, password):
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "UPDATE user SET name=%s, phone_number=%s, profile_image_url=%s, role=%s, password=SHA2(%s, 256) WHERE id=%s",
-                (name, phone_number, profile_image_url, role, password, id)
+                "UPDATE user SET name=%s, profile_image=%s, id_role=%s, password=SHA2(%s, 256) WHERE id=%s",
+                (name, profile_image, role, password, id_user)
             )
             connection.commit()
 
@@ -88,12 +89,18 @@ def update_user(id, name, phone_number, profile_image_url, role, password):
         'body': 'User updated successfully.'
     }
 
+
 def verify_role(role):
-    connection = pymysql.connect(host=rds_host, user=rds_user, passwd=rds_password, db=rds_db)
+    connection = pymysql.connect(
+        host=rds_host,
+        user=rds_user,
+        password=rds_password,
+        database=rds_db
+    )
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id FROM role WHERE name = %s", (role,))
+            cursor.execute("SELECT id_role FROM role WHERE id_role = %s", role)
             result = cursor.fetchone()
             return result is not None
     except Exception as e:
