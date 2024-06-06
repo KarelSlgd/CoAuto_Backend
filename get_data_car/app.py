@@ -20,7 +20,7 @@ def lambda_handler(event, context):
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id_auto, model, brand, year, category, fuel,doors,motor,heigth,width,length,weigth,detais,id_status FROM auto")
+            cursor.execute("SELECT id_auto, model, brand, year,price, category, fuel,doors,motor,height,width,length,weight,detais,id_status FROM auto")
             result = cursor.fetchall()
 
             for row in result:
@@ -28,17 +28,18 @@ def lambda_handler(event, context):
                     'id_auto': row[0],
                     'model': row[1],
                     'brand': row[2],
-                    'year': row[3],
-                    'category': row[4],
-                    'fuel': row[5],
-                    'doors':row[6],
-                    'motor':row[7],
-                    'heigth':row[8],
-                    'width':row[9],
-                    'length':row[10],
-                    'weigth':row[11],
-                    'detais':row[12],
-                    'id_Status':row[13]
+                    'price':row[3],
+                    'year': row[4],
+                    'category': row[5],
+                    'fuel': row[6],
+                    'doors':row[7],
+                    'motor':row[8],
+                    'height':row[9],
+                    'width':row[10],
+                    'length':row[11],
+                    'weight':row[12],
+                    'detais':row[13],
+                    'id_Status':row[14]
                 }
                 cars.append(car)
 
@@ -49,6 +50,6 @@ def lambda_handler(event, context):
         "statusCode": 200,
         "body": json.dumps({
             "message": "get cars",
-            "data": car
+            "data": cars
         }),
     }
