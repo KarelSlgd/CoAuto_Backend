@@ -17,14 +17,13 @@ def lambda_handler(event, context):
             'body': 'Invalid request body.'
         }
 
-    id_user = body.get('id')
+    id_user = body.get('id_user')
     name = body.get('name')
-    phone_number = body.get('phone_number')
     profile_image = body.get('profile_image')
-    role = body.get('role')
+    id_role = body.get('id_role')
     password = body.get('password')
 
-    if not id_user or not name or not phone_number or not role or not password:
+    if not id_user or not name or not id_role or not password:
         return {
             'statusCode': 400,
             'body': 'Missing parameters.'
@@ -36,30 +35,18 @@ def lambda_handler(event, context):
             'body': 'Name exceeds 50 characters.'
         }
 
-    if len(phone_number) < 10:
-        return {
-            'statusCode': 400,
-            'body': 'Phone number must be 10 characters.'
-        }
-
-    if len(phone_number) > 10:
-        return {
-            'statusCode': 400,
-            'body': 'Phone number exceeds 10 characters.'
-        }
-
-    if not verify_role(role):
+    if not verify_role(id_role):
         return {
             'statusCode': 400,
             'body': 'Role does not exist.'
         }
 
-    response = update_user(id_user, name, profile_image, role, password)
+    response = update_user(id_user, name, profile_image, id_role, password)
 
     return response
 
 
-def update_user(id_user, name, profile_image, role, password):
+def update_user(id_user, name, profile_image, id_role, password):
     connection = pymysql.connect(
         host=rds_host,
         user=rds_user,
@@ -71,7 +58,7 @@ def update_user(id_user, name, profile_image, role, password):
         with connection.cursor() as cursor:
             cursor.execute(
                 "UPDATE user SET name=%s, profile_image=%s, id_role=%s, password=SHA2(%s, 256) WHERE id=%s",
-                (name, profile_image, role, password, id_user)
+                (name, profile_image, id_role, password, id_user)
             )
             connection.commit()
 

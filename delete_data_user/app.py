@@ -1,24 +1,35 @@
 import pymysql
 import os
+import json
 
 rds_host = os.environ['RDS_HOST']
 rds_user = os.environ['DB_USERNAME']
 rds_password = os.environ['DB_PASSWORD']
 rds_db = os.environ['DB_NAME']
 
-def lambda_handler(event, context):
-    id = event['id']
-    status = event['status']
 
-    if not id or not status:
+def lambda_handler(event, context):
+    try:
+        body = json.loads(event['body'])
+    except (TypeError, KeyError, json.JSONDecodeError):
+        return {
+            'statusCode': 400,
+            'body': 'Invalid request body.'
+        }
+
+    id_user = body.get('id_user')
+    id_status = body.get('id_status')
+
+    if not id_user or not id_status:
         return {
             'statusCode': 400,
             'body': 'Missing parameters.'
         }
 
-    response = delete_user(id, status)
+    response = delete_user(id_user, id_status)
 
     return response
+
 
 def delete_user(id, status):
     connection = pymysql.connect(
@@ -30,13 +41,13 @@ def delete_user(id, status):
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("UPDATE user SET status=%s WHERE id=%s", (status, id))
+            cursor.execute("UPDATE user SET id_status=%s WHERE id_user=%s", (status, id))
             connection.commit()
 
     except Exception as e:
         return {
             'statusCode': 500,
-            'body': 'Failed to delete user.'
+            'body': f'Failed to update user: {str(e)}'
         }
 
     finally:
