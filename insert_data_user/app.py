@@ -1,6 +1,7 @@
 import pymysql
 import os
 import re
+import json
 
 rds_host = os.environ['RDS_HOST']
 rds_user = os.environ['DB_USERNAME']
@@ -8,12 +9,20 @@ rds_password = os.environ['DB_PASSWORD']
 rds_db = os.environ['DB_NAME']
 
 def lambda_handler(event, context):
-    email = event['email']
-    name = event['name']
-    phone_number = event['phone_number']
-    profile_image_url = event['profile_image_url']
-    role = event['role']
-    password = event['password']
+    try:
+        body = json.loads(event['body'])
+    except (TypeError, KeyError, json.JSONDecodeError):
+        return {
+            'statusCode': 400,
+            'body': 'Invalid request body.'
+        }
+
+    email = body.get('email')
+    name = body.get('name')
+    phone_number = body.get('phone_number')
+    profile_image_url = body.get('profile_image_url')
+    role = body.get('role')
+    password = body.get('password')
 
     if not email or not name or not phone_number or not role or not password:
         return {
@@ -28,7 +37,7 @@ def lambda_handler(event, context):
             'body': 'Invalid email format.'
         }
 
-    if len(email) >= 30:
+    if len(email) >= 50:
         return {
             'statusCode': 400,
             'body': 'Email exceeds 50 characters.'
@@ -40,7 +49,7 @@ def lambda_handler(event, context):
             'body': 'Phone number must be numeric.'
         }
 
-    if len(phone_number) >= 10:
+    if len(phone_number) > 10:
         return {
             'statusCode': 400,
             'body': 'Phone number exceeds 10 characters.'
@@ -52,7 +61,7 @@ def lambda_handler(event, context):
             'body': 'Name exceeds 50 characters.'
         }
 
-    if verify_role(role):
+    if not verify_role(role):
         return {
             'statusCode': 400,
             'body': 'Role does not exist.'
@@ -80,7 +89,7 @@ def insert_into_user(email, name, phone_number, profile_image_url, role, passwor
     except Exception as e:
         return {
             'statusCode': 500,
-            'body': 'An error occurred: {}'.format(e)
+            'body': f'An error occurred: {str(e)}'
         }
 
     finally:
@@ -96,10 +105,9 @@ def verify_role(role):
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id FROM role WHERE name = %s", (role))
+            cursor.execute("SELECT id FROM role WHERE name = %s", (role,))
             result = cursor.fetchone()
-            if not result:
-                return True
+            return result is not None
     except Exception as e:
         return False
     finally:
