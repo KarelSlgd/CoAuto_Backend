@@ -43,6 +43,11 @@ Resources:
     Properties:
       Name: CarApi
       StageName: Prod
+  RateApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: RateApi
+      StageName: Prod
 
   GetDataUserFunction:
     Type: AWS::Serverless::Function
@@ -129,6 +134,23 @@ Resources:
             Path: /get_data
             Method: get
 
+  GetDataRateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: get_data_rate/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataCar:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RateApi
+            Path: /get_data
+            Method: get
+
 Outputs:
   GetDataUserApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to User Model"
@@ -145,6 +167,9 @@ Outputs:
   GetDataCarApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to Car Model"
     Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data"
+  GetDataRateApiUrl:
+    Description: "API Gateway endpoint URL with path get_data for Prod stage to Rate Model"
+    Value: !Sub "https://${RateApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data"
   GetDataUserFunctionArn:
     Description: "Get data user Lambda Function ARN"
     Value: !GetAtt GetDataUserFunction.Arn
@@ -160,6 +185,9 @@ Outputs:
   GetDataCarFunctionArn:
     Description: "Get data car Lambda Function ARN"
     Value: !GetAtt GetDataCarFunction.Arn
+  GetDataRateFunctionArn:
+    Description: "Get data rate Lambda Function ARN"
+    Value: !GetAtt GetDataRateFunction.Arn
   LambdaExecutionRoleArn:
     Description: "Lambda Execution Role ARN"
     Value: !GetAtt LambdaExecutionRole.Arn

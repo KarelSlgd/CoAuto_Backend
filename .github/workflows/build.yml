@@ -34,6 +34,14 @@ jobs:
         run: |
           cd delete_data_user
           pip install -r requirements.txt
+      - name: Install dependencies for get_data_car
+        run: |
+          cd get_data_car
+          pip install -r requirements.txt
+      - name: Install dependencies for get_data_rate
+        run: |
+          cd get_data_rate
+          pip install -r requirements.txt
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
@@ -70,6 +78,14 @@ jobs:
       - name: Install dependencies for delete_data_user
         run: |
           cd delete_data_user
+          pip install -r requirements.txt
+      - name: Install dependencies for get_data_car
+        run: |
+          cd get_data_car
+          pip install -r requirements.txt
+      - name: Install dependencies for get_data_rate
+        run: |
+          cd get_data_rate
           pip install -r requirements.txt
       - name: Install AWS CLI
         run: |
