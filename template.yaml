@@ -122,7 +122,7 @@ Resources:
       Architectures:
         - x86_64
       Events:
-        GetDataUser:
+        GetDataCar:
           Type: Api
           Properties:
             RestApiId: !Ref CarApi
