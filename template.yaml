@@ -142,6 +142,9 @@ Outputs:
   DeleteDataUserApiUrl:
     Description: "API Gateway endpoint URL with path delete_data for Prod stage to User Model"
     Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_data"
+  GetDataCarApiUrl:
+    Description: "API Gateway endpoint URL with path get_data for Prod stage to Car Model"
+    Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data"
   GetDataUserFunctionArn:
     Description: "Get data user Lambda Function ARN"
     Value: !GetAtt GetDataUserFunction.Arn
@@ -154,14 +157,9 @@ Outputs:
   DeleteDataUserFunctionArn:
     Description: "Delete data user Lambda Function ARN"
     Value: !GetAtt DeleteDataUserFunction.Arn
-
-    GetDataCarApiUrl:
-      Description: "API Gateway endpoint URL with path get_data for Prod stage to Car Model"
-      Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data"
-    GetDataUserFunctionArn:
-      Description: "Get data car Lambda Function ARN"
-      Value: !GetAtt GetDataCarFunction.Arn
-
+  GetDataCarFunctionArn:
+    Description: "Get data car Lambda Function ARN"
+    Value: !GetAtt GetDataCarFunction.Arn
   LambdaExecutionRoleArn:
     Description: "Lambda Execution Role ARN"
     Value: !GetAtt LambdaExecutionRole.Arn
