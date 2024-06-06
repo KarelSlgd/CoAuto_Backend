@@ -32,21 +32,19 @@ def lambda_handler(event, context):
     id_status = body.get('id_status')
     image_urls = body.get('image_urls', [])
 
-    # Validate mandatory parameters
     if not model or not brand or not year or not price or not category or not fuel or not doors or not motor or not height or not width or not length or not weight or not id_status:
         return {
             'statusCode': 400,
             'body': 'Missing parameters.'
         }
 
-    # Perform necessary validations
-    if len(model) > 50:
+    if len(model) > 30:
         return {
             'statusCode': 400,
             'body': 'Model exceeds 50 characters.'
         }
 
-    if len(brand) > 50:
+    if len(brand) > 30:
         return {
             'statusCode': 400,
             'body': 'Brand exceeds 50 characters.'
@@ -108,12 +106,12 @@ def lambda_handler(event, context):
             'body': 'Weight must be a float.'
         }
 
-    response = insert_into_car(model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status)
+    response = insert_into_car(model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, image_urls)
 
     return response
 
 
-def insert_into_car(model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status):
+def insert_into_car(model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, image_urls):
     connection = pymysql.connect(
         host=rds_host,
         user=rds_user,
@@ -123,8 +121,15 @@ def insert_into_car(model, brand, year, price, category, fuel, doors, motor, hei
 
     try:
         with connection.cursor() as cursor:
-            insert_query = """INSERT INTO auto (model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status)  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s)"""
+            insert_query = """INSERT INTO auto (model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status)  
+                              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
             cursor.execute(insert_query, (model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status))
+            auto_id = cursor.lastrowid
+
+            for image_url in image_urls:
+                insert_image_query = "INSERT INTO auto_image (auto_id, image_url) VALUES (%s, %s)"
+                cursor.execute(insert_image_query, (auto_id, image_url))
+
             connection.commit()
 
     except Exception as e:
