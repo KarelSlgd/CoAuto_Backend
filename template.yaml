@@ -38,6 +38,11 @@ Resources:
     Properties:
       Name: UserApi
       StageName: Prod
+  CarApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: CarApi
+      StageName: Prod
 
   GetDataUserFunction:
     Type: AWS::Serverless::Function
@@ -107,6 +112,23 @@ Resources:
             Path: /delete_data
             Method: delete
 
+  GetDataCarFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: get_data_car/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataUser:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CarApi
+            Path: /get_data
+            Method: get
+
 Outputs:
   GetDataUserApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to User Model"
@@ -132,6 +154,14 @@ Outputs:
   DeleteDataUserFunctionArn:
     Description: "Delete data user Lambda Function ARN"
     Value: !GetAtt DeleteDataUserFunction.Arn
+
+    GetDataCarApiUrl:
+      Description: "API Gateway endpoint URL with path get_data for Prod stage to Car Model"
+      Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data"
+    GetDataUserFunctionArn:
+      Description: "Get data car Lambda Function ARN"
+      Value: !GetAtt GetDataCarFunction.Arn
+
   LambdaExecutionRoleArn:
     Description: "Lambda Execution Role ARN"
     Value: !GetAtt LambdaExecutionRole.Arn
