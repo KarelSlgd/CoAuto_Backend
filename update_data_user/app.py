@@ -57,7 +57,7 @@ def update_user(id_user, name, profile_image, id_role, password):
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "UPDATE user SET name=%s, profile_image=%s, id_role=%s, password=SHA2(%s, 256) WHERE id=%s",
+                "UPDATE user SET name=%s, profile_image=%s, id_role=%s, password=SHA2(%s, 256) WHERE id_user=%s",
                 (name, profile_image, id_role, password, id_user)
             )
             connection.commit()
