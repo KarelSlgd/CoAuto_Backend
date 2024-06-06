@@ -7,6 +7,7 @@ rds_user = os.environ['DB_USERNAME']
 rds_password = os.environ['DB_PASSWORD']
 rds_db = os.environ['DB_NAME']
 
+
 def lambda_handler(event, context):
     connection = pymysql.connect(
         host=rds_host,
@@ -19,16 +20,17 @@ def lambda_handler(event, context):
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id, email, phone_number, profile_image_url, role FROM user")
+            cursor.execute("SELECT id_user, email, name, profile_image, id_role, id_status FROM user")
             result = cursor.fetchall()
 
             for row in result:
                 user = {
-                    'id': row[0],
+                    'id_user': row[0],
                     'email': row[1],
-                    'phone_number': row[2],
-                    'profile_image_url': row[3],
-                    'role': row[4]
+                    'name': row[2],
+                    'profile_image': row[3],
+                    'id_role': row[4],
+                    'id_status': row[5]
                 }
                 users.append(user)
 
