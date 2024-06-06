@@ -167,6 +167,23 @@ Resources:
             RestApiId: !Ref CarApi
             Path: /insert_data
             Method: post
+  DeleteDataCarFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: delete_data_car/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CarApi
+            Path: /delete_data
+            Method: delete
+
 Outputs:
   GetDataUserApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to User Model"
@@ -207,6 +224,9 @@ Outputs:
   InsertDataCarApiUrl:
     Description: "API Gateway endpoint URL with path insert_data for Prod stage to Car Model"
     Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
+  DeleteDataCarFunctionArn:
+    Description: "Delete data car Lambda Function ARN"
+    Value: !GetAtt DeleteDataCarFunction.Arn
   LambdaExecutionRoleArn:
     Description: "Lambda Execution Role ARN"
     Value: !GetAtt LambdaExecutionRole.Arn
