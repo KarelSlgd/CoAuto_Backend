@@ -8,6 +8,7 @@ rds_user = os.environ['DB_USERNAME']
 rds_password = os.environ['DB_PASSWORD']
 rds_db = os.environ['DB_NAME']
 
+
 def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
@@ -16,10 +17,12 @@ def lambda_handler(event, context):
             'statusCode': 400,
             'body': 'Invalid request body.'
         }
+
     value = body.get('value')
     comment = body.get('comment')
     id_auto = body.get('id_auto')
     id_user = body.get('id_user')
+
     value_n = 0
     try:
         value_n = int(value)
@@ -54,19 +57,23 @@ def lambda_handler(event, context):
             'statusCode': 400,
             'body': 'User does not exist.'
         }
-    if not(verify_auto(id_auto)):
+    if not (verify_auto(id_auto)):
         return {
             'statusCode': 400,
             'body': 'Auto does not exist.'
         }
+
     response = insert_into_rate(value_n, comment, id_auto, id_user)
+
     return response
+
+
 def insert_into_rate(value, comment, id_auto, id_user):
     connection = pymysql.connect(
-        host = rds_host,
-        user = rds_user,
-        password = rds_password,
-        database = rds_db
+        host=rds_host,
+        user=rds_user,
+        password=rds_password,
+        database=rds_db
     )
     try:
         with connection.cursor() as cursor:
@@ -81,12 +88,18 @@ def insert_into_rate(value, comment, id_auto, id_user):
     finally:
         connection.close()
 
+    return {
+        'statusCode': 200,
+        'body': 'Rate inserted successfully.'
+    }
+
+
 def verify_user(id_user):
     connection = pymysql.connect(
-        host = rds_host,
-        user = rds_user,
-        password = rds_password,
-        database = rds_db
+        host=rds_host,
+        user=rds_user,
+        password=rds_password,
+        database=rds_db
     )
     try:
         with connection.cursor() as cursor:
@@ -97,19 +110,21 @@ def verify_user(id_user):
         return False
     finally:
         connection.close()
+
+
 def verify_auto(id_auto):
     connection = pymysql.connect(
-        host = rds_host,
-        user = rds_user,
-        password = rds_password,
-        database = rds_db
+        host=rds_host,
+        user=rds_user,
+        password=rds_password,
+        database=rds_db
     )
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT id_auto FROM auto WHERE id_auto = %s", id_auto)
             result = cursor.fetchone()
             return result is not None
-    except:
+    except Exception as e:
         return False
     finally:
         connection.close()

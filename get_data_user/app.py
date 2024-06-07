@@ -20,16 +20,16 @@ def lambda_handler(event, context):
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id_user, email, name, profile_image, id_role, id_status FROM user")
+            cursor.execute("SELECT id_user, email, u.name AS nameUser, profile_image, r.name as nameRole, id_status FROM user u INNER JOIN role r ON u.id_role = r.id_role;")
             result = cursor.fetchall()
 
             for row in result:
                 user = {
                     'id_user': row[0],
                     'email': row[1],
-                    'name': row[2],
+                    'nameUser': row[2],
                     'profile_image': row[3],
-                    'id_role': row[4],
+                    'nameRole': row[4],
                     'id_status': row[5]
                 }
                 users.append(user)
