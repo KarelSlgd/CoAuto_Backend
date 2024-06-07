@@ -150,10 +150,11 @@ Resources:
             RestApiId: !Ref RateApi
             Path: /get_data
             Method: get
+
   GetDataOneRateFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: get_data_one_rate/
+      CodeUri: get_one_data_rate/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -166,6 +167,7 @@ Resources:
             RestApiId: !Ref RateApi
             Path: /get_data_one
             Method: get
+
   InsertDataCarFunction:
     Type: AWS::Serverless::Function
     Properties:
