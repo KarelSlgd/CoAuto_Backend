@@ -136,7 +136,7 @@ def update_car(id_auto, model, year, price, category, fuel, doors, motor, height
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "UPDATE user SET model=%s, year=%s, price=%s, category=%s, fuel=%s, doors=%s, motor=%s, height=%s, width=%s, length=%s, weight=%s, details=%s, id_status=%s WHERE id_auto=%s",
+                "UPDATE auto SET model=%s, year=%s, price=%s, category=%s, fuel=%s, doors=%s, motor=%s, height=%s, width=%s, length=%s, weight=%s, details=%s, id_status=%s WHERE id_auto=%s",
                 (model, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, id_auto)
             )
 
