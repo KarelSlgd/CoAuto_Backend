@@ -141,32 +141,12 @@ def update_car(id_auto, model, brand, year, price, category, fuel, doors, motor,
                 (model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, id_auto)
             )
 
-            cursor.execute("SELECT url FROM auto_image WHERE id_auto = &s", id_auto)
-
-            urls_new_image = cursor.fetchall()
-            urls_new_image = [url[0] for url in urls_new_image]
-
-            urls_insert = list(set(image_urls) - set(urls_new_image))
-            urls_delete = list(set(urls_new_image) - set(image_urls))
-
-            for url in urls_insert:
-                cursor.execute(
-                    "INSERT INTO auto_image (id_auto, url) VALUES (%s, %s)",
-                    (id_auto, url)
-                )
-
-            for url in urls_delete:
-                cursor.execute(
-                    "DELETE FROM auto_image WHERE id_auto = %s AND url = %s",
-                    (id_auto, url)
-                )
-
             connection.commit()
 
     except Exception as e:
         return {
             'statusCode': 500,
-            'body': f'Failed to update user: {str(e)}'
+            'body': f'Failed to update car: {str(e)}'
         }
 
     finally:
