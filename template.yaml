@@ -150,6 +150,22 @@ Resources:
             RestApiId: !Ref RateApi
             Path: /get_data
             Method: get
+  InsertDataRateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: insert_data_rate/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CarApi
+            Path: /insert_data
+            Method: post
 
   InsertDataCarFunction:
     Type: AWS::Serverless::Function
@@ -204,6 +220,9 @@ Outputs:
   GetDataRateFunctionArn:
     Description: "Get data rate Lambda Function ARN"
     Value: !GetAtt GetDataRateFunction.Arn
+  InsertDataRateFunctionArn:
+    Description: "Insert data rate Lambda Function ARN"
+    Value: !GetAtt InsertDataRateFunction.Arn
   InsertDataCarApiUrl:
     Description: "API Gateway endpoint URL with path insert_data for Prod stage to Car Model"
     Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"

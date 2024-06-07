@@ -56,7 +56,6 @@ def lambda_handler(event, context):
         }
 
     response = insert_into_user(email, name, profile_image, id_role, password)
-
     return response
 
 
