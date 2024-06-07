@@ -20,7 +20,7 @@ def lambda_handler(event, context):
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id_user, email, u.name AS nameUser, profile_image, r.name as nameRole, id_status FROM user u INNER JOIN role r ON u.id_role = r.id_role;")
+            cursor.execute("SELECT id_user, email, u.name AS nameUser, profile_image, r.name as nameRole, s.value FROM user u INNER JOIN role r ON u.id_role = r.id_role INNER JOIN status s ON u.id_status = s.id_status;")
             result = cursor.fetchall()
 
             for row in result:
@@ -30,7 +30,7 @@ def lambda_handler(event, context):
                     'nameUser': row[2],
                     'profile_image': row[3],
                     'nameRole': row[4],
-                    'id_status': row[5]
+                    'status': row[5]
                 }
                 users.append(user)
 
