@@ -34,7 +34,7 @@ def lambda_handler(event, context):
     id_status = body.get('id_status')
 
     # Validate mandatory parameters
-    if not id_auto or not model or not brand or not year or not price or not category or not fuel or not doors or not motor or not height or not length or not weight or not id_status:
+    if not id_auto or not model or not brand or not year or not price or not category or not fuel or not doors or not motor or not height or not width or not length or not weight or not id_status:
         return {
             'statusCode': 400,
             'body': 'Missing parameters.'
@@ -121,11 +121,11 @@ def lambda_handler(event, context):
             'body': 'Weight must be a float.'
         }
 
-    response = update_car(id_auto, model, year, price, category, fuel, doors, motor, height, weight, length, details, id_status)
+    response = update_car(id_auto, model, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status)
 
     return response
 
-def update_car(id_auto, model, year, price, category, fuel, doors, motor, height, weight, length, details, id_status):
+def update_car(id_auto, model, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status):
     connection = pymysql.connect(
         host=rds_host,
         user=rds_user,
@@ -136,8 +136,8 @@ def update_car(id_auto, model, year, price, category, fuel, doors, motor, height
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "UPDATE user SET model=%s, year=%s, price=%s, category=%s, fuel=%s, doors=%s, motor=%s, height=%s, width=%s, length=%s, details=%s, id_status=%s WHERE id_auto=%s",
-                (model, year, price, category, fuel, doors, motor, height, width, length, details, id_status, id_auto)
+                "UPDATE user SET model=%s, year=%s, price=%s, category=%s, fuel=%s, doors=%s, motor=%s, height=%s, width=%s, length=%s, weight=%s, details=%s, id_status=%s WHERE id_auto=%s",
+                (model, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, id_auto)
             )
 
             connection.commit()
