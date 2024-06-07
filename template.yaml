@@ -150,7 +150,22 @@ Resources:
             RestApiId: !Ref RateApi
             Path: /get_data
             Method: get
-
+  GetDataOneRateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: get_data__one_rate/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataCar:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RateApi
+            Path: /get_data_one
+            Method: get
   InsertDataCarFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -184,6 +199,22 @@ Resources:
             Path: /delete_data
             Method: delete
 
+  UpdateDataCarFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: update_data_car/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CarApi
+            Path: /update_data
+            Method: put
 Outputs:
   GetDataUserApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to User Model"
@@ -221,9 +252,16 @@ Outputs:
   GetDataRateFunctionArn:
     Description: "Get data rate Lambda Function ARN"
     Value: !GetAtt GetDataRateFunction.Arn
+  GetDataOneRateFunctionArn:
+    Description: "Get data one rate Lambda Function ARN"
+    Value: !GetAtt GetDataOnwRateFunction.Arn
   InsertDataCarApiUrl:
     Description: "API Gateway endpoint URL with path insert_data for Prod stage to Car Model"
     Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
+
+  UpdateDataCarApiUrl:
+    Description: "API Gateway endpoint URL with path update_data for Prod stage to Car Model"
+    Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_data"
   DeleteDataCarFunctionArn:
     Description: "Delete data car Lambda Function ARN"
     Value: !GetAtt DeleteDataCarFunction.Arn
