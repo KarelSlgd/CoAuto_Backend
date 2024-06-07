@@ -20,7 +20,7 @@ def lambda_handler(event, context):
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id_auto, model, brand, year,price, category, fuel,doors,motor,height,width,length,weight,details,id_status FROM auto")
+            cursor.execute("SELECT id_auto, model, brand, year,price, category, fuel,doors,motor,height,width,length,weight,details,s.value FROM auto a INNER JOIN status s ON a.id_status = s.id_status")
             result = cursor.fetchall()
 
             for row in result:
@@ -39,7 +39,7 @@ def lambda_handler(event, context):
                     'length':row[11],
                     'weight':row[12],
                     'details':row[13],
-                    'id_Status':row[14]
+                    'status':row[14]
                 }
                 cars.append(car)
 
