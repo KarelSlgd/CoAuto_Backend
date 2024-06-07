@@ -126,6 +126,7 @@ def lambda_handler(event, context):
     return response
 
 def update_car(id_auto, model, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status):
+    # Conection db
     connection = pymysql.connect(
         host=rds_host,
         user=rds_user,
