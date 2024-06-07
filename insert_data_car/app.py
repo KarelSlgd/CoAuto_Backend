@@ -127,7 +127,7 @@ def insert_into_car(model, brand, year, price, category, fuel, doors, motor, hei
             auto_id = cursor.lastrowid
 
             for image_url in image_urls:
-                insert_image_query = "INSERT INTO auto_image (auto_id, image_url) VALUES (%s, %s)"
+                insert_image_query = "INSERT INTO auto_image (id_auto, image_url) VALUES (%s, %s)"
                 cursor.execute(insert_image_query, (auto_id, image_url))
 
             connection.commit()
