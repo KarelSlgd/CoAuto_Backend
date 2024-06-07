@@ -150,6 +150,7 @@ Resources:
             RestApiId: !Ref RateApi
             Path: /get_data
             Method: get
+
   InsertDataRateFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -163,7 +164,7 @@ Resources:
         GetDataStudent:
           Type: Api
           Properties:
-            RestApiId: !Ref CarApi
+            RestApiId: !Ref RateApi
             Path: /insert_data
             Method: post
 
@@ -200,6 +201,7 @@ Resources:
             RestApiId: !Ref CarApi
             Path: /insert_data
             Method: post
+
   DeleteDataCarFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -233,6 +235,7 @@ Resources:
             RestApiId: !Ref CarApi
             Path: /update_data
             Method: put
+
 Outputs:
   GetDataUserApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to User Model"
@@ -246,12 +249,27 @@ Outputs:
   DeleteDataUserApiUrl:
     Description: "API Gateway endpoint URL with path delete_data for Prod stage to User Model"
     Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_data"
+
   GetDataCarApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to Car Model"
     Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data"
+  InsertDataCarApiUrl:
+    Description: "API Gateway endpoint URL with path insert_data for Prod stage to Car Model"
+    Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
+  UpdateDataCarApiUrl:
+    Description: "API Gateway endpoint URL with path update_data for Prod stage to Car Model"
+    Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_data"
+  DeleteDataCarApiUrl:
+    Description: "API Gateway endpoint URL with path delete_data for Prod stage to Car Model"
+    Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_data"
+
   GetDataRateApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to Rate Model"
     Value: !Sub "https://${RateApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data"
+  InsertDataRateApiUrl:
+    Description: "API Gateway endpoint URL with path insert_data for Prod stage to Rate Model"
+    Value: !Sub "https://${RateApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
+
   GetDataUserFunctionArn:
     Description: "Get data user Lambda Function ARN"
     Value: !GetAtt GetDataUserFunction.Arn
@@ -264,9 +282,20 @@ Outputs:
   DeleteDataUserFunctionArn:
     Description: "Delete data user Lambda Function ARN"
     Value: !GetAtt DeleteDataUserFunction.Arn
+
   GetDataCarFunctionArn:
     Description: "Get data car Lambda Function ARN"
     Value: !GetAtt GetDataCarFunction.Arn
+  InsertDataCarFunctionArn:
+    Description: "Insert data car Lambda Function ARN"
+    Value: !GetAtt InsertDataCarFunction.Arn
+  UpdateDataCarFunctionArn:
+    Description: "Update data car Lambda Function ARN"
+    Value: !GetAtt UpdateDataCarFunction.Arn
+  DeleteDataCarFunctionArn:
+    Description: "Delete data car Lambda Function ARN"
+    Value: !GetAtt DeleteDataCarFunction.Arn
+
   GetDataRateFunctionArn:
     Description: "Get data rate Lambda Function ARN"
     Value: !GetAtt GetDataRateFunction.Arn
@@ -276,16 +305,7 @@ Outputs:
   InsertDataRateFunctionArn:
     Description: "Insert data rate Lambda Function ARN"
     Value: !GetAtt InsertDataRateFunction.Arn
-  InsertDataCarApiUrl:
-    Description: "API Gateway endpoint URL with path insert_data for Prod stage to Car Model"
-    Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
 
-  UpdateDataCarApiUrl:
-    Description: "API Gateway endpoint URL with path update_data for Prod stage to Car Model"
-    Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_data"
-  DeleteDataCarFunctionArn:
-    Description: "Delete data car Lambda Function ARN"
-    Value: !GetAtt DeleteDataCarFunction.Arn
   LambdaExecutionRoleArn:
     Description: "Lambda Execution Role ARN"
     Value: !GetAtt LambdaExecutionRole.Arn

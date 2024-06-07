@@ -18,6 +18,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.12'
+
       - name: Install dependencies for get_data_user
         run: |
           cd get_data_user
@@ -34,18 +35,37 @@ jobs:
         run: |
           cd delete_data_user
           pip install -r requirements.txt
+
       - name: Install dependencies for get_data_car
         run: |
           cd get_data_car
+          pip install -r requirements.txt
+      - name: Install dependencies for insert_data_car
+        run: |
+          cd insert_data_car
           pip install -r requirements.txt
       - name: Install dependencies for update_data_car
         run: |
           cd update_data_car
           pip install -r requirements.txt
+      - name: Install dependencies for delete_data_car
+        run: |
+          cd delete_data_car
+          pip install -r requirements.txt
+
       - name: Install dependencies for get_data_rate
         run: |
           cd get_data_rate
           pip install -r requirements.txt
+      - name: Install dependencies for insert_data_rate
+        run: |
+          cd insert_data_rate
+          pip install -r requirements.txt
+      - name: Install dependencies for get_one_data_rate
+        run: |
+          cd get_one_data_rate
+          pip install -r requirements.txt
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
@@ -83,18 +103,37 @@ jobs:
         run: |
           cd delete_data_user
           pip install -r requirements.txt
+
       - name: Install dependencies for get_data_car
         run: |
           cd get_data_car
           pip install -r requirements.txt
-      - name: Install dependencies for get_data_rate
+      - name: Install dependencies for insert_data_car
         run: |
-          cd get_data_rate
+          cd insert_data_car
           pip install -r requirements.txt
       - name: Install dependencies for update_data_car
         run: |
           cd update_data_car
           pip install -r requirements.txt
+      - name: Install dependencies for delete_data_car
+        run: |
+          cd delete_data_car
+          pip install -r requirements.txt
+
+      - name: Install dependencies for get_data_rate
+        run: |
+          cd get_data_rate
+          pip install -r requirements.txt
+      - name: Install dependencies for get_one_data_rate
+        run: |
+          cd get_one_data_rate
+          pip install -r requirements.txt
+      - name: Install dependencies for insert_data_rate
+        run: |
+          cd insert_data_rate
+          pip install -r requirements.txt
+
       - name: Install AWS CLI
         run: |
           sudo apt-get update
