@@ -151,6 +151,23 @@ Resources:
             Path: /get_data
             Method: get
 
+  GetOneDataRateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: get_data_one_rate/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataCar:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RateApi
+            Path: /get_data_one
+            Method: get
+
   InsertDataCarFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -203,6 +220,9 @@ Outputs:
   GetDataRateApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to Rate Model"
     Value: !Sub "https://${RateApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data"
+  GetDataOneRateApiUrl:
+    Description: "API Gateway endpoint URL with path get_data_one for Prod stage to Rate Model"
+    Value: !Sub "https://${RateApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data_one"
   GetDataUserFunctionArn:
     Description: "Get data user Lambda Function ARN"
     Value: !GetAtt GetDataUserFunction.Arn
@@ -221,6 +241,9 @@ Outputs:
   GetDataRateFunctionArn:
     Description: "Get data rate Lambda Function ARN"
     Value: !GetAtt GetDataRateFunction.Arn
+  GetOneDataRateFunctionArn:
+    Description: "Get data One rate Lambda Function ARN"
+    Value: !GetAtt GetOneDataRateFunction.Arn
   InsertDataCarApiUrl:
     Description: "API Gateway endpoint URL with path insert_data for Prod stage to Car Model"
     Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
