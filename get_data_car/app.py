@@ -20,7 +20,7 @@ def lambda_handler(event, context):
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id_auto, model, brand, year,price, category, fuel,doors,motor,height,width,length,weight,detais,id_status FROM auto")
+            cursor.execute("SELECT id_auto, model, brand, year,price, category, fuel,doors,motor,height,width,length,weight,details,id_status FROM auto")
             result = cursor.fetchall()
 
             for row in result:
@@ -38,7 +38,7 @@ def lambda_handler(event, context):
                     'width':row[10],
                     'length':row[11],
                     'weight':row[12],
-                    'detais':row[13],
+                    'details':row[13],
                     'id_Status':row[14]
                 }
                 cars.append(car)
