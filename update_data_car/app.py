@@ -7,6 +7,7 @@ rds_user = os.environ['DB_USERNAME']
 rds_password = os.environ['DB_PASSWORD']
 rds_db = os.environ['DB_NAME']
 
+
 def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
@@ -16,8 +17,9 @@ def lambda_handler(event, context):
             'body': 'Invalid request body.'
         }
 
-    model = body.get('model')
-    brand = body.get('brand')
+    id_auto = body.get('id_auto')
+    model = body.get('brand')
+    brand = body.get('model')
     year = body.get('year')
     price = body.get('price')
     category = body.get('category')
@@ -30,24 +32,37 @@ def lambda_handler(event, context):
     weight = body.get('weight')
     details = body.get('details')
     id_status = body.get('id_status')
-    image_urls = body.get('image_urls', [])
 
-    if not model or not brand or not year or not price or not category or not fuel or not doors or not motor or not height or not width or not length or not weight or not id_status:
+    # Validate mandatory parameters
+    if not id_auto or not model or not brand or not year or not price or not category or not fuel or not doors or not motor or not height or not length or not weight or not id_status:
         return {
             'statusCode': 400,
             'body': 'Missing parameters.'
         }
 
+    # Perform necessary validations
     if len(model) > 30:
         return {
             'statusCode': 400,
-            'body': 'Model exceeds 50 characters.'
+            'body': 'Model exceeds 30 characters'
         }
 
     if len(brand) > 30:
         return {
             'statusCode': 400,
-            'body': 'Brand exceeds 50 characters.'
+            'body': 'Brand exceeds 30 characters'
+        }
+
+    if len(category) > 20:
+        return {
+            'statusCode': 400,
+            'body': 'Category exceeds 20 characters'
+        }
+
+    if len(fuel) > 20:
+        return {
+            'statusCode': 400,
+            'body': 'Fuel exceeds 20 characters'
         }
 
     try:
@@ -106,12 +121,11 @@ def lambda_handler(event, context):
             'body': 'Weight must be a float.'
         }
 
-    response = insert_into_car(model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, image_urls)
+    response = update_car(id_auto, model, year, price, category, fuel, doors, motor, height, weight, length, details, id_status)
 
     return response
 
-
-def insert_into_car(model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, image_urls):
+def update_car(id_auto, model, year, price, category, fuel, doors, motor, height, weight, length, details, id_status):
     connection = pymysql.connect(
         host=rds_host,
         user=rds_user,
@@ -121,21 +135,17 @@ def insert_into_car(model, brand, year, price, category, fuel, doors, motor, hei
 
     try:
         with connection.cursor() as cursor:
-            insert_query = """INSERT INTO auto (model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status)  
-                              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-            cursor.execute(insert_query, (model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status))
-            auto_id = cursor.lastrowid
-
-            for image_url in image_urls:
-                insert_image_query = "INSERT INTO auto_image (id_auto, url) VALUES (%s, %s)"
-                cursor.execute(insert_image_query, (auto_id, image_url))
+            cursor.execute(
+                "UPDATE user SET model=%s, year=%s, price=%s, category=%s, fuel=%s, doors=%s, motor=%s, height=%s, width=%s, length=%s, details=%s, id_status=%s WHERE id_auto=%s",
+                (model, year, price, category, fuel, doors, motor, height, width, length, details, id_status, id_auto)
+            )
 
             connection.commit()
 
     except Exception as e:
         return {
             'statusCode': 500,
-            'body': f'An error occurred: {str(e)}'
+            'body': f'Failed to update user: {str(e)}'
         }
 
     finally:
@@ -143,5 +153,5 @@ def insert_into_car(model, brand, year, price, category, fuel, doors, motor, hei
 
     return {
         'statusCode': 200,
-        'body': 'Record inserted successfully.'
+        'body': 'Car updated successfully.'
     }
