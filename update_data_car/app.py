@@ -32,6 +32,7 @@ def lambda_handler(event, context):
     weight = body.get('weight')
     details = body.get('details')
     id_status = body.get('id_status')
+    image_urls = body.get('image_urls', [])
 
     # Validate mandatory parameters
     if not id_auto or not model or not brand or not year or not price or not category or not fuel or not doors or not motor or not height or not width or not length or not weight or not id_status:
@@ -121,12 +122,11 @@ def lambda_handler(event, context):
             'body': 'Weight must be a float.'
         }
 
-    response = update_car(id_auto, model, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status)
+    response = update_car(id_auto, model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, image_urls)
 
     return response
 
-def update_car(id_auto, model, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status):
-    # Conection db
+def update_car(id_auto, model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, image_urls):
     connection = pymysql.connect(
         host=rds_host,
         user=rds_user,
@@ -137,9 +137,29 @@ def update_car(id_auto, model, year, price, category, fuel, doors, motor, height
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "UPDATE auto SET model=%s, year=%s, price=%s, category=%s, fuel=%s, doors=%s, motor=%s, height=%s, width=%s, length=%s, weight=%s, details=%s, id_status=%s WHERE id_auto=%s",
-                (model, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, id_auto)
+                "UPDATE auto SET model=%s, brand=%s, year=%s, price=%s, category=%s, fuel=%s, doors=%s, motor=%s, height=%s, width=%s, length=%s, weight=%s, details=%s, id_status=%s WHERE id_auto=%s",
+                (model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, id_auto)
             )
+
+            cursor.execute("SELECT url FROM auto_image WHERE id_auto = &s", id_auto)
+
+            urls_new_image = cursor.fetchall()
+            urls_new_image = [url[0] for url in urls_new_image]
+
+            urls_insert = list(set(image_urls) - set(urls_new_image))
+            urls_delete = list(set(urls_new_image) - set(image_urls))
+
+            for url in urls_insert:
+                cursor.execute(
+                    "INSERT INTO auto_image (id_auto, url) VALUES (%s, %s)",
+                    (id_auto, url)
+                )
+
+            for url in urls_delete:
+                cursor.execute(
+                    "DELETE FROM auto_image WHERE id_auto = %s AND url = %s",
+                    (id_auto, url)
+                )
 
             connection.commit()
 
