@@ -48,6 +48,11 @@ Resources:
     Properties:
       Name: RateApi
       StageName: Prod
+  CognitoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: CognitoApi
+      StageName: Prod
 
   GetDataUserFunction:
     Type: AWS::Serverless::Function
@@ -249,7 +254,7 @@ Resources:
         GetDataStudent:
           Type: Api
           Properties:
-            RestApiId: !Ref UserApi
+            RestApiId: !Ref CognitoApi
             Path: /register
             Method: post
 
