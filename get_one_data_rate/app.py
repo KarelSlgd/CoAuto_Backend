@@ -14,9 +14,9 @@ rds_db = os.getenv('DB_NAME')
 def lambda_handler(event, context):
     print("Received event:", json.dumps(event))
 
-    #id_auto = event['queryStringParameters'].get('id_auto')
-    body = json.loads(event['body'])
-    id_auto = body['id_auto']
+    id_auto = event['queryStringParameters'].get('id_auto')
+    #body = json.loads(event['body'])
+    #id_auto = body['id_auto']
 
     if not id_auto:
         return {
