@@ -35,7 +35,6 @@ jobs:
 
       - name: Install dependencies for rate service
         run: |
-          cd get_data_rate
           pip install -r get_data_rate/requirements.txt
           pip install -r insert_data_rate/requirements.txt
           pip install -r get_one_data_rate/requirements.txt
@@ -81,7 +80,6 @@ jobs:
 
       - name: Install dependencies for rate service
         run: |
-          cd get_data_rate
           pip install -r get_data_rate/requirements.txt
           pip install -r get_one_data_rate/requirements.txt
           pip install -r insert_data_rate/requirements.txt
