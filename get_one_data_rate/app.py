@@ -1,17 +1,22 @@
+from dotenv import load_dotenv
 import json
 import pymysql
 import os
 
-rds_host = os.environ['RDS_HOST']
-rds_user = os.environ['DB_USERNAME']
-rds_password = os.environ['DB_PASSWORD']
-rds_db = os.environ['DB_NAME']
+load_dotenv()
+
+rds_host = os.getenv('RDS_HOST')
+rds_user = os.getenv('DB_USERNAME')
+rds_password = os.getenv('DB_PASSWORD')
+rds_db = os.getenv('DB_NAME')
 
 
 def lambda_handler(event, context):
     print("Received event:", json.dumps(event))
 
-    id_auto = event['queryStringParameters'].get('id_auto')
+    #id_auto = event['queryStringParameters'].get('id_auto')
+    body = json.loads(event['body'])
+    id_auto = body['id_auto']
 
     if not id_auto:
         return {
