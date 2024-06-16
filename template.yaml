@@ -294,7 +294,7 @@ Outputs:
 
   ResigterUserApiUrl:
     Description: "API Gateway endpoint URL with path register_user for Prod stage to User Model"
-    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/register"
+    Value: !Sub "https://${CognitoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/register"
 
   GetDataUserFunctionArn:
     Description: "Get data user Lambda Function ARN"
