@@ -236,6 +236,21 @@ Resources:
             Path: /update_data
             Method: put
 
+  RegisterUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: register_user/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UserApi
+
 Outputs:
   GetDataUserApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to User Model"
@@ -269,6 +284,10 @@ Outputs:
   InsertDataRateApiUrl:
     Description: "API Gateway endpoint URL with path insert_data for Prod stage to Rate Model"
     Value: !Sub "https://${RateApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
+
+  ResigterUserApiUrl:
+    Description: "API Gateway endpoint URL with path register_user for Prod stage to User Model"
+    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/register_user"
 
   GetDataUserFunctionArn:
     Description: "Get data user Lambda Function ARN"
@@ -305,6 +324,10 @@ Outputs:
   InsertDataRateFunctionArn:
     Description: "Insert data rate Lambda Function ARN"
     Value: !GetAtt InsertDataRateFunction.Arn
+
+  RegisterUserFunctionArn:
+    Description: "Register user Lambda Function ARN"
+    Value: !GetAtt RegisterUserFunction.Arn
 
   LambdaExecutionRoleArn:
     Description: "Lambda Execution Role ARN"

@@ -19,52 +19,30 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install dependencies for get_data_user
+      - name: Install dependencies for user service
         run: |
-          cd get_data_user
-          pip install -r requirements.txt
-      - name: Install dependencies for insert_data_user
-        run: |
-          cd insert_data_user
-          pip install -r requirements.txt
-      - name: Install dependencies for update_data_user
-        run: |
-          cd update_data_user
-          pip install -r requirements.txt
-      - name: Install dependencies for delete_data_user
-        run: |
-          cd delete_data_user
-          pip install -r requirements.txt
+          pip install -r get_data_user/requirements.txt
+          pip install -r insert_data_user/requirements.txt
+          pip install -r update_data_user/requirements.txt
+          pip install -r delete_data_user/requirements.txt
 
-      - name: Install dependencies for get_data_car
+      - name: Install dependencies for car service
         run: |
-          cd get_data_car
-          pip install -r requirements.txt
-      - name: Install dependencies for insert_data_car
-        run: |
-          cd insert_data_car
-          pip install -r requirements.txt
-      - name: Install dependencies for update_data_car
-        run: |
-          cd update_data_car
-          pip install -r requirements.txt
-      - name: Install dependencies for delete_data_car
-        run: |
-          cd delete_data_car
-          pip install -r requirements.txt
+          pip install -r get_data_car/requirements.txt
+          pip install -r insert_data_car/requirements.txt
+          pip install -r update_data_car/requirements.txt
+          pip install -r delete_data_car/requirements.txt
 
-      - name: Install dependencies for get_data_rate
+      - name: Install dependencies for rate service
         run: |
           cd get_data_rate
-          pip install -r requirements.txt
-      - name: Install dependencies for insert_data_rate
+          pip install -r get_data_rate/requirements.txt
+          pip install -r insert_data_rate/requirements.txt
+          pip install -r get_one_data_rate/requirements.txt
+
+      - name: Install dependencies for cognito service
         run: |
-          cd insert_data_rate
-          pip install -r requirements.txt
-      - name: Install dependencies for get_one_data_rate
-        run: |
-          cd get_one_data_rate
-          pip install -r requirements.txt
+          pip install -r register/requirements.txt
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -87,52 +65,30 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.12'
-      - name: Install dependencies for get_data_user
+      - name: Install dependencies for user service
         run: |
-          cd get_data_user
-          pip install -r requirements.txt
-      - name: Install dependencies for insert_data_user
-        run: |
-          cd insert_data_user
-          pip install -r requirements.txt
-      - name: Install dependencies for update_data_user
-        run: |
-          cd update_data_user
-          pip install -r requirements.txt
-      - name: Install dependencies for delete_data_user
-        run: |
-          cd delete_data_user
-          pip install -r requirements.txt
+          pip install -r get_data_user/requirements.txt
+          pip install -r insert_data_user/requirements.txt
+          pip install -r update_data_user/requirements.txt
+          pip install -r delete_data_user/requirements.txt
 
-      - name: Install dependencies for get_data_car
+      - name: Install dependencies for car service
         run: |
-          cd get_data_car
-          pip install -r requirements.txt
-      - name: Install dependencies for insert_data_car
-        run: |
-          cd insert_data_car
-          pip install -r requirements.txt
-      - name: Install dependencies for update_data_car
-        run: |
-          cd update_data_car
-          pip install -r requirements.txt
-      - name: Install dependencies for delete_data_car
-        run: |
-          cd delete_data_car
-          pip install -r requirements.txt
+          pip install -r get_data_car/requirements.txt
+          pip install -r insert_data_car/requirements.txt
+          pip install -r update_data_car/requirements.txt
+          pip install -r delete_data_car/requirements.txt
 
-      - name: Install dependencies for get_data_rate
+      - name: Install dependencies for rate service
         run: |
           cd get_data_rate
-          pip install -r requirements.txt
-      - name: Install dependencies for get_one_data_rate
+          pip install -r get_data_rate/requirements.txt
+          pip install -r get_one_data_rate/requirements.txt
+          pip install -r insert_data_rate/requirements.txt
+
+      - name: Install dependencies for cognito service
         run: |
-          cd get_one_data_rate
-          pip install -r requirements.txt
-      - name: Install dependencies for insert_data_rate
-        run: |
-          cd insert_data_rate
-          pip install -r requirements.txt
+          pip install -r register/requirements.txt
 
       - name: Install AWS CLI
         run: |
