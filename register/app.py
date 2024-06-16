@@ -31,3 +31,9 @@ def get_secret():
 
 secrets = get_secret()
 
+
+def lambda_handler(event, context):
+    body = json.loads(event['body'])
+
+    password = body['password']
+    email = body['email']
