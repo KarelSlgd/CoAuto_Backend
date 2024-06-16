@@ -250,6 +250,8 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref UserApi
+            Path: /register
+            Method: post
 
 Outputs:
   GetDataUserApiUrl:
@@ -287,7 +289,7 @@ Outputs:
 
   ResigterUserApiUrl:
     Description: "API Gateway endpoint URL with path register_user for Prod stage to User Model"
-    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/register_user"
+    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/register"
 
   GetDataUserFunctionArn:
     Description: "Get data user Lambda Function ARN"
