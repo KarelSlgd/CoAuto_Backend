@@ -1,5 +1,3 @@
-import os
-import boto3
 from dotenv import load_dotenv
 import json
 import boto3
@@ -26,8 +24,6 @@ def get_secret():
         )
         secret = get_secret_value_response['SecretString']
     except ClientError as e:
-        # For a list of exceptions thrown, see
-        # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
         raise e
 
     return json.loads(secret)
@@ -35,44 +31,3 @@ def get_secret():
 
 secrets = get_secret()
 
-
-def lambda_handler(event, context):
-    try:
-        body = json.loads(event['body'])
-
-        password = body['password']
-        email = body['email']
-
-        if not email or not password:
-            return {
-                'statusCode': 400,
-                'body': json.dumps('Missing parameters.')
-            }
-
-        register_user(email, password, secrets)
-
-    except Exception as e:
-        return {
-            'statusCode': 500,
-            'body': json.dumps('Internal server error.')
-        }
-
-
-def register_user(email, password, secret):
-    client = boto3.client('cognito-idp')
-    response = client.sign_up(
-        ClientId=secret['COGNITO_CLIENT_ID'],
-        Username=email,
-        Password=password,
-        UserAttributes=[
-            {
-                'Name': 'email',
-                'Value': email
-            }
-        ]
-    )
-
-    return {
-        'statusCode': 200,
-        'body': json.dumps('User registered successfully.')
-    }
