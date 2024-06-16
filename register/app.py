@@ -10,3 +10,10 @@ def lambda_handler(event, context):
 
     password = body['password']
     email = body['email']
+
+    return {
+        'statusCode': 200,
+        'body': json.dumps({
+            'message': 'User registered successfully.'
+        })
+    }
