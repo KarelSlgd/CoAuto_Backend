@@ -293,7 +293,7 @@ Outputs:
     Value: !Sub "https://${RateApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
 
   ResigterUserApiUrl:
-    Description: "API Gateway endpoint URL with path register_user for Prod stage to User Model"
+    Description: "API Gateway endpoint URL with path register for Prod stage to Cognito Model"
     Value: !Sub "https://${CognitoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/register"
 
   GetDataUserFunctionArn:
