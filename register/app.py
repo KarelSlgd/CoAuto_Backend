@@ -38,7 +38,7 @@ def lambda_handler(event, context):
         }
 
     password = body.get('password')
-    email = body.get('brand')
+    email = body.get('email')
 
     try:
         secret = get_secret()
