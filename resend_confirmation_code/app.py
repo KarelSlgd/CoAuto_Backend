@@ -46,7 +46,7 @@ def lambda_handler(event, context):
 
     try:
         secret = get_secret()
-        response = resend_confirmation_code(email, secret)
+        response = resend_code(email, secret)
         return response
     except Exception as e:
         return {
@@ -55,7 +55,7 @@ def lambda_handler(event, context):
         }
 
 
-def resend_confirmation_code(email, secret):
+def resend_code(email, secret):
     try:
         client = boto3.client('cognito-idp')
         secret_hash = calculate_secret_hash(secret['COGNITO_CLIENT_ID'], secret['SECRET_KEY'], email)
