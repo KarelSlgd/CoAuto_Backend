@@ -32,9 +32,8 @@ def get_secret():
 
 
 def calculate_secret_hash(client_id, secret_key, username):
-    message = bytes(username + client_id, 'utf-8')
-    key = bytes(secret_key, 'utf-8')
-    dig = hmac.new(key, msg=message, digestmod=hashlib.sha256).digest()
+    message = username + client_id
+    dig = hmac.new(secret_key.encode('utf-8'),message.encode('utf-8'),hashlib.sha256).digest()
     return base64.b64encode(dig).decode()
 
 
@@ -67,22 +66,14 @@ def register_user(email, password, secret):
         secret_hash = calculate_secret_hash(secret['COGNITO_CLIENT_ID'], secret['SECRET_KEY'], email)
         response = client.sign_up(
             ClientId=secret['COGNITO_CLIENT_ID'],
+            SecretHash=secret_hash,
             Username=email,
             Password=password,
-            SecretHash=secret_hash,
             UserAttributes=[
                 {
                     'Name': 'email',
                     'Value': email
                 },
-                {
-                    'Name': 'picture',
-                    'Value': ''
-                },
-                {
-                    'Name': 'name',
-                    'Value': ''
-                }
             ]
         )
         return response
