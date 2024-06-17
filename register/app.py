@@ -10,7 +10,6 @@ load_dotenv()
 
 
 def get_secret():
-
     secret_name = "COAUTO"
     region_name = "us-east-1"
 
@@ -33,7 +32,7 @@ def get_secret():
 
 def calculate_secret_hash(client_id, secret_key, username):
     message = username + client_id
-    dig = hmac.new(secret_key.encode('utf-8'),message.encode('utf-8'),hashlib.sha256).digest()
+    dig = hmac.new(secret_key.encode('utf-8'), message.encode('utf-8'), hashlib.sha256).digest()
     return base64.b64encode(dig).decode()
 
 
@@ -74,9 +73,12 @@ def register_user(email, password, secret):
                     'Name': 'email',
                     'Value': email
                 },
+                {
+                    'Name': 'picture',
+                    'Value': ''
+                }
             ]
         )
-        return response
 
     except Exception as e:
         return {
