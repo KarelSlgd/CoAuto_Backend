@@ -3,7 +3,7 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   CoAutoBackend
 
-  Sample SAM Template for CoAuto_Backend
+  App CoAutoBackend para Desarrollo Web Integral
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -33,10 +33,10 @@ Resources:
                   - logs:PutLogEvents
                 Resource: arn:aws:logs:*:*:*
 
-  UsersApi:
+  UserApi:
     Type: AWS::Serverless::Api
     Properties:
-      Name: UsersApi
+      Name: UserApi
       StageName: Prod
   CarApi:
     Type: AWS::Serverless::Api
@@ -67,7 +67,7 @@ Resources:
         GetDataUser:
           Type: Api
           Properties:
-            RestApiId: !Ref UsersApi
+            RestApiId: !Ref UserApi
             Path: /get_data
             Method: get
 
@@ -84,7 +84,7 @@ Resources:
         GetDataStudent:
           Type: Api
           Properties:
-            RestApiId: !Ref UsersApi
+            RestApiId: !Ref UserApi
             Path: /insert_data
             Method: post
 
@@ -101,7 +101,7 @@ Resources:
         GetDataStudent:
           Type: Api
           Properties:
-            RestApiId: !Ref UsersApi
+            RestApiId: !Ref UserApi
             Path: /update_data
             Method: put
 
@@ -118,7 +118,7 @@ Resources:
         GetDataStudent:
           Type: Api
           Properties:
-            RestApiId: !Ref UsersApi
+            RestApiId: !Ref UserApi
             Path: /delete_data
             Method: delete
 
@@ -261,16 +261,16 @@ Resources:
 Outputs:
   GetDataUserApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to User Model"
-    Value: !Sub "https://${UsersApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data"
+    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data"
   InsertDataUserApiUrl:
     Description: "API Gateway endpoint URL with path insert_data for Prod stage to User Model"
-    Value: !Sub "https://${UsersApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
+    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
   UpdateDataUserApiUrl:
     Description: "API Gateway endpoint URL with path update_data for Prod stage to User Model"
-    Value: !Sub "https://${UsersApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_data"
+    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_data"
   DeleteDataUserApiUrl:
     Description: "API Gateway endpoint URL with path delete_data for Prod stage to User Model"
-    Value: !Sub "https://${UsersApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_data"
+    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_data"
 
   GetDataCarApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to Car Model"
