@@ -1,55 +1,74 @@
+from dotenv import load_dotenv
 import json
-import pymysql
-import os
+import boto3
+from botocore.exceptions import ClientError
 
-rds_host = os.environ['RDS_HOST']
-rds_user = os.environ['DB_USERNAME']
-rds_password = os.environ['DB_PASSWORD']
-rds_db = os.environ['DB_NAME']
+load_dotenv()
+
+
+def get_secret():
+
+    secret_name = "COAUTO"
+    region_name = "us-east-1"
+
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='secretsmanager',
+        region_name=region_name
+    )
+
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+        secret = get_secret_value_response['SecretString']
+    except ClientError as e:
+        raise e
+
+    return json.loads(secret)
+
+
 
 
 def lambda_handler(event, context):
-    connection = pymysql.connect(
-        host=rds_host,
-        user=rds_user,
-        password=rds_password,
-        database=rds_db
+    try:
+        body = json.loads(event['body'])
+
+        password = body['password']
+        email = body['email']
+
+        if not email or not password:
+            return {
+                'statusCode': 400,
+                'body': json.dumps('Missing parameters.')
+            }
+
+        secrets = get_secret()
+
+        register_user(email, password, secrets)
+
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': json.dumps('Internal server error.')
+        }
+
+
+def register_user(email, password, secret):
+    client = boto3.client('cognito-idp')
+    response = client.sign_up(
+        ClientId=secret['COGNITO_CLIENT_ID'],
+        Username=email,
+        Password=password,
+        UserAttributes=[
+            {
+                'Name': 'email',
+                'Value': email
+            }
+        ]
     )
 
-    cars = []
-
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT id_auto, model, brand, year,price, category, fuel,doors,motor,height,width,length,weight,details,s.value FROM auto a INNER JOIN status s ON a.id_status = s.id_status")
-            result = cursor.fetchall()
-
-            for row in result:
-                car = {
-                    'id_auto': row[0],
-                    'model': row[1],
-                    'brand': row[2],
-                    'price':row[3],
-                    'year': row[4],
-                    'category': row[5],
-                    'fuel': row[6],
-                    'doors':row[7],
-                    'motor':row[8],
-                    'height':row[9],
-                    'width':row[10],
-                    'length':row[11],
-                    'weight':row[12],
-                    'details':row[13],
-                    'status':row[14]
-                }
-                cars.append(car)
-
-    finally:
-        connection.close()
-
     return {
-        "statusCode": 200,
-        "body": json.dumps({
-            "message": "get cars",
-            "data": cars
-        }),
+        'statusCode': 200,
+        'body': json.dumps('User registered successfully.')
     }
