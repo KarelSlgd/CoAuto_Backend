@@ -43,9 +43,9 @@ def lambda_handler(event, context):
                 'body': json.dumps('Missing parameters.')
             }
 
-        secrets = get_secret()
+        return get_secret()
 
-        register_user(email, password, secrets)
+        #register_user(email, password, secrets)
 
     except Exception as e:
         return {
