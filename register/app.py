@@ -50,7 +50,9 @@ def lambda_handler(event, context):
     except Exception as e:
         return {
             'statusCode': 500,
-            'body': json.dumps('Internal server error.')
+            'body': json.dumps(f"An error occurred: {str(e)}")
+            'password': 'password',
+            'email': 'email'
         }
 
 
