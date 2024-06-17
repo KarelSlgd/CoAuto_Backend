@@ -2,10 +2,10 @@ import json
 import pymysql
 import os
 
-rds_host = os.environ['RDS_HOST']
-rds_user = os.environ['DB_USERNAME']
-rds_password = os.environ['DB_PASSWORD']
-rds_db = os.environ['DB_NAME']
+rds_host = os.getenv('RDS_HOST')
+rds_user = os.getenv('DB_USERNAME')
+rds_password = os.getenv('DB_PASSWORD')
+rds_db = os.getenv('DB_NAME')
 
 
 def lambda_handler(event, context):
