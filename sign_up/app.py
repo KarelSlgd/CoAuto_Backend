@@ -1,12 +1,9 @@
-from dotenv import load_dotenv
+from botocore.exceptions import ClientError
 import json
 import boto3
-from botocore.exceptions import ClientError
 import hmac
 import hashlib
 import base64
-
-load_dotenv()
 
 
 def get_secret():
@@ -47,10 +44,12 @@ def lambda_handler(event, context):
 
     password = body.get('password')
     email = body.get('email')
+    picture = body.get('picture')
+    name = body.get('name')
 
     try:
         secret = get_secret()
-        response = register_user(email, password, secret)
+        response = register_user(email, password, picture, name, secret)
         return response
     except Exception as e:
         return {
@@ -59,7 +58,7 @@ def lambda_handler(event, context):
         }
 
 
-def register_user(email, password, secret):
+def register_user(email, password, picture, name, secret):
     try:
         client = boto3.client('cognito-idp')
         secret_hash = calculate_secret_hash(secret['COGNITO_CLIENT_ID'], secret['SECRET_KEY'], email)
@@ -75,11 +74,11 @@ def register_user(email, password, secret):
                 },
                 {
                     'Name': 'picture',
-                    'Value': 'aaa'
+                    'Value': picture
                 },
                 {
                     'Name': 'name',
-                    'Value': 'aaaaa'
+                    'Value': name
                 }
 
             ]
@@ -93,5 +92,5 @@ def register_user(email, password, secret):
 
     return {
         'statusCode': 200,
-        'body': json.dumps({'message': 'User registration successful', 'user': response['UserSub']})
+        'body': json.dumps({'message': 'Send verification code', 'user': response['UserSub']})
     }

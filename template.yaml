@@ -244,7 +244,7 @@ Resources:
   RegisterUserFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: register/
+      CodeUri: sign_up/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -256,6 +256,40 @@ Resources:
           Properties:
             RestApiId: !Ref CognitoApi
             Path: /register
+            Method: post
+
+  ConfirmSignUpFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: confirm_sign_up/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CognitoApi
+            Path: /confirm_sign_up
+            Method: post
+
+  ResendConfirmationCodeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: resend_confirmation_code/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CognitoApi
+            Path: /resend_confirmation_code
             Method: post
 
 Outputs:
@@ -292,9 +326,15 @@ Outputs:
     Description: "API Gateway endpoint URL with path insert_data for Prod stage to Rate Model"
     Value: !Sub "https://${RateApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
 
-  ResigterUserApiUrl:
-    Description: "API Gateway endpoint URL with path register for Prod stage to Cognito Model"
+  SignUpUserApiUrl:
+    Description: "API Gateway endpoint URL with path sign_up for Prod stage to Cognito Model"
     Value: !Sub "https://${CognitoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/register"
+  ConfirmSignUpApiUrl:
+    Description: "API Gateway endpoint URL with path confirm_sign_up for Prod stage to Cognito Model"
+    Value: !Sub "https://${CognitoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/confirm_sign_up"
+  ResendConfirmationCodeApiUrl:
+    Description: "API Gateway endpoint URL with path resend_confirmation_code for Prod stage to Cognito Model"
+    Value: !Sub "https://${CognitoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/resend_confirmation_code"
 
   GetDataUserFunctionArn:
     Description: "Get data user Lambda Function ARN"
@@ -335,6 +375,12 @@ Outputs:
   RegisterUserFunctionArn:
     Description: "Register user Lambda Function ARN"
     Value: !GetAtt RegisterUserFunction.Arn
+  ConfirmSignUpFunctionArn:
+    Description: "Confirm sign up Lambda Function ARN"
+    Value: !GetAtt ConfirmSignUpFunction.Arn
+  ResendConfirmationCodeFunctionArn:
+    Description: "Resend confirmation code Lambda Function ARN"
+    Value: !GetAtt ResendConfirmationCodeFunction.Arn
 
   LambdaExecutionRoleArn:
     Description: "Lambda Execution Role ARN"

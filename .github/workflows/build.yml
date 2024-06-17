@@ -41,7 +41,9 @@ jobs:
 
       - name: Install dependencies for cognito service
         run: |
-          pip install -r register/requirements.txt
+          pip install -r sign_up/requirements.txt
+          pip install -r resend_confirmation_code/requirements.txt
+          pip install -r confirm_sign_up/requirements.txt
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -86,7 +88,9 @@ jobs:
 
       - name: Install dependencies for cognito service
         run: |
-          pip install -r register/requirements.txt
+          pip install -r sign_up/requirements.txt
+          pip install -r resend_confirmation_code/requirements.txt
+          pip install -r confirm_sign_up/requirements.txt
 
       - name: Install AWS CLI
         run: |
