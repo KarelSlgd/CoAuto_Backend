@@ -2,6 +2,9 @@ from dotenv import load_dotenv
 import json
 import boto3
 from botocore.exceptions import ClientError
+import hmac
+import hashlib
+import base64
 
 load_dotenv()
 
@@ -26,6 +29,13 @@ def get_secret():
         raise e
 
     return json.loads(secret)
+
+
+def calculate_secret_hash(client_id, secret_key, username):
+    message = bytes(username + client_id, 'utf-8')
+    key = bytes(secret_key, 'utf-8')
+    dig = hmac.new(key, msg=message, digestmod=hashlib.sha256).digest()
+    return base64.b64encode(dig).decode()
 
 
 def lambda_handler(event, context):
@@ -54,10 +64,12 @@ def lambda_handler(event, context):
 def register_user(email, password, secret):
     try:
         client = boto3.client('cognito-idp')
+        secret_hash = calculate_secret_hash(secret['COGNITO_CLIENT_ID'], secret['SECRET_KEY'], email)
         response = client.sign_up(
             ClientId=secret['COGNITO_CLIENT_ID'],
             Username=email,
             Password=password,
+            SecretHash=secret_hash,
             UserAttributes=[
                 {
                     'Name': 'email',
