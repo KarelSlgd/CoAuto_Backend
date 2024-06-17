@@ -28,31 +28,30 @@ def get_secret():
     return json.loads(secret)
 
 
-
-
 def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
+    except (TypeError, KeyError, json.JSONDecodeError):
+        return {
+            'statusCode': 400,
+            'body': 'Invalid request body.'
+        }
 
-        password = body['password']
-        email = body['email']
+    password = body.get('password')
+    email = body.get('brand')
 
-        if not email or not password:
-            return {
-                'statusCode': 400,
-                'body': json.dumps('Missing parameters.')
-            }
-
-        return get_secret()
-
-        #register_user(email, password, secrets)
-
-    except Exception as e:
+    try:
+        secret = get_secret()
+        return {
+            'statusCode': 200,
+            'body': json.dumps(secret)
+        }
+    except ClientError as e:
         return {
             'statusCode': 500,
-            'body': json.dumps(f"An error occurred: {str(e)}"),
-            'password': 'password',
-            'email': 'email'
+            'body': json.dumps(f'An error occurred: {str(e)}'),
+            'email': email,
+            'password': password
         }
 
 
