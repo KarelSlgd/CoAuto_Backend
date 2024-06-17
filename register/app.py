@@ -62,6 +62,14 @@ def register_user(email, password, secret):
                 {
                     'Name': 'email',
                     'Value': email
+                },
+                {
+                    'Name': 'picture',
+                    'Value': ''
+                },
+                {
+                    'Name': 'name',
+                    'Value': ''
                 }
             ]
         )
@@ -72,3 +80,8 @@ def register_user(email, password, secret):
             'statusCode': 500,
             'body': json.dumps(f'An error occurred: {str(e)}')
         }
+
+    return {
+        'statusCode': 200,
+        'body': json.dumps({'message': 'User registration successful', 'user': response['UserSub']})
+    }
