@@ -75,8 +75,13 @@ def register_user(email, password, secret):
                 },
                 {
                     'Name': 'picture',
-                    'Value': ''
+                    'Value': 'aaa'
+                },
+                {
+                    'Name': 'name',
+                    'Value': 'aaaaa'
                 }
+
             ]
         )
 
