@@ -42,34 +42,33 @@ def lambda_handler(event, context):
 
     try:
         secret = get_secret()
-        return {
-            'statusCode': 200,
-            'body': json.dumps(secret)
-        }
-    except ClientError as e:
+        response = register_user(email, password, secret)
+        return response
+    except Exception as e:
         return {
             'statusCode': 500,
-            'body': json.dumps(f'An error occurred: {str(e)}'),
-            'email': email,
-            'password': password
+            'body': json.dumps(f'An error occurred: {str(e)}')
         }
 
 
 def register_user(email, password, secret):
-    client = boto3.client('cognito-idp')
-    response = client.sign_up(
-        ClientId=secret['COGNITO_CLIENT_ID'],
-        Username=email,
-        Password=password,
-        UserAttributes=[
-            {
-                'Name': 'email',
-                'Value': email
-            }
-        ]
-    )
+    try:
+        client = boto3.client('cognito-idp')
+        response = client.sign_up(
+            ClientId=secret['COGNITO_CLIENT_ID'],
+            Username=email,
+            Password=password,
+            UserAttributes=[
+                {
+                    'Name': 'email',
+                    'Value': email
+                }
+            ]
+        )
+        return response
 
-    return {
-        'statusCode': 200,
-        'body': json.dumps('User registered successfully.')
-    }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': json.dumps(f'An error occurred: {str(e)}')
+        }
