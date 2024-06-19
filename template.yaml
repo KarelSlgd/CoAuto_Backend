@@ -57,7 +57,7 @@ Resources:
   GetDataUserFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: get_data_user/
+      CodeUri: user/get_data_user/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -74,7 +74,7 @@ Resources:
   InsertDataUserFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: insert_data_user/
+      CodeUri: user/insert_data_user/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -91,7 +91,7 @@ Resources:
   UpdateDataUserFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: update_data_user/
+      CodeUri: user/update_data_user/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -108,7 +108,7 @@ Resources:
   DeleteDataUserFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: delete_data_user/
+      CodeUri: user/delete_data_user/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -125,7 +125,7 @@ Resources:
   GetDataCarFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: get_data_car/
+      CodeUri: car/get_data_car/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -142,7 +142,7 @@ Resources:
   GetDataRateFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: get_data_rate/
+      CodeUri: rate/get_data_rate/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -159,7 +159,7 @@ Resources:
   InsertDataRateFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: insert_data_rate/
+      CodeUri: rate/insert_data_rate/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -176,7 +176,7 @@ Resources:
   GetDataOneRateFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: get_one_data_rate/
+      CodeUri: rate/get_one_data_rate/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -193,7 +193,7 @@ Resources:
   InsertDataCarFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: insert_data_car/
+      CodeUri: car/insert_data_car/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -210,7 +210,7 @@ Resources:
   DeleteDataCarFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: delete_data_car/
+      CodeUri: car/delete_data_car/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -227,7 +227,7 @@ Resources:
   UpdateDataCarFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: update_data_car/
+      CodeUri: car/update_data_car/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -244,7 +244,7 @@ Resources:
   RegisterUserFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: sign_up/
+      CodeUri: cognito/sign_up/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -261,7 +261,7 @@ Resources:
   ConfirmSignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: confirm_sign_up/
+      CodeUri: cognito/confirm_sign_up/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -278,7 +278,7 @@ Resources:
   ResendConfirmationCodeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: resend_confirmation_code/
+      CodeUri: cognito/resend_confirmation_code/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn

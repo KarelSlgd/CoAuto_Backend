@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from get_one_data_rate import app
+from rate.get_one_data_rate import app
 import unittest
 import json
 
@@ -18,7 +18,7 @@ mock_path = {
 
 class TestRate(unittest.TestCase):
     @patch.dict("os.environ", {"REGION_NAME": "mexico", "DATA_BASE": "database", "SECRET_NAME": "secret"})
-    @patch("get_one_data_rate.app.lambda_handler")
+    @patch("rate.get_one_data_rate.app.lambda_handler")
     def test_lambda_handler(self, mock_lambda_handler):
         mock_lambda_handler.return_value = {
             'statusCode': 200,
@@ -35,7 +35,7 @@ class TestRate(unittest.TestCase):
         print(body["data"])
 
     @patch.dict("os.environ", {"REGION_NAME": "mexico", "DATA_BASE": "database", "SECRET_NAME": "secret"})
-    @patch("get_one_data_rate.app.lambda_handler")
+    @patch("rate.get_one_data_rate.app.lambda_handler")
     def test_lambda_handler_missing_id_rate(self, mock_lambda_handler):
         mock_body_missing_id_auto = {
             "body": json.dumps({})
@@ -55,7 +55,7 @@ class TestRate(unittest.TestCase):
 
     #Este aun no jala xd
     @patch.dict("os.environ", {"REGION_NAME": "mexico", "DATA_BASE": "database", "SECRET_NAME": "secret"})
-    @patch("get_one_data_rate.app.lambda_handler")
+    @patch("rate.get_one_data_rate.app.lambda_handler")
     def test_lambda_handler_internal_error(self, mock_connect):
         mock_connect.side_effect = Exception('Query execution failed.')
         result = app.lambda_handler(mock_body, None)

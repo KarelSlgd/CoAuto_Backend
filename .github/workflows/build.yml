@@ -21,29 +21,33 @@ jobs:
 
       - name: Install dependencies for user service
         run: |
-          pip install -r get_data_user/requirements.txt
-          pip install -r insert_data_user/requirements.txt
-          pip install -r update_data_user/requirements.txt
-          pip install -r delete_data_user/requirements.txt
+          pip install -r user/get_data_user/requirements.txt
+          pip install -r user/insert_data_user/requirements.txt
+          pip install -r user/update_data_user/requirements.txt
+          pip install -r user/delete_data_user/requirements.txt
 
       - name: Install dependencies for car service
         run: |
-          pip install -r get_data_car/requirements.txt
-          pip install -r insert_data_car/requirements.txt
-          pip install -r update_data_car/requirements.txt
-          pip install -r delete_data_car/requirements.txt
+          pip install -r car/get_data_car/requirements.txt
+          pip install -r car/insert_data_car/requirements.txt
+          pip install -r car/update_data_car/requirements.txt
+          pip install -r car/delete_data_car/requirements.txt
 
       - name: Install dependencies for rate service
         run: |
-          pip install -r get_data_rate/requirements.txt
-          pip install -r insert_data_rate/requirements.txt
-          pip install -r get_one_data_rate/requirements.txt
+          pip install -r rate/get_data_rate/requirements.txt
+          pip install -r rate/insert_data_rate/requirements.txt
+          pip install -r rate/get_one_data_rate/requirements.txt
 
       - name: Install dependencies for cognito service
         run: |
-          pip install -r sign_up/requirements.txt
-          pip install -r resend_confirmation_code/requirements.txt
-          pip install -r confirm_sign_up/requirements.txt
+          pip install -r cognito/sign_up/requirements.txt
+          pip install -r cognito/resend_confirmation_code/requirements.txt
+          pip install -r cognito/confirm_sign_up/requirements.txt
+
+      - name: Install dependencies for common service
+        run: |
+          pip install -r common/requirements.txt
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -68,29 +72,33 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies for user service
         run: |
-          pip install -r get_data_user/requirements.txt
-          pip install -r insert_data_user/requirements.txt
-          pip install -r update_data_user/requirements.txt
-          pip install -r delete_data_user/requirements.txt
+          pip install -r user/get_data_user/requirements.txt
+          pip install -r user/insert_data_user/requirements.txt
+          pip install -r user/update_data_user/requirements.txt
+          pip install -r user/delete_data_user/requirements.txt
 
       - name: Install dependencies for car service
         run: |
-          pip install -r get_data_car/requirements.txt
-          pip install -r insert_data_car/requirements.txt
-          pip install -r update_data_car/requirements.txt
-          pip install -r delete_data_car/requirements.txt
+          pip install -r car/get_data_car/requirements.txt
+          pip install -r car/insert_data_car/requirements.txt
+          pip install -r car/update_data_car/requirements.txt
+          pip install -r car/delete_data_car/requirements.txt
 
       - name: Install dependencies for rate service
         run: |
-          pip install -r get_data_rate/requirements.txt
-          pip install -r get_one_data_rate/requirements.txt
-          pip install -r insert_data_rate/requirements.txt
+          pip install -r rate/get_data_rate/requirements.txt
+          pip install -r rate/get_one_data_rate/requirements.txt
+          pip install -r rate/insert_data_rate/requirements.txt
 
       - name: Install dependencies for cognito service
         run: |
-          pip install -r sign_up/requirements.txt
-          pip install -r resend_confirmation_code/requirements.txt
-          pip install -r confirm_sign_up/requirements.txt
+          pip install -r cognito/sign_up/requirements.txt
+          pip install -r cognito/resend_confirmation_code/requirements.txt
+          pip install -r cognito/confirm_sign_up/requirements.txt
+
+      - name: Install dependencies for common service
+        run: |
+          pip install -r common/requirements.txt
 
       - name: Install AWS CLI
         run: |
