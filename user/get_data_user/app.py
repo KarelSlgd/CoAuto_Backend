@@ -1,6 +1,6 @@
 import json
 import os
-from common.app import get_connection
+from common.connection import get_connection
 rds_host = os.getenv('RDS_HOST')
 rds_user = os.getenv('DB_USERNAME')
 rds_password = os.getenv('DB_PASSWORD')
