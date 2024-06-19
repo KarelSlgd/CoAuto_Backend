@@ -1,11 +1,5 @@
-import pymysql
-import os
 import json
-
-rds_host = os.environ['RDS_HOST']
-rds_user = os.environ['DB_USERNAME']
-rds_password = os.environ['DB_PASSWORD']
-rds_db = os.environ['DB_NAME']
+from common.connection import get_connection
 
 
 def lambda_handler(event, context):
@@ -47,12 +41,7 @@ def lambda_handler(event, context):
 
 
 def update_user(id_user, name, profile_image, id_role, password):
-    connection = pymysql.connect(
-        host=rds_host,
-        user=rds_user,
-        password=rds_password,
-        database=rds_db
-    )
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
@@ -78,12 +67,7 @@ def update_user(id_user, name, profile_image, id_role, password):
 
 
 def verify_role(role):
-    connection = pymysql.connect(
-        host=rds_host,
-        user=rds_user,
-        password=rds_password,
-        database=rds_db
-    )
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:

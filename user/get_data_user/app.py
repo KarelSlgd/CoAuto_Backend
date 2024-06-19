@@ -1,11 +1,5 @@
 import json
-import os
 from common.connection import get_connection
-
-rds_host = os.getenv('RDS_HOST')
-rds_user = os.getenv('DB_USERNAME')
-rds_password = os.getenv('DB_PASSWORD')
-rds_db = os.getenv('DB_NAME')
 
 
 def lambda_handler(event, context):
