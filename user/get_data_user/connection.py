@@ -1,23 +1,31 @@
 import json
 import boto3
 import pymysql
+import os
 from botocore.exceptions import ClientError
 
 
 def get_connection():
     secrets = get_secret()
-    connection = pymysql.connect(
-        host=secrets['host'],
-        user=secrets['username'],
-        password=secrets['password'],
-        database=secrets['dbname']
-    )
+    try:
+        connection = pymysql.connect(
+            host=secrets['host'],
+            user=secrets['username'],
+            password=secrets['password'],
+            database=secrets['dbname']
+        )
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': f'Failed to connect to database: {str(e)}'
+        }
+
     return connection
 
 
 def get_secret():
-    secret_name = "COAUTO"
-    region_name = "us-east-1"
+    secret_name = os.getenv('SECRET_NAME')
+    region_name = os.getenv('REGION_NAME')
 
     session = boto3.session.Session()
     client = session.client(
@@ -31,6 +39,9 @@ def get_secret():
         )
         secret = get_secret_value_response['SecretString']
     except ClientError as e:
-        raise e
+        return {
+            'statusCode': 500,
+            'body': f'Failed to retrieve secret: {str(e)}'
+        }
 
     return json.loads(secret)
