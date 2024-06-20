@@ -37,7 +37,7 @@ def lambda_handler(event, context):
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id_rate, value, comment, id_auto, id_user FROM rate WHERE id_auto = %s", (id_auto,))
+            cursor.execute("SELECT id_rate, value, comment, a.model, a.brand, u.name, u.lastname FROM rate r INNER JOIN auto a ON r.id_auto=a.id_auto INNER JOIN user u ON r.id_user=u.id_user WHERE a.id_auto = %s", (id_auto,))
             result = cursor.fetchall()
 
             for row in result:
@@ -45,8 +45,10 @@ def lambda_handler(event, context):
                     'id_rate': row[0],
                     'value': row[1],
                     'comment': row[2],
-                    'id_auto': row[3],
-                    'id_user': row[4]
+                    'model': row[3],
+                    'brand': row[4],
+                    'name': row[5],
+                    'lastname': row[6]
                 }
                 rates.append(rate)
 

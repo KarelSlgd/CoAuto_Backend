@@ -1,24 +1,24 @@
 import json
-from common.connection import get_connection
+from user.get_data_user.connection import get_connection
 
 
 def lambda_handler(event, context):
     connection = get_connection()
     users = []
     try:
+        query = "SELECT id_user, id_cognito, email, u.name AS nameUser, lastname, r.name AS nameRole, s.value FROM user u INNER JOIN role r ON u.id_role = r.id_role INNER JOIN status s ON u.id_status = s.id_status;"
         with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT id_user, email, u.name AS nameUser, profile_image, r.name as nameRole, s.value FROM user u INNER JOIN role r ON u.id_role = r.id_role INNER JOIN status s ON u.id_status = s.id_status;")
+            cursor.execute(query)
             result = cursor.fetchall()
-
             for row in result:
                 user = {
-                    'id_user': row[0],
-                    'email': row[1],
-                    'nameUser': row[2],
-                    'profile_image': row[3],
-                    'nameRole': row[4],
-                    'status': row[5]
+                    'idUser': row['id_user'],
+                    'idCognito': row['id_cognito'],
+                    'email': row['email'],
+                    'name': row['nameUser'],
+                    'lastname': row['lastname'],
+                    'role': row['nameRole'],
+                    'status': row['value']
                 }
                 users.append(user)
 

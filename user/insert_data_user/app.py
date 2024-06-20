@@ -1,6 +1,6 @@
 import re
 import json
-from common.connection import get_connection
+from user.insert_data_user.connection import get_connection
 
 
 def lambda_handler(event, context):
@@ -14,11 +14,10 @@ def lambda_handler(event, context):
 
     email = body.get('email')
     name = body.get('name')
-    profile_image = body.get('profile_image')
+    lastname = body.get('lastname')
     id_role = body.get('id_role')
-    password = body.get('password')
 
-    if not email or not name or not id_role or not password:
+    if not email or not name or not id_role or not lastname:
         return {
             'statusCode': 400,
             'body': 'Missing parameters.'
@@ -49,17 +48,17 @@ def lambda_handler(event, context):
             'body': 'Role does not exist.'
         }
 
-    response = insert_into_user(email, name, profile_image, id_role, password)
+    response = insert_into_user(email, name, lastname, id_role)
     return response
 
 
-def insert_into_user(email, name, profile_image, role, password):
+def insert_into_user(email, name, lastname, role):
     connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
-            insert_query = "INSERT INTO user (email, name, profile_image, id_role, password, id_status) VALUES (%s, %s, %s, %s, SHA2(%s, 256), 1)"
-            cursor.execute(insert_query, (email, name, profile_image, role, password))
+            insert_query = "INSERT INTO user (email, name, lastname, id_role, id_status) VALUES (%s, %s, %s, %s, 1)"
+            cursor.execute(insert_query, (email, name, lastname, role))
             connection.commit()
 
     except Exception as e:

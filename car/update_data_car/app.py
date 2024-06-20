@@ -19,23 +19,22 @@ def lambda_handler(event, context):
 
     id_auto = body.get('id_auto')
     model = body.get('brand')
-    brand = body.get('model')
+    brand = body.get('brand')
     year = body.get('year')
     price = body.get('price')
-    category = body.get('category')
+    type = body.get('type')
     fuel = body.get('fuel')
     doors = body.get('doors')
-    motor = body.get('motor')
+    engine = body.get('engine')
     height = body.get('height')
     width = body.get('width')
     length = body.get('length')
-    weight = body.get('weight')
-    details = body.get('details')
+    description = body.get('description')
     id_status = body.get('id_status')
     image_urls = body.get('image_urls', [])
 
     # Validate mandatory parameters
-    if not id_auto or not model or not brand or not year or not price or not category or not fuel or not doors or not motor or not height or not width or not length or not weight or not id_status:
+    if not id_auto or not model or not brand or not year or not price or not type or not fuel or not doors or not engine or not height or not width or not length or not id_status:
         return {
             'statusCode': 400,
             'body': 'Missing parameters.'
@@ -54,7 +53,7 @@ def lambda_handler(event, context):
             'body': 'Brand exceeds 30 characters'
         }
 
-    if len(category) > 20:
+    if len(type) > 20:
         return {
             'statusCode': 400,
             'body': 'Category exceeds 20 characters'
@@ -114,19 +113,13 @@ def lambda_handler(event, context):
             'body': 'Length must be a float.'
         }
 
-    try:
-        weight = float(weight)
-    except ValueError:
-        return {
-            'statusCode': 400,
-            'body': 'Weight must be a float.'
-        }
 
-    response = update_car(id_auto, model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, image_urls)
+    response = update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status, image_urls)
 
     return response
 
-def update_car(id_auto, model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, image_urls):
+
+def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status, image_urls):
     connection = pymysql.connect(
         host=rds_host,
         user=rds_user,
@@ -137,8 +130,8 @@ def update_car(id_auto, model, brand, year, price, category, fuel, doors, motor,
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "UPDATE auto SET model=%s, brand=%s, year=%s, price=%s, category=%s, fuel=%s, doors=%s, motor=%s, height=%s, width=%s, length=%s, weight=%s, details=%s, id_status=%s WHERE id_auto=%s",
-                (model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, id_auto)
+                "UPDATE auto SET model=%s, brand=%s, year=%s, price=%s, type=%s, fuel=%s, doors=%s, engine=%s, height=%s, width=%s, length=%s, description=%s, id_status=%s WHERE id_auto=%s",
+                (model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status, id_auto)
             )
 
             connection.commit()

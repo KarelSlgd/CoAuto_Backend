@@ -15,24 +15,23 @@ def lambda_handler(event, context):
             'statusCode': 400,
             'body': 'Invalid request body.'
         }
-
+    # SELECT id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, a.description, s.value FROM auto a INNER JOIN status s ON a.id_status = s.id_status;
     model = body.get('model')
     brand = body.get('brand')
     year = body.get('year')
     price = body.get('price')
-    category = body.get('category')
+    type = body.get('type')
     fuel = body.get('fuel')
     doors = body.get('doors')
-    motor = body.get('motor')
+    engine = body.get('engine')
     height = body.get('height')
     width = body.get('width')
     length = body.get('length')
-    weight = body.get('weight')
-    details = body.get('details')
+    description = body.get('description')
     id_status = body.get('id_status')
     image_urls = body.get('image_urls', [])
 
-    if not model or not brand or not year or not price or not category or not fuel or not doors or not motor or not height or not width or not length or not weight or not id_status:
+    if not model or not brand or not year or not price or not type or not fuel or not doors or not engine or not height or not width or not length or not id_status:
         return {
             'statusCode': 400,
             'body': 'Missing parameters.'
@@ -98,20 +97,12 @@ def lambda_handler(event, context):
             'body': 'Length must be a float.'
         }
 
-    try:
-        weight = float(weight)
-    except ValueError:
-        return {
-            'statusCode': 400,
-            'body': 'Weight must be a float.'
-        }
-
-    response = insert_into_car(model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, image_urls)
+    response = insert_into_car(model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status, image_urls)
 
     return response
 
 
-def insert_into_car(model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status, image_urls):
+def insert_into_car(model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status, image_urls):
     connection = pymysql.connect(
         host=rds_host,
         user=rds_user,
@@ -121,9 +112,9 @@ def insert_into_car(model, brand, year, price, category, fuel, doors, motor, hei
 
     try:
         with connection.cursor() as cursor:
-            insert_query = """INSERT INTO auto (model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status)  
-                              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-            cursor.execute(insert_query, (model, brand, year, price, category, fuel, doors, motor, height, width, length, weight, details, id_status))
+            insert_query = """INSERT INTO auto (model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status)  
+                              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+            cursor.execute(insert_query, (model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status))
             auto_id = cursor.lastrowid
 
             for image_url in image_urls:

@@ -30,6 +30,7 @@ def lambda_handler(event, context):
 
     return response
 
+
 def delete_car(id_auto, id_status):
     connection = pymysql.connect(
         host=rds_host,
