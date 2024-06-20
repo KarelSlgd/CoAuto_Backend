@@ -6,7 +6,7 @@ from user.get_data_user.connection import get_connection
 from user.get_data_user import app
 
 
-class TestDatabaseConnection(unittest.TestCase):
+class TestUser(unittest.TestCase):
 
     @patch('user.get_data_user.connection.get_secret')
     @patch('pymysql.connect')
@@ -46,7 +46,6 @@ class TestDatabaseConnection(unittest.TestCase):
 
     @patch('user.get_data_user.app.get_connection')
     def test_lambda_handler_success(self, mock_get_connection):
-        # Mocking the database connection and cursor
         mock_connection = MagicMock()
         mock_cursor = MagicMock()
         mock_get_connection.return_value = mock_connection
