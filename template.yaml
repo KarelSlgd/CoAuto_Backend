@@ -71,23 +71,6 @@ Resources:
             Path: /get_data
             Method: get
 
-  InsertDataUserFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: user/insert_data_user/
-      Handler: app.lambda_handler
-      Runtime: python3.12
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Architectures:
-        - x86_64
-      Events:
-        GetDataStudent:
-          Type: Api
-          Properties:
-            RestApiId: !Ref UserApi
-            Path: /insert_data
-            Method: post
-
   UpdateDataUserFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -296,9 +279,6 @@ Outputs:
   GetDataUserApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to User Model"
     Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data"
-  InsertDataUserApiUrl:
-    Description: "API Gateway endpoint URL with path insert_data for Prod stage to User Model"
-    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
   UpdateDataUserApiUrl:
     Description: "API Gateway endpoint URL with path update_data for Prod stage to User Model"
     Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_data"
@@ -339,9 +319,6 @@ Outputs:
   GetDataUserFunctionArn:
     Description: "Get data user Lambda Function ARN"
     Value: !GetAtt GetDataUserFunction.Arn
-  InsertDataUserFunctionArn:
-    Description: "Insert data user Lambda Function ARN"
-    Value: !GetAtt InsertDataUserFunction.Arn
   UpdateDataUserFunctionArn:
     Description: "Update data user Lambda Function ARN"
     Value: !GetAtt UpdateDataUserFunction.Arn
