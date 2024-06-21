@@ -24,8 +24,8 @@ def get_connection():
 
 
 def get_secret():
-    secret_name = os.getenv('SECRET_NAME')
-    region_name = os.getenv('REGION_NAME')
+    secret_name = "COAUTO"
+    region_name = "us-east-1"
 
     session = boto3.session.Session()
     client = session.client(
