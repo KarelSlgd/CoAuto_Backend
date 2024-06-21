@@ -68,7 +68,7 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies for user service
         run: |
-          pip install -r user/get_data_user/requirements.txt
+          pip install -r user/requirements.txt
           pip install -r user/insert_data_user/requirements.txt
           pip install -r user/update_data_user/requirements.txt
           pip install -r user/delete_data_user/requirements.txt
