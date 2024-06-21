@@ -1,5 +1,5 @@
 import json
-from user.get_data_user.connection import get_connection
+from user.get_data_user.common.connection import get_connection
 
 
 def lambda_handler(event, context):

@@ -2,7 +2,7 @@ import unittest
 import json
 
 from unittest.mock import patch, MagicMock
-from user.get_data_user.connection import get_connection
+from user.get_data_user.common.connection import get_connection
 from user.get_data_user import app
 
 
