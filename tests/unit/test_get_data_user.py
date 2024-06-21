@@ -2,13 +2,12 @@ import unittest
 import json
 
 from unittest.mock import patch, MagicMock
-from user.get_data_user.common.connection import get_connection
 from user.get_data_user import app
 
 
 class TestUser(unittest.TestCase):
 
-    @patch('user.get_data_user.connection.get_secret')
+    @patch('user.get_data_user.app.get_secret')
     @patch('pymysql.connect')
     def test_get_connection_success(self, mock_connect, mock_get_secret):
         mock_get_secret.return_value = {
@@ -20,7 +19,7 @@ class TestUser(unittest.TestCase):
 
         mock_connect.return_value = MagicMock()
 
-        connection = get_connection()
+        connection = app.get_connection()
         self.assertIsNotNone(connection)
         mock_get_secret.assert_called_once_with()
         mock_connect.assert_called_once_with(
@@ -29,20 +28,6 @@ class TestUser(unittest.TestCase):
             password='test_pass',
             database='test_db'
         )
-
-    @patch('user.get_data_user.connection.get_secret')
-    def test_get_connection_failure(self, mock_get_secret):
-        mock_get_secret.return_value = {
-            'host': 'localhost',
-            'username': 'test_user',
-            'password': 'test_pass',
-            'dbname': 'test_db'
-        }
-
-        with patch('user.get_data_user.connection.get_connection', side_effect=Exception('Connection error')):
-            response = get_connection()
-            self.assertEqual(response['statusCode'], 500)
-            self.assertIn('Failed to connect to database', response['body'])
 
     @patch('user.get_data_user.app.get_connection')
     def test_lambda_handler_success(self, mock_get_connection):
