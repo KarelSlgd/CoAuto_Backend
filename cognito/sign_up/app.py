@@ -68,6 +68,12 @@ def lambda_handler(event, context):
     lastname = body.get('lastname')
     id_role = body.get('id_role')
 
+    if not password or not email or not picture or not name or not lastname or not id_role:
+        return {
+            'statusCode': 400,
+            'body': 'Missing parameters.'
+        }
+
     if len(name) > 50:
         return {
             'statusCode': 400,
