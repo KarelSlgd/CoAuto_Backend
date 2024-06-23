@@ -65,7 +65,7 @@ def login_auth(email, password, secret):
         secret_hash = calculate_secret_hash(secret['COGNITO_CLIENT_ID'], secret['SECRET_KEY'], email)
         response = client.initiate_auth(
             ClientId=secret['COGNITO_CLIENT_ID'],
-            SecretHash=secret_hash,
+            #SecretHash=secret_hash,
             AuthFlow='USER_PASSWORD_AUTH',
             AuthParameters={
                 'USERNAME': email,
