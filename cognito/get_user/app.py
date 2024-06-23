@@ -118,7 +118,7 @@ def get_into_user(token):
                         ON u.id_status = s.id_status
                     WHERE id_cognito = '{token}';""".format(token=token)
 
-        with connection.cursor() as cursor:
+        with connection.cursor(pymysql.cursors.DictCursor) as cursor:
             cursor.execute(query)
             result = cursor.fetchone()
             user = {
@@ -142,4 +142,4 @@ def get_into_user(token):
     finally:
         connection.close()
 
-    return user
+    return json.dumps(user)
