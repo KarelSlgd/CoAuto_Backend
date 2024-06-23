@@ -292,6 +292,23 @@ Resources:
             Path: /login
             Method: post
 
+  GetInfoUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cognito/get_user/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CognitoApi
+            Path: /get_user
+            Method: post
+
 Outputs:
   GetDataUserApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to User Model"
@@ -335,6 +352,9 @@ Outputs:
   LoginApiUrl:
     Description: "API Gateway endpoint URL with path login for Prod stage to Cognito Model"
     Value: !Sub "https://${CognitoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/login"
+  GetInfoUserApiUrl:
+    Description: "API Gateway endpoint URL with path get_user for Prod stage to Cognito Model"
+    Value: !Sub "https://${CognitoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_user"
 
   GetDataUserFunctionArn:
     Description: "Get data user Lambda Function ARN"
@@ -381,6 +401,9 @@ Outputs:
   LoginFunctionArn:
     Description: "Login Lambda Function ARN"
     Value: !GetAtt LoginFunction.Arn
+  GetInfoUserFunctionArn:
+    Description: "Get info user Lambda Function ARN"
+    Value: !GetAtt GetInfoUserFunction.Arn
 
   LambdaExecutionRoleArn:
     Description: "Lambda Execution Role ARN"

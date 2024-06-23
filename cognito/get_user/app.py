@@ -45,12 +45,11 @@ def lambda_handler(event, context):
             'body': 'Invalid request body.'
         }
 
-    email = body.get('email')
-    password = body.get('password')
+    token = body.get('token')
 
     try:
         secret = get_secret()
-        response = login_auth(email, password, secret)
+        response = get_info(token, secret)
         return response
     except Exception as e:
         return {
@@ -59,18 +58,11 @@ def lambda_handler(event, context):
         }
 
 
-def login_auth(email, password, secret):
+def get_info(token, secret):
     try:
         client = boto3.client('cognito-idp')
-        secret_hash = calculate_secret_hash(secret['COGNITO_CLIENT_ID'], secret['SECRET_KEY'], email)
-        response = client.initiate_auth(
-            ClientId=secret['COGNITO_CLIENT_ID'],
-            AuthFlow='USER_PASSWORD_AUTH',
-            AuthParameters={
-                'USERNAME': email,
-                'PASSWORD': password,
-                'SECRET_HASH': secret_hash
-            },
+        response = client.get_user(
+            AccessToken=token
         )
 
     except Exception as e:
@@ -81,5 +73,5 @@ def login_auth(email, password, secret):
 
     return {
         'statusCode': 200,
-        'body': json.dumps(response['AuthenticationResult'])
+        'body': json.dumps(response)
     }
