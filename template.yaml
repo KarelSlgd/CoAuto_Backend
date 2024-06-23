@@ -275,6 +275,23 @@ Resources:
             Path: /resend_confirmation_code
             Method: post
 
+  LoginFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cognito/login/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CognitoApi
+            Path: /login
+            Method: post
+
 Outputs:
   GetDataUserApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to User Model"
@@ -315,6 +332,9 @@ Outputs:
   ResendConfirmationCodeApiUrl:
     Description: "API Gateway endpoint URL with path resend_confirmation_code for Prod stage to Cognito Model"
     Value: !Sub "https://${CognitoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/resend_confirmation_code"
+  LoginApiUrl:
+    Description: "API Gateway endpoint URL with path login for Prod stage to Cognito Model"
+    Value: !Sub "https://${CognitoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/login"
 
   GetDataUserFunctionArn:
     Description: "Get data user Lambda Function ARN"
@@ -358,6 +378,9 @@ Outputs:
   ResendConfirmationCodeFunctionArn:
     Description: "Resend confirmation code Lambda Function ARN"
     Value: !GetAtt ResendConfirmationCodeFunction.Arn
+  LoginFunctionArn:
+    Description: "Login Lambda Function ARN"
+    Value: !GetAtt LoginFunction.Arn
 
   LambdaExecutionRoleArn:
     Description: "Lambda Execution Role ARN"
