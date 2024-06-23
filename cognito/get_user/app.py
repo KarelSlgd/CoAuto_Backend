@@ -4,6 +4,25 @@ import boto3
 import hmac
 import hashlib
 import base64
+import pymysql
+
+
+def get_connection():
+    secrets = get_secret()
+    try:
+        connection = pymysql.connect(
+            host=secrets['host'],
+            user=secrets['username'],
+            password=secrets['password'],
+            database=secrets['dbname']
+        )
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': f'Failed to connect to database: {str(e)}'
+        }
+
+    return connection
 
 
 def get_secret():
@@ -48,8 +67,7 @@ def lambda_handler(event, context):
     token = body.get('token')
 
     try:
-        secret = get_secret()
-        response = get_info(token, secret)
+        response = get_info(token)
         return response
     except Exception as e:
         return {
@@ -58,7 +76,7 @@ def lambda_handler(event, context):
         }
 
 
-def get_info(token, secret):
+def get_info(token):
     try:
         client = boto3.client('cognito-idp')
         response = client.get_user(
@@ -71,7 +89,57 @@ def get_info(token, secret):
             'body': json.dumps(f'An error occurred: {str(e)}')
         }
 
+    user = get_into_user(response['Username'])
+
     return {
         'statusCode': 200,
-        'body': json.dumps(response)
+        'body': json.dumps({
+            'userAttributes': response['UserAttributes'],
+            'user': user
+        })
     }
+
+
+def get_into_user(token):
+    connection = get_connection()
+    try:
+        query = """SELECT 
+                        id_user, 
+                        id_cognito, 
+                        email,
+                        u.name AS nameUser,
+                        lastname, 
+                        r.name AS nameRole,
+                        s.value 
+                    FROM user u
+                    INNER JOIN role r 
+                        ON u.id_role = r.id_role 
+                    INNER JOIN status s 
+                        ON u.id_status = s.id_status
+                    WHERE id_cognito = '{token}';""".format(token=token)
+
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            result = cursor.fetchone()
+            user = {
+                'idUser': result['id_user'],
+                'idCognito': result['id_cognito'],
+                'email': result['email'],
+                'name': result['nameUser'],
+                'lastname': result['lastname'],
+                'role': result['nameRole'],
+                'status': result['value']
+            }
+
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': json.dumps({
+                'message': f'An error occurred: {str(e)}'
+            })
+        }
+
+    finally:
+        connection.close()
+
+    return user
