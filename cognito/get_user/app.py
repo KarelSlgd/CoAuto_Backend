@@ -142,4 +142,4 @@ def get_into_user(token):
     finally:
         connection.close()
 
-    return json.dumps(user)
+    return user
