@@ -1,13 +1,7 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from rate.get_one_data_rate import app
 import unittest
 import json
-
-mock_body = {
-    "body": json.dumps({
-        "id_auto": 2
-    })
-}
 
 mock_path = {
     "pathParameters": {
@@ -17,49 +11,63 @@ mock_path = {
 
 
 class TestRate(unittest.TestCase):
-    @patch.dict("os.environ", {"REGION_NAME": "mexico", "DATA_BASE": "database", "SECRET_NAME": "secret"})
-    @patch("rate.get_one_data_rate.app.lambda_handler")
-    def test_lambda_handler(self, mock_lambda_handler):
-        mock_lambda_handler.return_value = {
-            'statusCode': 200,
-            'body': json.dumps({
-                'message': 'Rates retrieved successfully.',
-                'data': [{"id_rate": 2, "value": 2, "comment": "Es el mejor!", "id_auto": 3, "id_user": 2}]
+
+    @patch("rate.get_one_data_rate.app.execute_query")
+    @patch("rate.get_one_data_rate.app.connect_to_db")
+    @patch("rate.get_one_data_rate.app.close_connection")
+    def test_lambda_handler_data(self, mock_close_connection, mock_connect_to_db, mock_execute_query):
+        mock_connection = MagicMock()
+        mock_connect_to_db.return_value = mock_connection
+
+        mock_execute_query.return_value = [
+            (2, 2, "Es el mejor!", "Hola", "Hola", "Victor", "flores")
+        ]
+
+        mock_body = {
+            "body": json.dumps({
+                "id_auto": 2
             })
         }
+
         result = app.lambda_handler(mock_body, None)
         self.assertEqual(result['statusCode'], 200)
         body = json.loads(result['body'])
         self.assertIn("data", body)
         self.assertTrue(body["data"])
-        print(body["data"])
+        mock_close_connection.assert_called_once()
 
-    @patch.dict("os.environ", {"REGION_NAME": "mexico", "DATA_BASE": "database", "SECRET_NAME": "secret"})
-    @patch("rate.get_one_data_rate.app.lambda_handler")
-    def test_lambda_handler_missing_id_rate(self, mock_lambda_handler):
-        mock_body_missing_id_auto = {
-            "body": json.dumps({})
-        }
-        mock_lambda_handler.return_value = {
-            'statusCode': 400,
-            'body': json.dumps({
-                'message': 'Missing id_auto parameter.'
+    @patch("rate.get_one_data_rate.app.connect_to_db")
+    def test_lambda_handler_missing_id_rate(self, mock_connect_to_db,):
+        mock_connection = MagicMock()
+        mock_connect_to_db.return_value = mock_connection
+        mock_body = {
+            "body": json.dumps({
+                "id": 2
             })
         }
-        result = app.lambda_handler(mock_body_missing_id_auto, None)
+        result = app.lambda_handler(mock_body, None)
         self.assertEqual(result['statusCode'], 400)
         body = json.loads(result['body'])
-        self.assertIn('message', body)
-        self.assertEqual(body['message'], 'Missing id_auto parameter.')
-        print(body['message'])
+        self.assertIn('Missing id_auto parameter.', body['message'])
 
-    #Este aun no jala xd
-    @patch.dict("os.environ", {"REGION_NAME": "mexico", "DATA_BASE": "database", "SECRET_NAME": "secret"})
-    @patch("rate.get_one_data_rate.app.lambda_handler")
-    def test_lambda_handler_internal_error(self, mock_connect):
-        mock_connect.side_effect = Exception('Query execution failed.')
-        result = app.lambda_handler(mock_body, None)
-        self.assertEqual(result['statusCode'], 500)
-        body = json.loads(result['body'])
-        self.assertIn("error", body)
-        self.assertEqual(body["error"], "An error occurred while processing the request.")
+    @patch("rate.get_one_data_rate.app.execute_query")
+    @patch("rate.get_one_data_rate.app.connect_to_db")
+    @patch("rate.get_one_data_rate.app.close_connection")
+    def test_lambda_handler_internal_error(self, mock_connect_to_db, mock_close_connection, mock_execute_query):
+        mock_connection = MagicMock()
+        mock_connect_to_db.return_value = mock_connection
+        mock_execute_query.side_effect = Exception('Query execution failed.')
+
+        mock_body = {
+            "body": json.dumps({
+                "id_auto": 2
+            })
+        }
+
+        response = app.lambda_handler(mock_body, None)
+        self.assertEqual(response['statusCode'], 500)
+        body = json.loads(response['body'])
+        self.assertIn('An error occurred', body['message'])
+        self.assertIn("Query execution failed.", body['message'])
+        mock_close_connection.assert_called_once()
+
