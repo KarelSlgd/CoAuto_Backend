@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import json
 import os
-from .database import connect_to_db, close_connection, execute_query
+from db.database import connect_to_db, close_connection, execute_query
 
 load_dotenv()
 

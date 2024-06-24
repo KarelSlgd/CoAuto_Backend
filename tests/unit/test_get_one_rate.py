@@ -3,12 +3,6 @@ from rate.get_one_data_rate import app
 import unittest
 import json
 
-mock_path = {
-    "pathParameters": {
-        "id_auto": 2
-    }
-}
-
 
 class TestRate(unittest.TestCase):
 
