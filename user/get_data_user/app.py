@@ -8,10 +8,10 @@ def get_connection():
     secrets = get_secret()
     try:
         connection = pymysql.connect(
-            host=secrets['host'],
-            user=secrets['username'],
-            password=secrets['password'],
-            database=secrets['dbname']
+            host=secrets['HOST'],
+            user=secrets['USERNAME'],
+            password=secrets['PASSWORD'],
+            database=secrets['DB_NAME']
         )
     except Exception as e:
         return {
