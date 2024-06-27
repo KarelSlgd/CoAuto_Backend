@@ -1,6 +1,6 @@
 import json
 import boto3
-from cognito.login.database import get_secret, calculate_secret_hash
+from database import get_secret, calculate_secret_hash
 
 
 def lambda_handler(event, context):

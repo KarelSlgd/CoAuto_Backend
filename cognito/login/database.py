@@ -5,6 +5,7 @@ import base64
 import json
 import boto3
 
+
 def get_secret():
     secret_name = "COAUTO"
     region_name = "us-east-1"
