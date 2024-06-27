@@ -31,11 +31,6 @@ def get_info(token):
         response = client.get_user(
             AccessToken=token
         )
-        secrets = get_secret()
-        group = client.admin_list_groups_for_user(
-            Username=response['Username'],
-            UserPoolId=secrets['COGNITO_USER_POOL_ID']
-        )
 
     except Exception as e:
         return {
@@ -45,6 +40,12 @@ def get_info(token):
 
     user = get_into_user(response['Username'])
 
+    secrets = get_secret()
+    group = client.admin_list_groups_for_user(
+        Username=user['email'],
+        UserPoolId=secrets['COGNITO_USER_POOL_ID']
+    )
+    
     return {
         'statusCode': 200,
         'body': json.dumps({
