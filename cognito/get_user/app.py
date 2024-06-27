@@ -41,17 +41,18 @@ def get_info(token):
     user = get_into_user(response['Username'])
 
     secrets = get_secret()
-    group = client.admin_list_groups_for_user(
+    response_role = client.admin_list_groups_for_user(
         Username=user['email'],
         UserPoolId=secrets['COGNITO_USER_POOL_ID']
     )
-    
+    groups = [group['GroupName'] for group in response_role['Groups']]
+
     return {
         'statusCode': 200,
         'body': json.dumps({
             'userAttributes': response['UserAttributes'],
             'user': user,
-            'groups': group['Groups'][0] if group['Groups'] else None
+            'groups': groups
         })
     }
 
