@@ -32,7 +32,7 @@ def get_info(token):
             AccessToken=token
         )
         secrets = get_secret()
-        groupUser = client.admin_list_groups_for_user(
+        group = client.admin_list_groups_for_user(
             Username=response['Username'],
             UserPoolId=secrets['COGNITO_USER_POOL_ID']
         )
@@ -50,7 +50,7 @@ def get_info(token):
         'body': json.dumps({
             'userAttributes': response['UserAttributes'],
             'user': user,
-            'groups': groupUser['Groups']
+            'groups': group['Groups'][0] if group['Groups'] else None
         })
     }
 
