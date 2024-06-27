@@ -1,7 +1,7 @@
 import json
 import boto3
 import pymysql
-from database import get_connection, close_connection
+from database import get_connection, close_connection, get_secret
 
 
 def lambda_handler(event, context):
@@ -31,6 +31,11 @@ def get_info(token):
         response = client.get_user(
             AccessToken=token
         )
+        secrets = get_secret()
+        groupUser = client.admin_list_groups_for_user(
+            Username=response['Username'],
+            UserPoolId=secrets['COGNITO_USER_POOL_ID']
+        )
 
     except Exception as e:
         return {
@@ -44,7 +49,8 @@ def get_info(token):
         'statusCode': 200,
         'body': json.dumps({
             'userAttributes': response['UserAttributes'],
-            'user': user
+            'user': user,
+            'groups': groupUser['Groups']
         })
     }
 
