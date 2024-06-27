@@ -42,7 +42,7 @@ def get_info(token):
 
     secrets = get_secret()
     response_role = client.admin_list_groups_for_user(
-        Username=user['email'],
+        Username=response['Username'],
         UserPoolId=secrets['COGNITO_USER_POOL_ID']
     )
     groups = [group['GroupName'] for group in response_role['Groups']]
