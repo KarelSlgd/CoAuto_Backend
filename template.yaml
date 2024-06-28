@@ -142,7 +142,7 @@ Resources:
             Path: /get_data
             Method: get
             Auth:
-              Authorizer: !Ref CarAuthorizer
+              Authorizer: CarAuthorizer
 
   GetDataUserFunction:
     Type: AWS::Serverless::Function
