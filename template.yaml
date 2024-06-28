@@ -96,6 +96,7 @@ Resources:
     Properties:
       Name: UserApi
       StageName: Prod
+
   CarsAuthorizer:
     Type: AWS::ApiGateway::Authorizer
     Properties:
@@ -105,6 +106,7 @@ Resources:
       Type: COGNITO_USER_POOLS
       ProviderARNs:
         - !GetAtt CognitoUserPool.Arn
+          
   CarApi:
     Type: AWS::Serverless::Api
     Properties:
