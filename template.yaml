@@ -111,7 +111,7 @@ Resources:
       Name: CarApi
       StageName: Prod
       Auth:
-        DefaultAuthorizer: !Ref CarsAuthorizer
+        DefaultAuthorizer: CarsAuthorizer
         Authorizers:
           CarsAuthorizer:
             UserPoolArn: !GetAtt CognitoUserPool.Arn
@@ -195,7 +195,7 @@ Resources:
             Path: /get_data
             Method: get
             Auth:
-              Authorizer: !Ref CarsAuthorizer
+              Authorizer: CarsAuthorizer
 
   GetDataRateFunction:
     Type: AWS::Serverless::Function
