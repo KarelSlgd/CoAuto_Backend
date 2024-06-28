@@ -114,6 +114,9 @@ Resources:
       StageName: Prod
       Auth:
         DefaultAuthorizer: CarAuthorizerLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+        Authorizers:
+          CarAuthorizerLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL:
+            UserPoolArn: !GetAtt CognitoUserPool.Arn
 
   RateApi:
     Type: AWS::Serverless::Api
