@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import json
 import os
-from db.database import connect_to_db, close_connection, execute_query
+from .database import connect_to_db, close_connection, execute_query
 
 load_dotenv()
 
@@ -14,9 +14,6 @@ def lambda_handler(event, context):
     else:
         body = json.loads(event.get('body', '{}'))
         id_auto = body.get('id_auto')
-    #id_auto = event['queryStringParameters'].get('id_auto')
-    #body = json.loads(event['body'])
-    #id_auto = body['id_auto']
 
     if not id_auto:
         return {
