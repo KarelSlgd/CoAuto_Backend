@@ -102,6 +102,11 @@ Resources:
     Properties:
       Name: CarApi
       StageName: Prod
+      Auth:
+        DefaultAuthorizer: CarAuthorizer
+        Authorizers:
+          CarAuthorizer:
+            UserPoolArn: !GetAtt CognitoUserPool.Arn
 
   RateApi:
     Type: AWS::Serverless::Api
