@@ -43,7 +43,7 @@ def get_secret():
     except ClientError as e:
         return {
             'statusCode': 500,
-            'body': json.dumps(f'An error occurred : {str(e)}')
+            'body': json.dumps(f'An error occurred: {str(e)}')
         }
 
     return json.loads(secret)

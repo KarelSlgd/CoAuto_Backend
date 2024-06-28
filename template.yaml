@@ -64,7 +64,7 @@ Resources:
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: CoAutoUserPool
+      UserPoolName: CognitoUserPool
       UsernameAttributes:
         - email
       AutoVerifiedAttributes:
