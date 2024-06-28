@@ -59,7 +59,7 @@ def register_user(email, password, picture, name, lastname, id_role, secret):
         client = boto3.client('cognito-idp')
         secret_hash = calculate_secret_hash(secret['COGNITO_CLIENT_ID'], secret['SECRET_KEY'], email)
         response = client.sign_up(
-            ClientId=secret['COGNITO_CLIENT_ID'],
+            ClientId=secret['COGNITO_CLIENT_ID'], 
             SecretHash=secret_hash,
             Username=email,
             Password=password,
