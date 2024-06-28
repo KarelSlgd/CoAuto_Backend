@@ -61,36 +61,6 @@ Resources:
                   - cognito-idp:AdminUserGlobalSignOut
                 Resource: 'arn:aws:cognito-idp:us-east-1:*:*'
 
-  CognitoUserPool:
-    Type: AWS::Cognito::UserPool
-    Properties:
-      UserPoolName: CognitoUserPool
-      UsernameAttributes:
-        - email
-      AutoVerifiedAttributes:
-        - email
-      Policies:
-        PasswordPolicy:
-          MinimumLength: 8
-          RequireUppercase: True
-          RequireLowercase: True
-          RequireNumbers: True
-          RequireSymbols: True
-
-  AdminUserGroup:
-    Type: AWS::Cognito::UserPoolGroup
-    Properties:
-      GroupName: AdminUserGroup
-      UserPoolId: !Ref CognitoUserPool
-      Precedence: 1
-
-  ClientUserGroup:
-    Type: AWS::Cognito::UserPoolGroup
-    Properties:
-      GroupName: ClientUserGroup
-      UserPoolId: !Ref CognitoUserPool
-      Precedence: 2
-
   UserApi:
     Type: AWS::Serverless::Api
     Properties:
