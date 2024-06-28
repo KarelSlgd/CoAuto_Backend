@@ -32,17 +32,90 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: arn:aws:logs:*:*:*
+        - PolicyName: CognitoAdminInitiateAuth
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cognito-idp:AdminInitiateAuth
+                  - cognito-idp:AdminRespondToAuthChallenge
+                  - cognito-idp:AdminSetUserPassword
+                  - cognito-idp:AdminCreateUser
+                  - cognito-idp:AdminDeleteUser
+                  - cognito-idp:AdminUpdateUserAttributes
+                  - cognito-idp:AdminListGroupsForUser
+                  - cognito-idp:AdminAddUserToGroup
+                  - cognito-idp:AdminRemoveUserFromGroup
+                  - cognito-idp:AdminGetUser
+                  - cognito-idp:AdminGetUserAttributeVerificationCode
+                  - cognito-idp:AdminConfirmSignUp
+                  - cognito-idp:AdminForgetDevice
+                  - cognito-idp:AdminConfirmDevice
+                  - cognito-idp:AdminUpdateDeviceStatus
+                  - cognito-idp:AdminEnableUser
+                  - cognito-idp:AdminDisableUser
+                  - cognito-idp:AdminResetUserPassword
+                  - cognito-idp:AdminSetUserSettings
+                  - cognito-idp:AdminUpdateAuthEventFeedback
+                  - cognito-idp:AdminUserGlobalSignOut
+                Resource: 'arn:aws:cognito-idp:us-east-1:*:*'
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: CoAutoUserPool
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: True
+          RequireLowercase: True
+          RequireNumbers: True
+          RequireSymbols: True
+
+  AdminUserGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: AdminUserGroup
+      UserPoolId: !Ref CognitoUserPool
+      Precedence: 1
+
+  ClientUserGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: ClientUserGroup
+      UserPoolId: !Ref CognitoUserPool
+      Precedence: 2
 
   UserApi:
     Type: AWS::Serverless::Api
     Properties:
       Name: UserApi
       StageName: Prod
+  CarsAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: CarsAuthorizer
+      IdentitySource: method.request.header.Authorization
+      RestApiId: !Ref CarApi
+      Type: COGNITO_USER_POOLS
+      ProviderARNs:
+        - !GetAtt CognitoUserPool.Arn
   CarApi:
     Type: AWS::Serverless::Api
     Properties:
       Name: CarApi
       StageName: Prod
+      Auth:
+        DefaultAuthorizer: !Ref CarsAuthorizer
+        Authorizers:
+          CarsAuthorizer:
+            UserPoolArn: !GetAtt CognitoUserPool.Arn
+
   RateApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -121,6 +194,8 @@ Resources:
             RestApiId: !Ref CarApi
             Path: /get_data
             Method: get
+            Auth:
+              Authorizer: !Ref CarsAuthorizer
 
   GetDataRateFunction:
     Type: AWS::Serverless::Function
