@@ -61,6 +61,36 @@ Resources:
                   - cognito-idp:AdminUserGlobalSignOut
                 Resource: 'arn:aws:cognito-idp:us-east-1:*:*'
 
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: CognitoUserPool
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: True
+          RequireLowercase: True
+          RequireNumbers: True
+          RequireSymbols: True
+
+  AdminUserGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: AdminUserGroup
+      UserPoolId: !Ref CognitoUserPool
+      Precedence: 1
+
+  ClientUserGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: ClientUserGroup
+      UserPoolId: !Ref CognitoUserPool
+      Precedence: 2
+
   UserApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -78,11 +108,41 @@ Resources:
     Properties:
       Name: RateApi
       StageName: Prod
+
   CognitoApi:
     Type: AWS::Serverless::Api
     Properties:
       Name: CognitoApi
       StageName: Prod
+
+  CarAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: CarAuthorizer
+      IdentitySource: method.request.header.Authorization
+      RestApiId: !Ref CarApi
+      Type: COGNITO_USER_POOLS
+      ProviderARNs:
+        - !GetAtt CognitoUserPool.Arn
+
+  GetDataCarFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: car/get_data_car/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataCar:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CarApi
+            Path: /get_data
+            Method: get
+            Auth:
+              Authorizer: !Ref CarAuthorizer
 
   GetDataUserFunction:
     Type: AWS::Serverless::Function
@@ -134,23 +194,6 @@ Resources:
             RestApiId: !Ref UserApi
             Path: /delete_data
             Method: delete
-
-  GetDataCarFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: car/get_data_car/
-      Handler: app.lambda_handler
-      Runtime: python3.12
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Architectures:
-        - x86_64
-      Events:
-        GetDataCar:
-          Type: Api
-          Properties:
-            RestApiId: !Ref CarApi
-            Path: /get_data
-            Method: get
 
   GetDataRateFunction:
     Type: AWS::Serverless::Function
