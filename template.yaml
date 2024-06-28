@@ -123,7 +123,7 @@ Resources:
   CarAuthorizer:
     Type: AWS::ApiGateway::Authorizer
     Properties:
-      Name: CarAuthorizer
+      Name: CarAuthorizerTest
       IdentitySource: method.request.header.Authorization
       RestApiId: !Ref CarApi
       Type: COGNITO_USER_POOLS
