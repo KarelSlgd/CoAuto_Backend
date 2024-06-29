@@ -138,6 +138,16 @@ Resources:
       ProviderARNs:
         - !GetAtt CognitoUserPool.Arn
 
+  UserAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: UserAuthorizerTest
+      IdentitySource: method.request.header.Authorization
+      RestApiId: !Ref UserApi
+      Type: COGNITO_USER_POOLS
+      ProviderARNs:
+        - !GetAtt CognitoUserPool.Arn
+
   GetDataCarFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -173,6 +183,8 @@ Resources:
             RestApiId: !Ref UserApi
             Path: /get_data
             Method: get
+            Auth:
+              Authorizer: UserAuthorizer
 
   UpdateDataUserFunction:
     Type: AWS::Serverless::Function
