@@ -104,7 +104,11 @@ Resources:
     Properties:
       Name: UserApi
       StageName: Prod
-
+      Auth:
+         DefaultAuthorizer: UserAuthorizer
+         Authorizers:
+            UserAuthorizer:
+              UserPoolArn: !GetAtt CognitoUserPool.Arn
   CarApi:
     Type: AWS::Serverless::Api
     Properties:
