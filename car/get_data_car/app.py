@@ -17,6 +17,19 @@ def lambda_handler(event, context):
     )
 
     cars = []
+    try:
+        role = event['queryStringParameters']['rol']
+
+    except (TypeError, KeyError):
+        return {
+            'statusCode': 400,
+            'body': json.dumps('Invalid request parameter.')
+        }
+    if role == 'ClientUserGroup':
+        return {
+            'statusCode': 403,
+            'body': json.dumps('Access denegado. Rol no puede ser cliente.')
+        }
 
     try:
         with connection.cursor() as cursor:

@@ -30,6 +30,7 @@ def login_auth(email, password, secret):
     try:
         client = boto3.client('cognito-idp')
         secret_hash = calculate_secret_hash(secret['COGNITO_CLIENT_ID'], secret['SECRET_KEY'], email)
+
         response = client.initiate_auth(
             ClientId=secret['COGNITO_CLIENT_ID'],
             AuthFlow='USER_PASSWORD_AUTH',
@@ -39,14 +40,20 @@ def login_auth(email, password, secret):
                 'SECRET_HASH': secret_hash
             },
         )
+        user_groups = client.admin_list_groups_for_user(
+            Username=email,
+            UserPoolId=secret['COGNITO_USER_POOL_ID']
+        )
+        role = None
+        if user_groups['Groups']:
+            role = user_groups['Groups'][0]['GroupName']
+        return {
+            'statusCode': 200,
+            'body': json.dumps({'response':response['AuthenticationResult'], 'role':role})
+        }
 
     except Exception as e:
         return {
             'statusCode': 500,
             'body': json.dumps(f'An error occurred: {str(e)}')
         }
-
-    return {
-        'statusCode': 200,
-        'body': json.dumps(response['AuthenticationResult'])
-    }
