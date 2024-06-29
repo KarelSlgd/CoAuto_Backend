@@ -291,6 +291,8 @@ Resources:
             RestApiId: !Ref CarApi
             Path: /insert_data
             Method: post
+            Auth:
+              Authorizer: CarAuthorizer
 
   DeleteDataCarFunction:
     Type: AWS::Serverless::Function
@@ -308,6 +310,8 @@ Resources:
             RestApiId: !Ref CarApi
             Path: /delete_data
             Method: delete
+            Auth:
+              Authorizer: CarAuthorizer
 
   UpdateDataCarFunction:
     Type: AWS::Serverless::Function
@@ -325,6 +329,8 @@ Resources:
             RestApiId: !Ref CarApi
             Path: /update_data
             Method: put
+            Auth:
+              Authorizer: CarAuthorizer
 
   RegisterUserFunction:
     Type: AWS::Serverless::Function
