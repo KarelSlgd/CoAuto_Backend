@@ -131,6 +131,11 @@ Resources:
     Properties:
       Name: CognitoApi
       StageName: Prod
+      Cors:
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+        AllowCredentials: "'true'"
 
   CarAuthorizer:
     Type: AWS::ApiGateway::Authorizer

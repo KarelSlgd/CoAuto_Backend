@@ -1,7 +1,6 @@
 import json
 from connection import get_connection
 
-
 def lambda_handler(event, context):
     connection = get_connection()
     users = []
@@ -24,13 +23,13 @@ def lambda_handler(event, context):
             result = cursor.fetchall()
             for row in result:
                 user = {
-                    'idUser': row['idUser'],
-                    'idCognito': row['idCognito'],
-                    'email': row['email'],
-                    'name': row['nameUser'],
-                    'lastname': row['lastname'],
-                    'role': row['nameRole'],
-                    'status': row['value']
+                    'idUser': row[0],
+                    'idCognito': row[1],
+                    'email': row[2],
+                    'name': row[3],
+                    'lastname': row[4],
+                    'role': row[5],
+                    'status': row[6]
                 }
                 users.append(user)
 
