@@ -73,6 +73,11 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 200,
+        'headers': {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+        },
         "body": json.dumps({
             "message": "get cars",
             "data": cars
@@ -92,5 +97,5 @@ def get_jwt_claims(token):
 
         return claims
 
-    except (ValueError, json.JSONDecodeError) as e:
+    except ValueError:
         return None

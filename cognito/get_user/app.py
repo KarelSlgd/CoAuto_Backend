@@ -1,23 +1,33 @@
 import json
-import boto3
-import pymysql
-from database import get_connection, close_connection, get_secret
+import base64
+from database import get_connection, close_connection
 
 
 def lambda_handler(event, context):
-    try:
-        body = json.loads(event['body'])
-    except (TypeError, KeyError, json.JSONDecodeError):
+    headers = event.get('headers', {})
+    token = headers.get('Authorization')
+
+    if not token:
         return {
-            'statusCode': 400,
-            'body': 'Invalid request body.'
+            'statusCode': 401,
+            'body': json.dumps('Missing token.')
         }
 
-    token = body.get('token')
-
     try:
-        response = get_info(token)
-        return response
+        decoded_token = get_jwt_claims(token)
+        user_info = get_into_user(decoded_token['cognito:username'])
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+            },
+            'body': json.dumps({
+                'tokenDecode': decoded_token,
+                'userInfo': user_info
+            })
+        }
     except Exception as e:
         return {
             'statusCode': 500,
@@ -25,68 +35,51 @@ def lambda_handler(event, context):
         }
 
 
-def get_info(token):
+def get_jwt_claims(token):
     try:
-        client = boto3.client('cognito-idp')
-        response = client.get_user(
-            AccessToken=token
-        )
+        parts = token.split(".")
+        if len(parts) != 3:
+            return None
 
-    except Exception as e:
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f'An error occurred: {str(e)}')
-        }
+        payload_encoded = parts[1]
+        payload_decoded = base64.b64decode(payload_encoded + "==")
+        claims = json.loads(payload_decoded)
 
-    user = get_into_user(response['Username'])
+        return claims
 
-    secrets = get_secret()
-    response_role = client.admin_list_groups_for_user(
-        Username=response['Username'],
-        UserPoolId=secrets['COGNITO_USER_POOL_ID']
-    )
-    groups = [group['GroupName'] for group in response_role['Groups']]
-
-    return {
-        'statusCode': 200,
-        'body': json.dumps({
-            'userAttributes': response['UserAttributes'],
-            'user': user,
-            'groups': groups
-        })
-    }
+    except ValueError:
+        return None
 
 
 def get_into_user(token):
     connection = get_connection()
     try:
-        query = """SELECT 
-                        id_user, 
-                        id_cognito, 
-                        email,
-                        u.name AS nameUser,
-                        lastname, 
-                        r.name AS nameRole,
-                        s.value 
-                    FROM user u
-                    INNER JOIN role r 
-                        ON u.id_role = r.id_role 
-                    INNER JOIN status s 
-                        ON u.id_status = s.id_status
-                    WHERE id_cognito = '{token}';""".format(token=token)
+        with connection.cursor() as cursor:
+            query = """SELECT 
+                            id_user, 
+                            id_cognito, 
+                            email,
+                            u.name AS nameUser,
+                            lastname, 
+                            r.name AS nameRole,
+                            s.value 
+                        FROM user u
+                        INNER JOIN role r 
+                            ON u.id_role = r.id_role 
+                        INNER JOIN status s 
+                            ON u.id_status = s.id_status
+                        WHERE id_cognito = %s;"""
 
-        with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-            cursor.execute(query)
-            result = cursor.fetchone()
-            user = {
-                'idUser': result['id_user'],
-                'idCognito': result['id_cognito'],
-                'email': result['email'],
-                'name': result['nameUser'],
-                'lastname': result['lastname'],
-                'role': result['nameRole'],
-                'status': result['value']
-            }
+            cursor.execute(query, (token,))
+
+            row = cursor.fetchone()
+
+            if row:
+                columns = [desc[0] for desc in cursor.description]
+                result = dict(zip(columns, row))
+                return result
+            else:
+                return None
 
     except Exception as e:
         return {
@@ -98,5 +91,3 @@ def get_into_user(token):
 
     finally:
         close_connection(connection)
-
-    return user

@@ -43,5 +43,10 @@ def resend_code(email, secret):
 
     return {
         'statusCode': 200,
+        'headers': {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+        },
         'body': json.dumps({'message': 'Confirmation code resent.'})
     }

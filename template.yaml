@@ -104,6 +104,10 @@ Resources:
     Properties:
       Name: UserApi
       StageName: Prod
+      Cors:
+        AllowOrigin: "'*'"
+        AllowHeaders: "'*'"
+        AllowMethods: "'OPTIONS,POST,GET,PUT,DELETE'"
       Auth:
          DefaultAuthorizer: UserAuthorizer
          Authorizers:
@@ -114,6 +118,10 @@ Resources:
     Properties:
       Name: CarApi
       StageName: Prod
+      Cors:
+        AllowOrigin: "'*'"
+        AllowHeaders: "'*'"
+        AllowMethods: "'OPTIONS,POST,GET,PUT,DELETE'"
       Auth:
         DefaultAuthorizer: CarAuthorizer
         Authorizers:
@@ -125,6 +133,10 @@ Resources:
     Properties:
       Name: RateApi
       StageName: Prod
+      Cors:
+        AllowOrigin: "'*'"
+        AllowHeaders: "'*'"
+        AllowMethods: "'OPTIONS,POST,GET,PUT,DELETE'"
 
   CognitoApi:
     Type: AWS::Serverless::Api

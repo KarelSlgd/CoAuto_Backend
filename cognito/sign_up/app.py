@@ -95,6 +95,11 @@ def register_user(email, password, picture, name, lastname, id_role, secret):
 
     return {
         'statusCode': 200,
+        'headers': {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+        },
         'body': json.dumps({'message': 'Send verification code', 'user': response['UserSub']})
     }
 
