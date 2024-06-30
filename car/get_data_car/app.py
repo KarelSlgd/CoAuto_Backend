@@ -1,7 +1,7 @@
 import json
 import pymysql
 import os
-import jwt
+import base64
 
 rds_host = os.getenv('RDS_HOST')
 rds_user = os.getenv('DB_USERNAME')
@@ -17,7 +17,8 @@ def lambda_handler(event, context):
         database=rds_db
     )
 
-    token = event['headers'].get('Authorization')
+    headers = event.get('headers', {})
+    token = headers.get('Authorization')
 
     if not token:
         return {
@@ -26,23 +27,18 @@ def lambda_handler(event, context):
         }
 
     try:
-        decoded_token = jwt.decode(token, options={"verify_signature": False})
+        decoded_token = get_jwt_claims(token)
         role = decoded_token.get('cognito:groups')
-    except jwt.ExpiredSignatureError:
-        return {
-            'statusCode': 401,
-            'body': json.dumps('Token has expired.')
-        }
-    except jwt.InvalidTokenError:
-        return {
-            'statusCode': 401,
-            'body': json.dumps('Invalid token.')
-        }
+        if role == 'ClientUserGroup':
+            return {
+                'statusCode': 403,
+                'body': json.dumps('Access denied. Role cannot be client.')
+            }
 
-    if role == 'ClientUserGroup':
+    except Exception as e:
         return {
-            'statusCode': 403,
-            'body': json.dumps('Access denied. Role cannot be client.')
+            'statusCode': 401,
+            'body': json.dumps(f'Invalid token: {str(e)}')
         }
 
     cars = []
@@ -82,3 +78,19 @@ def lambda_handler(event, context):
             "data": cars
         }),
     }
+
+
+def get_jwt_claims(token):
+    try:
+        parts = token.split(".")
+        if len(parts) != 3:
+            return None
+
+        payload_encoded = parts[1]
+        payload_decoded = base64.b64decode(payload_encoded + "==")
+        claims = json.loads(payload_decoded)
+
+        return claims
+
+    except (ValueError, json.JSONDecodeError) as e:
+        return None
