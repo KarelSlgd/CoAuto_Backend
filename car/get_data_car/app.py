@@ -29,7 +29,7 @@ def lambda_handler(event, context):
     try:
         decoded_token = get_jwt_claims(token)
         role = decoded_token.get('cognito:groups')
-        if role == 'ClientUserGroup':
+        if 'ClientUserGroup' in role:
             return {
                 'statusCode': 403,
                 'body': json.dumps('Access denied. Role cannot be client.')
