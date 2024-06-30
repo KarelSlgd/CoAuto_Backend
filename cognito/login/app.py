@@ -49,6 +49,11 @@ def login_auth(email, password, secret):
             role = user_groups['Groups'][0]['GroupName']
         return {
             'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+            },
             'body': json.dumps({'response': response['AuthenticationResult'], 'role': role})
         }
 
