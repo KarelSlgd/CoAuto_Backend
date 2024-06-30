@@ -49,7 +49,7 @@ def login_auth(email, password, secret):
             role = user_groups['Groups'][0]['GroupName']
         return {
             'statusCode': 200,
-            'body': json.dumps({'response':response['AuthenticationResult'], 'role':role})
+            'body': json.dumps({'response': response['AuthenticationResult'], 'role': role})
         }
 
     except Exception as e:

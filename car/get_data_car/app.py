@@ -1,6 +1,7 @@
 import json
 import pymysql
 import os
+import jwt
 
 rds_host = os.getenv('RDS_HOST')
 rds_user = os.getenv('DB_USERNAME')
@@ -16,24 +17,40 @@ def lambda_handler(event, context):
         database=rds_db
     )
 
-    cars = []
-    try:
-        role = event['queryStringParameters']['rol']
+    token = event['headers'].get('Authorization')
 
-    except (TypeError, KeyError):
+    if not token:
         return {
-            'statusCode': 400,
-            'body': json.dumps('Invalid request parameter.')
+            'statusCode': 401,
+            'body': json.dumps('Missing token.')
         }
+
+    try:
+        decoded_token = jwt.decode(token, options={"verify_signature": False})
+        role = decoded_token.get('cognito:groups')
+    except jwt.ExpiredSignatureError:
+        return {
+            'statusCode': 401,
+            'body': json.dumps('Token has expired.')
+        }
+    except jwt.InvalidTokenError:
+        return {
+            'statusCode': 401,
+            'body': json.dumps('Invalid token.')
+        }
+
     if role == 'ClientUserGroup':
         return {
             'statusCode': 403,
-            'body': json.dumps('Access denegado. Rol no puede ser cliente.')
+            'body': json.dumps('Access denied. Role cannot be client.')
         }
+
+    cars = []
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, a.description, s.value FROM auto a INNER JOIN status s ON a.id_status = s.id_status")
+            cursor.execute(
+                "SELECT id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, a.description, s.value FROM auto a INNER JOIN status s ON a.id_status = s.id_status")
             result = cursor.fetchall()
 
             for row in result:
