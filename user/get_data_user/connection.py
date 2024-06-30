@@ -1,6 +1,7 @@
 import boto3
 import pymysql
 from botocore.exceptions import ClientError
+import json
 
 
 def get_connection():
