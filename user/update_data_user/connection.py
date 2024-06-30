@@ -7,10 +7,10 @@ from botocore.exceptions import ClientError
 def get_connection():
     secrets = get_secret()
     connection = pymysql.connect(
-        host=secrets['host'],
-        user=secrets['username'],
-        password=secrets['password'],
-        database=secrets['dbname']
+        host=secrets['HOST'],
+        user=secrets['USERNAME'],
+        password=secrets['PASSWORD'],
+        database=secrets['DB_NAME']
     )
     return connection
 

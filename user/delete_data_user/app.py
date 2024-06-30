@@ -1,5 +1,5 @@
 import json
-from user.delete_data_user.connection import get_connection
+from connection import get_connection
 
 
 def lambda_handler(event, context):

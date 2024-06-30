@@ -1,49 +1,5 @@
 import json
-import boto3
-import pymysql
-from botocore.exceptions import ClientError
-
-
-def get_connection():
-    secrets = get_secret()
-    try:
-        connection = pymysql.connect(
-            host=secrets['HOST'],
-            user=secrets['USERNAME'],
-            password=secrets['PASSWORD'],
-            database=secrets['DB_NAME']
-        )
-    except Exception as e:
-        return {
-            'statusCode': 500,
-            'body': f'Failed to connect to database: {str(e)}'
-        }
-
-    return connection
-
-
-def get_secret():
-    secret_name = 'COAUTO'
-    region_name = 'us-east-1'
-
-    session = boto3.session.Session()
-    client = session.client(
-        service_name='secretsmanager',
-        region_name=region_name
-    )
-
-    try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
-        secret = get_secret_value_response['SecretString']
-    except ClientError as e:
-        return {
-            'statusCode': 500,
-            'body': f'Failed to retrieve secret: {str(e)}'
-        }
-
-    return json.loads(secret)
+from connection import get_connection
 
 
 def lambda_handler(event, context):
@@ -51,8 +7,8 @@ def lambda_handler(event, context):
     users = []
     try:
         query = """SELECT 
-                        id_user, 
-                        id_cognito, 
+                        id_user AS idUser,
+                        id_cognito AS idCognito,
                         email,
                         u.name AS nameUser,
                         lastname, 
@@ -68,8 +24,8 @@ def lambda_handler(event, context):
             result = cursor.fetchall()
             for row in result:
                 user = {
-                    'idUser': row['id_user'],
-                    'idCognito': row['id_cognito'],
+                    'idUser': row['idUser'],
+                    'idCognito': row['idCognito'],
                     'email': row['email'],
                     'name': row['nameUser'],
                     'lastname': row['lastname'],

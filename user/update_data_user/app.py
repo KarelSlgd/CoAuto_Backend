@@ -1,5 +1,5 @@
 import json
-from user.update_data_user.connection import get_connection
+from connection import get_connection
 
 
 def lambda_handler(event, context):
@@ -13,11 +13,9 @@ def lambda_handler(event, context):
 
     id_user = body.get('id_user')
     name = body.get('name')
-    profile_image = body.get('profile_image')
-    id_role = body.get('id_role')
-    password = body.get('password')
+    lastname = body.get('lastname')
 
-    if not id_user or not name or not id_role or not password:
+    if not id_user or not name:
         return {
             'statusCode': 400,
             'body': 'Missing parameters.'
@@ -29,25 +27,19 @@ def lambda_handler(event, context):
             'body': 'Name exceeds 50 characters.'
         }
 
-    if not verify_role(id_role):
-        return {
-            'statusCode': 400,
-            'body': 'Role does not exist.'
-        }
-
-    response = update_user(id_user, name, profile_image, id_role, password)
+    response = update_user(id_user, name, lastname)
 
     return response
 
 
-def update_user(id_user, name, profile_image, id_role, password):
+def update_user(id_user, name, lastname):
     connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "UPDATE user SET name=%s, profile_image=%s, id_role=%s, password=SHA2(%s, 256) WHERE id_user=%s",
-                (name, profile_image, id_role, password, id_user)
+                "UPDATE user SET name=%s, lastname=%s WHERE id_user=%s",
+                (name, lastname, id_user)
             )
             connection.commit()
 
@@ -64,17 +56,3 @@ def update_user(id_user, name, profile_image, id_role, password):
         'statusCode': 200,
         'body': 'User updated successfully.'
     }
-
-
-def verify_role(role):
-    connection = get_connection()
-
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT id_role FROM role WHERE id_role = %s", role)
-            result = cursor.fetchone()
-            return result is not None
-    except Exception as e:
-        return False
-    finally:
-        connection.close()
