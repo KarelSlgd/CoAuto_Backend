@@ -1,11 +1,10 @@
-import pymysql
-import os
 import json
-
-rds_host = os.environ['RDS_HOST']
-rds_user = os.environ['DB_USERNAME']
-rds_password = os.environ['DB_PASSWORD']
-rds_db = os.environ['DB_NAME']
+from connection import get_connection
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
 
 
 def lambda_handler(event, context):
@@ -14,6 +13,7 @@ def lambda_handler(event, context):
     except (TypeError, KeyError, json.JSONDecodeError):
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Invalid request body.'
         }
 
@@ -37,6 +37,7 @@ def lambda_handler(event, context):
     if not id_auto or not model or not brand or not year or not price or not type or not fuel or not doors or not engine or not height or not width or not length or not id_status:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Missing parameters.'
         }
 
@@ -44,24 +45,28 @@ def lambda_handler(event, context):
     if len(model) > 30:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Model exceeds 30 characters'
         }
 
     if len(brand) > 30:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Brand exceeds 30 characters'
         }
 
     if len(type) > 20:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Category exceeds 20 characters'
         }
 
     if len(fuel) > 20:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Fuel exceeds 20 characters'
         }
 
@@ -70,6 +75,7 @@ def lambda_handler(event, context):
     except ValueError:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Year must be an integer.'
         }
 
@@ -78,6 +84,7 @@ def lambda_handler(event, context):
     except ValueError:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Price must be a float.'
         }
 
@@ -86,6 +93,7 @@ def lambda_handler(event, context):
     except ValueError:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Doors must be an integer.'
         }
 
@@ -94,6 +102,7 @@ def lambda_handler(event, context):
     except ValueError:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Height must be a float.'
         }
 
@@ -102,6 +111,7 @@ def lambda_handler(event, context):
     except ValueError:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Width must be a float.'
         }
 
@@ -110,6 +120,7 @@ def lambda_handler(event, context):
     except ValueError:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Length must be a float.'
         }
 
@@ -120,13 +131,7 @@ def lambda_handler(event, context):
 
 
 def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status, image_urls):
-    connection = pymysql.connect(
-        host=rds_host,
-        user=rds_user,
-        password=rds_password,
-        database=rds_db
-    )
-
+    connection = get_connection()
     try:
         with connection.cursor() as cursor:
             cursor.execute(
@@ -139,6 +144,7 @@ def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, he
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': f'Failed to update car: {str(e)}'
         }
 
@@ -147,5 +153,6 @@ def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, he
 
     return {
         'statusCode': 200,
+        'headers': headers_cors,
         'body': 'Car updated successfully.'
     }

@@ -1,11 +1,11 @@
-import pymysql
-import os
 import json
+from connection import get_connection
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
 
-rds_host = os.environ['RDS_HOST']
-rds_user = os.environ['DB_USERNAME']
-rds_password = os.environ['DB_PASSWORD']
-rds_db = os.environ['DB_NAME']
 
 def lambda_handler(event, context):
 
@@ -14,6 +14,7 @@ def lambda_handler(event, context):
     except (TypeError, KeyError, json.JSONDecodeError) as e:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': f'Invalid request body. Error: {str(e)}'
         }
 
@@ -23,6 +24,7 @@ def lambda_handler(event, context):
     if id_auto is None or id_status is None:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Missing parameters.'
         }
 
@@ -32,12 +34,7 @@ def lambda_handler(event, context):
 
 
 def delete_car(id_auto, id_status):
-    connection = pymysql.connect(
-        host=rds_host,
-        user=rds_user,
-        password=rds_password,
-        database=rds_db
-    )
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
@@ -46,6 +43,7 @@ def delete_car(id_auto, id_status):
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': f'Failed to update auto: {str(e)}'
         }
     finally:
@@ -53,5 +51,6 @@ def delete_car(id_auto, id_status):
 
     return {
         'statusCode': 200,
+        'headers': headers_cors,
         'body': 'Auto status updated successfully.'
     }

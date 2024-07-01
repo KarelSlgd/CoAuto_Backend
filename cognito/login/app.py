@@ -1,6 +1,11 @@
 import json
 import boto3
 from database import get_secret, calculate_secret_hash
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
 
 
 def lambda_handler(event, context):
@@ -9,6 +14,7 @@ def lambda_handler(event, context):
     except (TypeError, KeyError, json.JSONDecodeError):
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Invalid request body.'
         }
 
@@ -22,6 +28,7 @@ def lambda_handler(event, context):
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': json.dumps(f'An error occurred: {str(e)}')
         }
 
@@ -49,16 +56,13 @@ def login_auth(email, password, secret):
             role = user_groups['Groups'][0]['GroupName']
         return {
             'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
-            },
+            'headers': headers_cors,
             'body': json.dumps({'response': response['AuthenticationResult'], 'role': role})
         }
 
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': json.dumps(f'An error occurred: {str(e)}')
         }

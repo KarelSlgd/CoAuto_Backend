@@ -1,18 +1,20 @@
-import pymysql
-import os
 import json
+from connection import get_connection
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
 
-rds_host = os.environ['RDS_HOST']
-rds_user = os.environ['DB_USERNAME']
-rds_password = os.environ['DB_PASSWORD']
-rds_db = os.environ['DB_NAME']
 
 def lambda_handler(event, context):
+
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError):
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Invalid request body.'
         }
     # SELECT id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, a.description, s.value FROM auto a INNER JOIN status s ON a.id_status = s.id_status;
@@ -34,18 +36,21 @@ def lambda_handler(event, context):
     if not model or not brand or not year or not price or not type or not fuel or not doors or not engine or not height or not width or not length or not id_status:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Missing parameters.'
         }
 
     if len(model) > 30:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Model exceeds 50 characters.'
         }
 
     if len(brand) > 30:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Brand exceeds 50 characters.'
         }
 
@@ -54,6 +59,7 @@ def lambda_handler(event, context):
     except ValueError:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Year must be an integer.'
         }
 
@@ -62,6 +68,7 @@ def lambda_handler(event, context):
     except ValueError:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Price must be a float.'
         }
 
@@ -70,6 +77,7 @@ def lambda_handler(event, context):
     except ValueError:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Doors must be an integer.'
         }
 
@@ -78,6 +86,7 @@ def lambda_handler(event, context):
     except ValueError:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Height must be a float.'
         }
 
@@ -86,6 +95,7 @@ def lambda_handler(event, context):
     except ValueError:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Width must be a float.'
         }
 
@@ -94,6 +104,7 @@ def lambda_handler(event, context):
     except ValueError:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Length must be a float.'
         }
 
@@ -103,12 +114,7 @@ def lambda_handler(event, context):
 
 
 def insert_into_car(model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status, image_urls):
-    connection = pymysql.connect(
-        host=rds_host,
-        user=rds_user,
-        password=rds_password,
-        database=rds_db
-    )
+    connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
@@ -126,6 +132,7 @@ def insert_into_car(model, brand, year, price, type, fuel, doors, engine, height
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': f'An error occurred: {str(e)}'
         }
 
@@ -134,5 +141,6 @@ def insert_into_car(model, brand, year, price, type, fuel, doors, engine, height
 
     return {
         'statusCode': 200,
+        'headers': headers_cors,
         'body': 'Record inserted successfully.'
     }

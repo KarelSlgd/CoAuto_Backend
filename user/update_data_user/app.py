@@ -1,5 +1,10 @@
 import json
 from connection import get_connection
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
 
 
 def lambda_handler(event, context):
@@ -8,6 +13,7 @@ def lambda_handler(event, context):
     except (TypeError, KeyError, json.JSONDecodeError):
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Invalid request body.'
         }
 
@@ -18,12 +24,14 @@ def lambda_handler(event, context):
     if not id_user or not name:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Missing parameters.'
         }
 
     if len(name) > 50:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Name exceeds 50 characters.'
         }
 
@@ -46,6 +54,7 @@ def update_user(id_user, name, lastname):
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': f'Failed to update user: {str(e)}'
         }
 
@@ -54,5 +63,6 @@ def update_user(id_user, name, lastname):
 
     return {
         'statusCode': 200,
+        'headers': headers_cors,
         'body': 'User updated successfully.'
     }

@@ -1,6 +1,11 @@
 import json
 import boto3
 from database import get_secret, calculate_secret_hash, get_connection
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
 
 
 def lambda_handler(event, context):
@@ -9,6 +14,7 @@ def lambda_handler(event, context):
     except (TypeError, KeyError, json.JSONDecodeError):
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Invalid request body.'
         }
 
@@ -17,44 +23,41 @@ def lambda_handler(event, context):
     picture = body.get('picture')
     name = body.get('name')
     lastname = body.get('lastname')
-    id_role = body.get('id_role')
 
-    if not password or not email or not picture or not name or not lastname or not id_role:
+    if not password or not email or not picture or not name or not lastname:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Missing parameters.'
         }
 
     if len(name) > 50:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Name exceeds 50 characters.'
         }
 
     if len(lastname) > 100:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Lastname exceeds 100 characters.'
-        }
-
-    if not verify_role(id_role):
-        return {
-            'statusCode': 400,
-            'body': 'Role does not exist.'
         }
 
     try:
         secret = get_secret()
-        response = register_user(email, password, picture, name, lastname, id_role, secret)
+        response = register_user(email, password, picture, name, lastname, secret)
         return response
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': json.dumps(f'An error occurred: {str(e)}')
         }
 
 
-def register_user(email, password, picture, name, lastname, id_role, secret):
+def register_user(email, password, picture, name, lastname, secret):
     try:
         client = boto3.client('cognito-idp')
         secret_hash = calculate_secret_hash(secret['COGNITO_CLIENT_ID'], secret['SECRET_KEY'], email)
@@ -88,18 +91,15 @@ def register_user(email, password, picture, name, lastname, id_role, secret):
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': json.dumps(f'An error occurred: {str(e)}')
         }
 
-    insert_into_user(email, response['UserSub'], name, lastname, id_role)
+    insert_into_user(email, response['UserSub'], name, lastname)
 
     return {
         'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
-        },
+        'headers': headers_cors,
         'body': json.dumps({'message': 'Send verification code', 'user': response['UserSub']})
     }
 
@@ -109,13 +109,14 @@ def insert_into_user(email, id_cognito, name, lastname, role):
 
     try:
         with connection.cursor() as cursor:
-            insert_query = "INSERT INTO user (email, id_cognito, name, lastname, id_role, id_status) VALUES (%s, %s, %s, %s, %s, 1)"
+            insert_query = "INSERT INTO user (email, id_cognito, name, lastname, id_role, id_status) VALUES (%s, %s, %s, %s, 2, 1)"
             cursor.execute(insert_query, (email, id_cognito, name, lastname, role))
             connection.commit()
 
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': f'An error occurred: {str(e)}'
         }
 
@@ -124,19 +125,6 @@ def insert_into_user(email, id_cognito, name, lastname, role):
 
     return {
         'statusCode': 200,
+        'headers': headers_cors,
         'body': 'Record inserted successfully.'
     }
-
-
-def verify_role(role):
-    connection = get_connection()
-
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT id_role FROM role WHERE id_role = %s", role)
-            result = cursor.fetchone()
-            return result is not None
-    except Exception as e:
-        return False
-    finally:
-        connection.close()

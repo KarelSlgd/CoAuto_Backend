@@ -1,21 +1,16 @@
 import json
-import pymysql
-import os
 import base64
 
-rds_host = os.getenv('RDS_HOST')
-rds_user = os.getenv('DB_USERNAME')
-rds_password = os.getenv('DB_PASSWORD')
-rds_db = os.getenv('DB_NAME')
+from connection import get_connection
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
 
 
 def lambda_handler(event, context):
-    connection = pymysql.connect(
-        host=rds_host,
-        user=rds_user,
-        password=rds_password,
-        database=rds_db
-    )
+    connection = get_connection()
 
     headers = event.get('headers', {})
     token = headers.get('Authorization')
@@ -23,6 +18,7 @@ def lambda_handler(event, context):
     if not token:
         return {
             'statusCode': 401,
+            'headers': headers_cors,
             'body': json.dumps('Missing token.')
         }
 
@@ -32,12 +28,14 @@ def lambda_handler(event, context):
         if 'ClientUserGroup' in role:
             return {
                 'statusCode': 403,
+                'headers': headers_cors,
                 'body': json.dumps('Access denied. Role cannot be client.')
             }
 
     except Exception as e:
         return {
             'statusCode': 401,
+            'headers': headers_cors,
             'body': json.dumps(f'Invalid token: {str(e)}')
         }
 
@@ -73,11 +71,7 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 200,
-        'headers': {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
-        },
+        'headers': headers_cors,
         "body": json.dumps({
             "message": "get cars",
             "data": cars

@@ -1,5 +1,11 @@
 import json
 from connection import get_connection
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
+
 
 def lambda_handler(event, context):
     connection = get_connection()
@@ -36,6 +42,7 @@ def lambda_handler(event, context):
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': json.dumps({
                 'message': f'An error occurred: {str(e)}'
             })
@@ -46,11 +53,7 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 200,
-        'headers': {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
-        },
+        'headers': headers_cors,
         "body": json.dumps({
             "message": "get users",
             "data": users

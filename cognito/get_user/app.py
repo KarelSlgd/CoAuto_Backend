@@ -1,6 +1,11 @@
 import json
 import base64
 from database import get_connection, close_connection
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
 
 
 def lambda_handler(event, context):
@@ -10,6 +15,7 @@ def lambda_handler(event, context):
     if not token:
         return {
             'statusCode': 401,
+            'headers': headers_cors,
             'body': json.dumps('Missing token.')
         }
 
@@ -18,11 +24,7 @@ def lambda_handler(event, context):
         user_info = get_into_user(decoded_token['cognito:username'])
         return {
             'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
-            },
+            'headers': headers_cors,
             'body': json.dumps({
                 'tokenDecode': decoded_token,
                 'userInfo': user_info
@@ -31,6 +33,7 @@ def lambda_handler(event, context):
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': json.dumps(f'An error occurred: {str(e)}')
         }
 
@@ -84,6 +87,7 @@ def get_into_user(token):
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': json.dumps({
                 'message': f'An error occurred: {str(e)}'
             })
