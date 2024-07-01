@@ -62,6 +62,12 @@ def login_auth(email, password, secret):
             'body': json.dumps({'response': response['AuthenticationResult'], 'role': role})
         }
 
+    except client.exceptions.NotAuthorizedException as not_authorized:
+        return {
+            'statusCode': 408,
+            'headers': headers_cors,
+            'body': json.dumps({'message': 'Not authorized', 'error': str(not_authorized)})
+        }
     except client.exceptions.UserNotConfirmedException as user_not_confirmed:
         return {
             'statusCode': 408,
@@ -111,7 +117,7 @@ def login_auth(email, password, secret):
         return {
             'statusCode': 500,
             'headers': headers_cors,
-            'body': json.dumps({'message': 'An unknown error occurred'})
+            'body': json.dumps({'message': 'An unknown error occurred', 'error': str(client_error)})
         }
     except Exception as ex:
         return {
