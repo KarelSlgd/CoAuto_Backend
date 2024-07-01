@@ -64,31 +64,31 @@ def login_auth(email, password, secret):
 
     except client.exceptions.UserNotConfirmedException as user_not_confirmed:
         return {
-            'statusCode': 400,
+            'statusCode': 408,
             'headers': headers_cors,
             'body': json.dumps({'message': 'User not confirmed', 'error': str(user_not_confirmed)})
         }
     except client.exceptions.PasswordResetRequiredException as password_reset_required:
         return {
-            'statusCode': 400,
+            'statusCode': 408,
             'headers': headers_cors,
             'body': json.dumps({'message': 'Password reset required', 'error': str(password_reset_required)})
         }
     except client.exceptions.UserNotFoundException as user_not_found:
         return {
-            'statusCode': 400,
+            'statusCode': 408,
             'headers': headers_cors,
             'body': json.dumps({'message': 'User not found', 'error': str(user_not_found)})
         }
     except client.exceptions.TooManyRequestsException as too_many_requests:
         return {
-            'statusCode': 400,
+            'statusCode': 408,
             'headers': headers_cors,
             'body': json.dumps({'message': 'Too many requests', 'error': str(too_many_requests)})
         }
     except client.exceptions.InvalidParameterException as invalid_parameter:
         return {
-            'statusCode': 400,
+            'statusCode': 408,
             'headers': headers_cors,
             'body': json.dumps({'message': 'Invalid parameter', 'error': str(invalid_parameter)})
         }
@@ -104,7 +104,7 @@ def login_auth(email, password, secret):
                           'InvalidSmsRoleTrustRelationshipException', 'InvalidUserPoolConfigurationException',
                           'ResourceNotFoundException', 'UnexpectedLambdaException', 'UserLambdaValidationException'):
             return {
-                'statusCode': 400,
+                'statusCode': 408,
                 'headers': headers_cors,
                 'body': json.dumps({'message': 'Invalid request', 'error': str(client_error)})
             }
