@@ -62,66 +62,60 @@ def login_auth(email, password, secret):
             'body': json.dumps({'response': response['AuthenticationResult'], 'role': role})
         }
 
-    except client.exceptions.NotAuthorizedException as e:
+    except client.exceptions.UserNotConfirmedException as user_not_confirmed:
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': json.dumps({'message': 'Not authorized'})
+            'body': json.dumps({'message': 'User not confirmed', 'error': str(user_not_confirmed)})
         }
-    except client.exceptions.UserNotConfirmedException as e:
+    except client.exceptions.PasswordResetRequiredException as password_reset_required:
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': json.dumps({'message': 'User not confirmed'})
+            'body': json.dumps({'message': 'Password reset required', 'error': str(password_reset_required)})
         }
-    except client.exceptions.PasswordResetRequiredException as e:
+    except client.exceptions.UserNotFoundException as user_not_found:
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': json.dumps({'message': 'Password reset required'})
+            'body': json.dumps({'message': 'User not found', 'error': str(user_not_found)})
         }
-    except client.exceptions.UserNotFoundException as e:
+    except client.exceptions.TooManyRequestsException as too_many_requests:
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': json.dumps({'message': 'User not found'})
+            'body': json.dumps({'message': 'Too many requests', 'error': str(too_many_requests)})
         }
-    except client.exceptions.TooManyRequestsException as e:
+    except client.exceptions.InvalidParameterException as invalid_parameter:
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': json.dumps({'message': 'Too many requests'})
+            'body': json.dumps({'message': 'Invalid parameter', 'error': str(invalid_parameter)})
         }
-    except client.exceptions.InvalidParameterException as e:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps({'message': 'Invalid parameter'})
-        }
-    except client.exceptions.InternalErrorException as e:
+    except client.exceptions.InternalErrorException as internal_error:
         return {
             'statusCode': 500,
             'headers': headers_cors,
-            'body': json.dumps({'message': 'Internal error'})
+            'body': json.dumps({'message': 'Internal error', 'error': str(internal_error)})
         }
-    except ClientError as e:
-        error_code = e.response['Error']['Code']
+    except ClientError as client_error:
+        error_code = client_error.response['Error']['Code']
         if error_code in ('ForbiddenException', 'InvalidLambdaResponseException', 'InvalidSmsRoleAccessPolicyException',
                           'InvalidSmsRoleTrustRelationshipException', 'InvalidUserPoolConfigurationException',
                           'ResourceNotFoundException', 'UnexpectedLambdaException', 'UserLambdaValidationException'):
             return {
                 'statusCode': 400,
                 'headers': headers_cors,
-                'body': json.dumps({'message': 'Invalid request'})
+                'body': json.dumps({'message': 'Invalid request', 'error': str(client_error)})
             }
         return {
             'statusCode': 500,
             'headers': headers_cors,
             'body': json.dumps({'message': 'An unknown error occurred'})
         }
-    except Exception as e:
+    except Exception as ex:
         return {
             'statusCode': 500,
             'headers': headers_cors,
-            'body': json.dumps({'message': 'An unknown error occurred'})
+            'body': json.dumps({'message': 'An unknown error occurred', 'error': str(ex)})
         }
