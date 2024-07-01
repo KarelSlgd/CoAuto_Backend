@@ -72,7 +72,7 @@ def insert_into_rate(value, comment, id_auto, id_user):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            insert_query = "INSERT INTO rate (value, comment, id_auto, id_user) VALUES (%s, %s, %s, %s)"
+            insert_query = "INSERT INTO rate (value, comment, id_auto, id_user, id_status) VALUES (%s, %s, %s, %s, 5)"
             cursor.execute(insert_query, (value, comment, id_auto, id_user))
             connection.commit()
     except Exception as e:
