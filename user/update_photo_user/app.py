@@ -5,52 +5,89 @@ headers_cors = {
     'Access-Control-Allow-Headers': '*',
     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
 }
-
-cognito_client = boto3.client('cognito-idp')
+from connection import get_connection
 
 
 def lambda_handler(event, context):
+
+    headers = event.get('headers', {})
+    token = headers.get('Authorization')
+
+    if not token:
+        return {
+            'statusCode': 401,
+            'headers': headers_cors,
+            'body': json.dumps('Missing token.')
+        }
+
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError):
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': 'Invalid request body.'
+            'body': json.dumps({
+                'message': 'Invalid request body.'
+            })
         }
 
-    photo = body.get('photo')
-    access_token = body.get('access_token')
+    profile_image = body.get('profile_image')
 
-    if not photo or not access_token:
+    if not photo:
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': 'Missing parameters.'
+            'body': json.dumps({
+                'message': 'Missing parameters.'
+            })
         }
 
-    response = update_photo(photo, access_token)
+    response = update_photo(profile_image)
 
     return response
 
 
-def update_photo(photo, access_token):
+def update_photo(profile_image):
+    connection = get_connection()
+    decoded_token = get_jwt_claims(token)
+    id_user = decoded_token.get('cognito:username')
     try:
-        cognito_client.update_user_attributes(
-            AccessToken=access_token,
-            UserAttributes=[
-                {'Name': 'picture', 'Value': photo}
-            ]
-        )
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "UPDATE user SET profile_image=%s WHERE id_cognito=%s",
+                (profile_image, id_user)
+            )
+            connection.commit()
+
     except Exception as e:
         return {
             'statusCode': 500,
             'headers': headers_cors,
-            'body': f'Failed to update user in Cognito: {str(e)}'
+            'body': json.dumps({
+                'message': f'Failed to update user in Cognito: {str(e)}'
+            })
         }
 
     return {
         'statusCode': 200,
         'headers': headers_cors,
-        'body': 'User updated successfully.'
+        'body': json.dumps({
+            'message': 'User updated successfully.'
+        })
     }
+
+
+def get_jwt_claims(token):
+    try:
+        parts = token.split(".")
+        if len(parts) != 3:
+            return None
+
+        payload_encoded = parts[1]
+        payload_decoded = base64.b64decode(payload_encoded + "==")
+        claims = json.loads(payload_decoded)
+
+        return claims
+
+    except ValueError:
+        return None

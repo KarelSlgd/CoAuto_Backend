@@ -65,7 +65,8 @@ def get_into_user(token):
                             u.name AS nameUser,
                             lastname, 
                             r.name AS nameRole,
-                            s.value 
+                            s.value,
+                            profile_image
                         FROM user u
                         INNER JOIN role r 
                             ON u.id_role = r.id_role 

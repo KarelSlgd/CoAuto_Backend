@@ -18,7 +18,8 @@ def lambda_handler(event, context):
                         u.name AS nameUser,
                         lastname, 
                         r.name AS nameRole,
-                        s.value 
+                        s.value,
+                        profile_image
                     FROM user u
                     INNER JOIN role r 
                         ON u.id_role = r.id_role 
@@ -35,7 +36,8 @@ def lambda_handler(event, context):
                     'name': row[3],
                     'lastname': row[4],
                     'role': row[5],
-                    'status': row[6]
+                    'status': row[6],
+                    'profile_image': row[7]
                 }
                 users.append(user)
 
@@ -55,7 +57,6 @@ def lambda_handler(event, context):
         "statusCode": 200,
         'headers': headers_cors,
         "body": json.dumps({
-            "message": "get users",
             "data": users
         }),
     }
