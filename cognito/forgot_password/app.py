@@ -1,6 +1,6 @@
 import json
 import boto3
-from database import get_secret
+from database import get_secret, calculate_secret_hash
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
@@ -35,9 +35,11 @@ def lambda_handler(event, context):
 def forgot_pass(email, secret):
     try:
         client = boto3.client('cognito-idp')
+        secret_hash = calculate_secret_hash(secret['COGNITO_CLIENT_ID'], secret['SECRET_KEY'], email)
         response = client.forgot_password(
             ClientId=secret['COGNITO_CLIENT_ID'],
-            Username=email
+            Username=email,
+            SecretHash=secret_hash
         )
 
     except Exception as e:

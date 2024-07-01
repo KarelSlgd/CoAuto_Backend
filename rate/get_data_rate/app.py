@@ -1,20 +1,14 @@
 import json
-import pymysql
-import os
-
-rds_host = os.environ['RDS_HOST']
-rds_user = os.environ['DB_USERNAME']
-rds_password = os.environ['DB_PASSWORD']
-rds_db = os.environ['DB_NAME']
+from database import get_connection
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
 
 
 def lambda_handler(event, context):
-    connection = pymysql.connect(
-        host=rds_host,
-        user=rds_user,
-        password=rds_password,
-        database=rds_db
-    )
+    connection = get_connection()
 
     users = []
 
@@ -35,11 +29,19 @@ def lambda_handler(event, context):
                 }
                 users.append(user)
 
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': headers_cors,
+            'body': f'Failed to get rate: {str(e)}'
+        }
+
     finally:
         connection.close()
 
     return {
         "statusCode": 200,
+        'headers': headers_cors,
         "body": json.dumps({
             "message": "get rate",
             "data": users

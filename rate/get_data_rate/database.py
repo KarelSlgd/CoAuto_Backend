@@ -1,36 +1,53 @@
+import boto3
 import pymysql
-import logging
+from botocore.exceptions import ClientError
+import json
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
 
-logging.basicConfig(level=logging.INFO)
 
-
-def connect_to_db(host, user, password, database):
+def get_connection():
+    secrets = get_secret()
     try:
         connection = pymysql.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database
+            host=secrets['HOST'],
+            user=secrets['USERNAME'],
+            password=secrets['PASSWORD'],
+            database=secrets['DB_NAME']
         )
-        logging.info("Connected to MySQL database")
-        return connection
     except Exception as e:
-        logging.error(e)
-        return None
+        return {
+            'statusCode': 500,
+            'headers': headers_cors,
+            'body': f'Failed to connect to database: {str(e)}'
+        }
+
+    return connection
 
 
-def execute_query(connection, query):
+def get_secret():
+    secret_name = 'COAUTO'
+    region_name = 'us-east-1'
+
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='secretsmanager',
+        region_name=region_name
+    )
+
     try:
-        with connection.cursor() as cursor:
-            cursor.execute(query)
-            result = cursor.fetchall()
-            return result
-    except Exception as e:
-        logging.error(e)
-        return None
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+        secret = get_secret_value_response['SecretString']
+    except ClientError as e:
+        return {
+            'statusCode': 500,
+            'headers': headers_cors,
+            'body': f'Failed to retrieve secret: {str(e)}'
+        }
 
-
-def close_connection(connection):
-    if connection:
-        connection.close()
-        logging.info("Connection closed")
+    return json.loads(secret)

@@ -1,14 +1,16 @@
 from dotenv import load_dotenv
 import json
-import os
-from .database import connect_to_db, close_connection, execute_query
+from database import get_connection, close_connection, execute_query
 
 load_dotenv()
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
 
 
 def lambda_handler(event, context):
-    print("Received event:", json.dumps(event))
-
     if 'queryStringParameters' in event:
         id_auto = event['queryStringParameters'].get('id_auto')
     else:
@@ -18,17 +20,13 @@ def lambda_handler(event, context):
     if not id_auto:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': json.dumps({
                 'message': 'Missing id_auto parameter.'
             })
         }
 
-    rds_host = os.getenv('RDS_HOST')
-    rds_user = os.getenv('DB_USERNAME')
-    rds_password = os.getenv('DB_PASSWORD')
-    rds_db = os.getenv('DB_NAME')
-
-    connection = connect_to_db(rds_host, rds_user, rds_password, rds_db)
+    connection = get_connection()
     query = f"SELECT id_rate, value, comment, a.model, a.brand, u.name, u.lastname FROM rate r INNER JOIN auto a ON r.id_auto=a.id_auto INNER JOIN user u ON r.id_user=u.id_user WHERE a.id_auto = {id_auto}"
     rates = []
 
@@ -50,6 +48,7 @@ def lambda_handler(event, context):
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': json.dumps({
                 'message': f'An error occurred: {str(e)}'
             })
@@ -60,6 +59,7 @@ def lambda_handler(event, context):
 
     return {
         'statusCode': 200,
+        'headers': headers_cors,
         'body': json.dumps({
             'message': 'Rates retrieved successfully.',
             'data': rates

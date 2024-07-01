@@ -141,11 +141,20 @@ def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, he
             )
 
             existing_image_urls = get_existing_image_urls(cursor, id_auto)
-            new_image_urls = set(image_urls) - set(existing_image_urls)
 
+            # Insert new images
+            new_image_urls = set(image_urls) - set(existing_image_urls)
             for url in new_image_urls:
                 cursor.execute(
                     "INSERT INTO auto_image (url, id_auto) VALUES (%s, %s)",
+                    (url, id_auto)
+                )
+
+            # Delete removed images
+            removed_image_urls = set(existing_image_urls) - set(image_urls)
+            for url in removed_image_urls:
+                cursor.execute(
+                    "DELETE FROM auto_image WHERE url = %s AND id_auto = %s",
                     (url, id_auto)
                 )
 
