@@ -66,43 +66,43 @@ def login_auth(email, password, secret):
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': json.dumps('Not authorized')
+            'body': json.dumps({'message': 'Not authorized'})
         }
     except client.exceptions.UserNotConfirmedException as e:
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': json.dumps('User not confirmed')
+            'body': json.dumps({'message': 'User not confirmed'})
         }
     except client.exceptions.PasswordResetRequiredException as e:
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': json.dumps('Password reset required')
+            'body': json.dumps({'message': 'Password reset required'})
         }
     except client.exceptions.UserNotFoundException as e:
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': json.dumps('User not found')
+            'body': json.dumps({'message': 'User not found'})
         }
     except client.exceptions.TooManyRequestsException as e:
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': json.dumps('Too many requests')
+            'body': json.dumps({'message': 'Too many requests'})
         }
     except client.exceptions.InvalidParameterException as e:
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': json.dumps('Invalid parameter')
+            'body': json.dumps({'message': 'Invalid parameter'})
         }
     except client.exceptions.InternalErrorException as e:
         return {
             'statusCode': 500,
             'headers': headers_cors,
-            'body': json.dumps('Internal server error')
+            'body': json.dumps({'message': 'Internal error'})
         }
     except ClientError as e:
         error_code = e.response['Error']['Code']
@@ -112,17 +112,16 @@ def login_auth(email, password, secret):
             return {
                 'statusCode': 400,
                 'headers': headers_cors,
-                'body': json.dumps(f'Client error: {error_code}')
+                'body': json.dumps({'message': 'Invalid request'})
             }
         return {
             'statusCode': 500,
             'headers': headers_cors,
-            'body': json.dumps(f'An error occurred: {str(e)}')
+            'body': json.dumps({'message': 'An unknown error occurred'})
         }
     except Exception as e:
         return {
             'statusCode': 500,
             'headers': headers_cors,
-            'body': json.dumps(f'An unknown error occurred: {str(e)}')
+            'body': json.dumps({'message': 'An unknown error occurred'})
         }
-    
