@@ -1,5 +1,10 @@
 import json
 import boto3
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
 
 
 def lambda_handler(event, context):
@@ -8,12 +13,13 @@ def lambda_handler(event, context):
     except (TypeError, KeyError, json.JSONDecodeError):
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Invalid request body.'
         }
 
     previous_password = body.get('previous_password')
     new_password = body.get('new_password')
-    token = body.get('token')
+    token = body.get('access_token')
 
     try:
         response = change(previous_password, new_password, token)
@@ -37,10 +43,12 @@ def change(previous_password, new_password, token):
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': json.dumps(f'An error occurred: {str(e)}')
         }
 
     return {
         'statusCode': 200,
+        'headers': headers_cors,
         'body': json.dumps(response)
     }

@@ -64,6 +64,13 @@ def lambda_handler(event, context):
                     'description': row[12],
                     'status': row[13]
                 }
+                cursor.execute(
+                    "SELECT url FROM auto_image WHERE id_auto = %s", (row[0],))
+                image_results = cursor.fetchall()
+
+                for image_row in image_results:
+                    car['images'].append(image_row[0])
+
                 cars.append(car)
 
     finally:

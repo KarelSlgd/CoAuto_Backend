@@ -30,10 +30,9 @@ def lambda_handler(event, context):
     width = body.get('width')
     length = body.get('length')
     description = body.get('description')
-    id_status = body.get('id_status')
     image_urls = body.get('image_urls', [])
 
-    if not model or not brand or not year or not price or not type or not fuel or not doors or not engine or not height or not width or not length or not id_status:
+    if not model or not brand or not year or not price or not type or not fuel or not doors or not engine or not height or not width or not length:
         return {
             'statusCode': 400,
             'headers': headers_cors,
@@ -108,19 +107,19 @@ def lambda_handler(event, context):
             'body': 'Length must be a float.'
         }
 
-    response = insert_into_car(model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status, image_urls)
+    response = insert_into_car(model, brand, year, price, type, fuel, doors, engine, height, width, length, description, image_urls)
 
     return response
 
 
-def insert_into_car(model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status, image_urls):
+def insert_into_car(model, brand, year, price, type, fuel, doors, engine, height, width, length, description, image_urls):
     connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
             insert_query = """INSERT INTO auto (model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status)  
-                              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-            cursor.execute(insert_query, (model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status))
+                              VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 3)"""
+            cursor.execute(insert_query, (model, brand, year, price, type, fuel, doors, engine, height, width, length, description))
             auto_id = cursor.lastrowid
 
             for image_url in image_urls:

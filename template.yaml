@@ -433,6 +433,57 @@ Resources:
             Path: /get_user
             Method: post
 
+  ForgotPasswordFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cognito/forgot_password/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CognitoApi
+            Path: /forgot_password
+            Method: post
+
+  ConfirmForgotPasswordFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cognito/confirm_forgot_password/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CognitoApi
+            Path: /confirm_forgot_password
+            Method: post
+
+  ChangePasswordFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cognito/change_password/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CognitoApi
+            Path: /change_password
+            Method: post
+
 Outputs:
   GetDataUserApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to User Model"
@@ -479,6 +530,15 @@ Outputs:
   GetInfoUserApiUrl:
     Description: "API Gateway endpoint URL with path get_user for Prod stage to Cognito Model"
     Value: !Sub "https://${CognitoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_user"
+  ForgotPasswordApiUrl:
+    Description: "API Gateway endpoint URL with path forgot_password for Prod stage to Cognito Model"
+    Value: !Sub "https://${CognitoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/forgot_password"
+  ConfirmForgotPasswordApiUrl:
+    Description: "API Gateway endpoint URL with path confirm_forgot_password for Prod stage to Cognito Model"
+    Value: !Sub "https://${CognitoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/confirm_forgot_password"
+  ChangePasswordApiUrl:
+    Description: "API Gateway endpoint URL with path change_password for Prod stage to Cognito Model"
+    Value: !Sub "https://${CognitoApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/change_password"
 
   GetDataUserFunctionArn:
     Description: "Get data user Lambda Function ARN"
@@ -528,6 +588,15 @@ Outputs:
   GetInfoUserFunctionArn:
     Description: "Get info user Lambda Function ARN"
     Value: !GetAtt GetInfoUserFunction.Arn
+  ForgotPasswordFunctionArn:
+    Description: "Forgot password Lambda Function ARN"
+    Value: !GetAtt ForgotPasswordFunction.Arn
+  ConfirmForgotPasswordFunctionArn:
+    Description: "Confirm forgot password Lambda Function ARN"
+    Value: !GetAtt ConfirmForgotPasswordFunction.Arn
+  ChangePasswordFunctionArn:
+    Description: "Change password Lambda Function ARN"
+    Value: !GetAtt ChangePasswordFunction.Arn
 
   LambdaExecutionRoleArn:
     Description: "Lambda Execution Role ARN"

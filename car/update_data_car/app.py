@@ -1,5 +1,6 @@
 import json
 from connection import get_connection
+
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
@@ -30,11 +31,10 @@ def lambda_handler(event, context):
     width = body.get('width')
     length = body.get('length')
     description = body.get('description')
-    id_status = body.get('id_status')
     image_urls = body.get('image_urls', [])
 
     # Validate mandatory parameters
-    if not id_auto or not model or not brand or not year or not price or not type or not fuel or not doors or not engine or not height or not width or not length or not id_status:
+    if not id_auto or not model or not brand or not year or not price or not type or not fuel or not doors or not engine or not height or not width or not length:
         return {
             'statusCode': 400,
             'headers': headers_cors,
@@ -124,20 +124,29 @@ def lambda_handler(event, context):
             'body': 'Length must be a float.'
         }
 
-
-    response = update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status, image_urls)
+    response = update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length,
+                          description, image_urls)
 
     return response
 
 
-def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status, image_urls):
+def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, description, image_urls):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "UPDATE auto SET model=%s, brand=%s, year=%s, price=%s, type=%s, fuel=%s, doors=%s, engine=%s, height=%s, width=%s, length=%s, description=%s, id_status=%s WHERE id_auto=%s",
-                (model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_status, id_auto)
+                "UPDATE auto SET model=%s, brand=%s, year=%s, price=%s, type=%s, fuel=%s, doors=%s, engine=%s, height=%s, width=%s, length=%s, description=%s WHERE id_auto=%s",
+                (model, brand, year, price, type, fuel, doors, engine, height, width, length, description, id_auto)
             )
+
+            existing_image_urls = get_existing_image_urls(cursor, id_auto)
+            new_image_urls = set(image_urls) - set(existing_image_urls)
+
+            for url in new_image_urls:
+                cursor.execute(
+                    "INSERT INTO auto_image (url, id_auto) VALUES (%s, %s)",
+                    (url, id_auto)
+                )
 
             connection.commit()
 
@@ -156,3 +165,8 @@ def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, he
         'headers': headers_cors,
         'body': 'Car updated successfully.'
     }
+
+
+def get_existing_image_urls(cursor, id_auto):
+    cursor.execute("SELECT url FROM auto_image WHERE id_auto = %s", (id_auto,))
+    return [row['url'] for row in cursor.fetchall()]
