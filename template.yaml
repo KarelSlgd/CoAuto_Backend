@@ -244,6 +244,24 @@ Resources:
             Path: /delete_data
             Method: delete
 
+  UpdatePhotoUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: user/update_photo_user/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Timeout: 60
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UserApi
+            Path: /update_photo
+            Method: put
+
   GetDataRateFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -512,6 +530,9 @@ Outputs:
   DeleteDataUserApiUrl:
     Description: "API Gateway endpoint URL with path delete_data for Prod stage to User Model"
     Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_data"
+  UpdatePhotoUserApiUrl:
+    Description: "API Gateway endpoint URL with path update_photo for Prod stage to User Model"
+    Value: !Sub "https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/update_photo"
 
   GetDataCarApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to Car Model"
@@ -567,6 +588,9 @@ Outputs:
   DeleteDataUserFunctionArn:
     Description: "Delete data user Lambda Function ARN"
     Value: !GetAtt DeleteDataUserFunction.Arn
+  UpdatePhotoUserFunctionArn:
+    Description: "Update photo user Lambda Function ARN"
+    Value: !GetAtt UpdatePhotoUserFunction.Arn
 
   GetDataCarFunctionArn:
     Description: "Get data car Lambda Function ARN"

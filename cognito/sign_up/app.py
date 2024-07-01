@@ -104,13 +104,13 @@ def register_user(email, password, picture, name, lastname, secret):
     }
 
 
-def insert_into_user(email, id_cognito, name, lastname, role):
+def insert_into_user(email, id_cognito, name, lastname):
     connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
             insert_query = "INSERT INTO user (email, id_cognito, name, lastname, id_role, id_status) VALUES (%s, %s, %s, %s, 2, 1)"
-            cursor.execute(insert_query, (email, id_cognito, name, lastname, role))
+            cursor.execute(insert_query, (email, id_cognito, name, lastname))
             connection.commit()
 
     except Exception as e:

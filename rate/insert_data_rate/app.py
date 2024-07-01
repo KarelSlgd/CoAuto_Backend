@@ -62,7 +62,12 @@ def lambda_handler(event, context):
             'headers': headers_cors,
             'body': 'Auto does not exist.'
         }
-
+    if check_existing_review(id_user, id_auto):
+        return {
+            'statusCode': 400,
+            'headers': headers_cors,
+            'body': 'User has already reviewed this auto.'
+        }
     response = insert_into_rate(value_n, comment, id_auto, id_user)
 
     return response
@@ -109,6 +114,20 @@ def verify_auto(id_auto):
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT id_auto FROM auto WHERE id_auto = %s", id_auto)
+            result = cursor.fetchone()
+            return result is not None
+    except Exception as e:
+        return False
+    finally:
+        connection.close()
+
+
+def check_existing_review(id_user, id_auto):
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            check_query = "SELECT 1 FROM rate WHERE id_user = %s AND id_auto = %s"
+            cursor.execute(check_query, (id_user, id_auto))
             result = cursor.fetchone()
             return result is not None
     except Exception as e:

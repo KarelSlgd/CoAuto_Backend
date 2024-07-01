@@ -6,12 +6,19 @@ from botocore.exceptions import ClientError
 
 def get_connection():
     secrets = get_secret()
-    connection = pymysql.connect(
-        host=secrets['HOST'],
-        user=secrets['USERNAME'],
-        password=secrets['PASSWORD'],
-        database=secrets['DB_NAME']
-    )
+    try:
+        connection = pymysql.connect(
+            host=secrets['HOST'],
+            user=secrets['USERNAME'],
+            password=secrets['PASSWORD'],
+            database=secrets['DB_NAME']
+        )
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': f'Failed to connect to database: {str(e)}'
+        }
+
     return connection
 
 
@@ -31,6 +38,9 @@ def get_secret():
         )
         secret = get_secret_value_response['SecretString']
     except ClientError as e:
-        raise e
+        return {
+            'statusCode': 500,
+            'body': json.dumps(f'An error occurred: {str(e)}')
+        }
 
     return json.loads(secret)

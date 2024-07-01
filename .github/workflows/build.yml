@@ -24,6 +24,7 @@ jobs:
           pip install -r user/get_data_user/requirements.txt
           pip install -r user/update_data_user/requirements.txt
           pip install -r user/delete_data_user/requirements.txt
+          pip install -r user/update_photo_user/requirements.txt
 
       - name: Install dependencies for car service
         run: |
@@ -75,6 +76,7 @@ jobs:
           pip install -r user/get_data_user/requirements.txt
           pip install -r user/update_data_user/requirements.txt
           pip install -r user/delete_data_user/requirements.txt
+          pip install -r user/update_photo_user/requirements.txt
 
       - name: Install dependencies for car service
         run: |
