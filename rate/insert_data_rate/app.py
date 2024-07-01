@@ -1,12 +1,11 @@
-import pymysql
-import os
 import re
 import json
-
-rds_host = os.environ['RDS_HOST']
-rds_user = os.environ['DB_USERNAME']
-rds_password = os.environ['DB_PASSWORD']
-rds_db = os.environ['DB_NAME']
+from database import get_connection
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
 
 
 def lambda_handler(event, context):
@@ -15,6 +14,7 @@ def lambda_handler(event, context):
     except (TypeError, KeyError, json.JSONDecodeError):
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Invalid request body.'
         }
 
@@ -26,40 +26,40 @@ def lambda_handler(event, context):
     value_n = 0
     try:
         value_n = int(value)
-    except:
+    except ValueError:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Invalid rate value format.'
         }
     if not value or not id_auto or not id_user:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Missing parameters.'
         }
     if value_n > 5 or value_n < 1:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Rate value out of range.'
-        }
-    comment_regex = r'^[a-zA-Z0-9]+$'
-    if not re.match(comment_regex, comment):
-        return {
-            'statusCode': 400,
-            'body': 'Invalid comment format.'
         }
     if len(comment) > 100:
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Comment exceeds 100 characters.'
         }
     if not (verify_user(id_user)):
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'User does not exist.'
         }
     if not (verify_auto(id_auto)):
         return {
             'statusCode': 400,
+            'headers': headers_cors,
             'body': 'Auto does not exist.'
         }
 
@@ -69,12 +69,7 @@ def lambda_handler(event, context):
 
 
 def insert_into_rate(value, comment, id_auto, id_user):
-    connection = pymysql.connect(
-        host=rds_host,
-        user=rds_user,
-        password=rds_password,
-        database=rds_db
-    )
+    connection = get_connection()
     try:
         with connection.cursor() as cursor:
             insert_query = "INSERT INTO rate (value, comment, id_auto, id_user) VALUES (%s, %s, %s, %s)"
@@ -83,6 +78,7 @@ def insert_into_rate(value, comment, id_auto, id_user):
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': headers_cors,
             'body': f'An error has occurred: {str(e)}'
         }
     finally:
@@ -90,17 +86,13 @@ def insert_into_rate(value, comment, id_auto, id_user):
 
     return {
         'statusCode': 200,
+        'headers': headers_cors,
         'body': 'Rate inserted successfully.'
     }
 
 
 def verify_user(id_user):
-    connection = pymysql.connect(
-        host=rds_host,
-        user=rds_user,
-        password=rds_password,
-        database=rds_db
-    )
+    connection = get_connection()
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT id_user FROM user WHERE id_user = %s", id_user)
@@ -113,12 +105,7 @@ def verify_user(id_user):
 
 
 def verify_auto(id_auto):
-    connection = pymysql.connect(
-        host=rds_host,
-        user=rds_user,
-        password=rds_password,
-        database=rds_db
-    )
+    connection = get_connection()
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT id_auto FROM auto WHERE id_auto = %s", id_auto)
