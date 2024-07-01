@@ -1,6 +1,7 @@
 import json
 import boto3
 from database import get_secret, calculate_secret_hash
+from botocore.exceptions import ClientError
 
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
@@ -61,124 +62,67 @@ def login_auth(email, password, secret):
             'body': json.dumps({'response': response['AuthenticationResult'], 'role': role})
         }
 
-    except client.exceptions.CodeDeliveryFailureException as code_delivery_failure:
+    except client.exceptions.NotAuthorizedException as e:
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': json.dumps(f'Code delivery failure: {str(code_delivery_failure)}')
-
+            'body': json.dumps('Not authorized')
         }
-
-    except client.exceptions.ForbiddenException as forbidden:
+    except client.exceptions.UserNotConfirmedException as e:
         return {
             'statusCode': 400,
             'headers': headers_cors,
-            'body': json.dumps(f'Forbidden: {str(forbidden)}')
+            'body': json.dumps('User not confirmed')
         }
-
-    except client.exceptions.InternalErrorException as internal_error:
+    except client.exceptions.PasswordResetRequiredException as e:
+        return {
+            'statusCode': 400,
+            'headers': headers_cors,
+            'body': json.dumps('Password reset required')
+        }
+    except client.exceptions.UserNotFoundException as e:
+        return {
+            'statusCode': 400,
+            'headers': headers_cors,
+            'body': json.dumps('User not found')
+        }
+    except client.exceptions.TooManyRequestsException as e:
+        return {
+            'statusCode': 400,
+            'headers': headers_cors,
+            'body': json.dumps('Too many requests')
+        }
+    except client.exceptions.InvalidParameterException as e:
+        return {
+            'statusCode': 400,
+            'headers': headers_cors,
+            'body': json.dumps('Invalid parameter')
+        }
+    except client.exceptions.InternalErrorException as e:
         return {
             'statusCode': 500,
             'headers': headers_cors,
-            'body': json.dumps(f'Internal error: {str(internal_error)}')
+            'body': json.dumps('Internal server error')
         }
-
-    except client.exceptions.InvalidEmailRoleAccessPolicyException as invalid_email_role_access_policy:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps(f'Invalid email role access policy: {str(invalid_email_role_access_policy)}')
-        }
-
-    except client.exceptions.InvalidLambdaResponseException as invalid_lambda_response:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps(f'Invalid lambda response: {str(invalid_lambda_response)}')
-        }
-
-    except client.exceptions.InvalidParameterException as invalid_parameter:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps(f'Invalid parameter: {str(invalid_parameter)}')
-        }
-
-    except client.exceptions.InvalidPasswordException as invalid_password:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps(f'Invalid password: {str(invalid_password)}')
-        }
-
-    except client.exceptions.InvalidSmsRoleAccessPolicyException as invalid_sms_role_access_policy:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps(f'Invalid SMS role access policy: {str(invalid_sms_role_access_policy)}')
-        }
-
-    except client.exceptions.InvalidSmsRoleTrustRelationshipException as invalid_sms_role_trust_relationship:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps(f'Invalid SMS role trust relationship: {str(invalid_sms_role_trust_relationship)}')
-        }
-
-    except client.exceptions.LimitExceededException as limit_exceeded:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps(f'Limit exceeded: {str(limit_exceeded)}')
-        }
-
-    except client.exceptions.NotAuthorizedException as no_authorization:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps(f'Not authorized: {str(no_authorization)}')
-        }
-
-    except client.exceptions.ResourceNotFoundException as resource_not_found:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps(f'Resource not found: {str(resource_not_found)}')
-        }
-
-    except client.exceptions.TooManyRequestsException as too_many_requests:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps(f'Too many requests: {str(too_many_requests)}')
-        }
-
-    except client.exceptions.UnexpectedLambdaException as unexpected_lambda:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps(f'Unexpected lambda exception: {str(unexpected_lambda)}')
-
-        }
-
-    except client.exceptions.UserLambdaValidationException as user_lambda_validation:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps(f'User lambda validation exception: {str(user_lambda_validation)}')
-
-        }
-
-    except client.exceptions.UsernameExistsException as username_exists:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps(f'Username exists: {str(username_exists)}')
-        }
-
-    except Exception as e:
+    except ClientError as e:
+        error_code = e.response['Error']['Code']
+        if error_code in ('ForbiddenException', 'InvalidLambdaResponseException', 'InvalidSmsRoleAccessPolicyException',
+                          'InvalidSmsRoleTrustRelationshipException', 'InvalidUserPoolConfigurationException',
+                          'ResourceNotFoundException', 'UnexpectedLambdaException', 'UserLambdaValidationException'):
+            return {
+                'statusCode': 400,
+                'headers': headers_cors,
+                'body': json.dumps(f'Client error: {error_code}')
+            }
         return {
             'statusCode': 500,
             'headers': headers_cors,
             'body': json.dumps(f'An error occurred: {str(e)}')
         }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': headers_cors,
+            'body': json.dumps(f'An unknown error occurred: {str(e)}')
+        }
+    
