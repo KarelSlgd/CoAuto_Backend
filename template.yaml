@@ -177,6 +177,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataCar:
           Type: Api
@@ -196,6 +197,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataUser:
           Type: Api
@@ -215,6 +217,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataStudent:
           Type: Api
@@ -232,6 +235,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataStudent:
           Type: Api
@@ -249,6 +253,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataCar:
           Type: Api
@@ -266,6 +271,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataStudent:
           Type: Api
@@ -283,6 +289,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataCar:
           Type: Api
@@ -300,6 +307,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataStudent:
           Type: Api
@@ -319,6 +327,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataStudent:
           Type: Api
@@ -338,6 +347,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataStudent:
           Type: Api
@@ -357,6 +367,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataStudent:
           Type: Api
@@ -374,6 +385,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataStudent:
           Type: Api
@@ -391,6 +403,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataStudent:
           Type: Api
@@ -408,6 +421,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataStudent:
           Type: Api
@@ -425,6 +439,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataStudent:
           Type: Api
@@ -442,6 +457,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataStudent:
           Type: Api
@@ -459,6 +475,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataStudent:
           Type: Api
@@ -476,6 +493,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
         - x86_64
+      Timeout: 60
       Events:
         GetDataStudent:
           Type: Api
