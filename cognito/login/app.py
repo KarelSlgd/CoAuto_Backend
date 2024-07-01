@@ -70,7 +70,7 @@ def login_auth(email, password, secret):
         }
     except client.exceptions.UserNotConfirmedException as user_not_confirmed:
         return {
-            'statusCode': 407,
+            'statusCode': 402,
             'headers': headers_cors,
             'body': json.dumps({'message': 'User not confirmed', 'error': str(user_not_confirmed)})
         }
