@@ -130,7 +130,8 @@ def lambda_handler(event, context):
     return response
 
 
-def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, description, image_urls):
+def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, description,
+               image_urls):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
@@ -169,4 +170,4 @@ def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, he
 
 def get_existing_image_urls(cursor, id_auto):
     cursor.execute("SELECT url FROM auto_image WHERE id_auto = %s", (id_auto,))
-    return [row['url'] for row in cursor.fetchall()]
+    return [row[0] for row in cursor.fetchall()]

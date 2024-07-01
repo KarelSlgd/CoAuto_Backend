@@ -62,7 +62,8 @@ def lambda_handler(event, context):
                     'width': row[10],
                     'length': row[11],
                     'description': row[12],
-                    'status': row[13]
+                    'status': row[13],
+                    'images': []
                 }
                 cursor.execute(
                     "SELECT url FROM auto_image WHERE id_auto = %s", (row[0],))
