@@ -1,5 +1,4 @@
 import json
-import boto3
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
@@ -33,7 +32,7 @@ def lambda_handler(event, context):
 
     profile_image = body.get('profile_image')
 
-    if not photo:
+    if not profile_image:
         return {
             'statusCode': 400,
             'headers': headers_cors,
