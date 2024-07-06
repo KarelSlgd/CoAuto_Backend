@@ -1,6 +1,6 @@
 import json
 import boto3
-from database import get_secret, calculate_secret_hash
+from database import get_secret, calculate_secret_hash, handle_response
 from botocore.exceptions import ClientError
 
 headers_cors = {
@@ -13,12 +13,8 @@ headers_cors = {
 def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
-    except (TypeError, KeyError, json.JSONDecodeError):
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Invalid request body.'
-        }
+    except (TypeError, KeyError, json.JSONDecodeError) as e:
+        return handle_response(e, 'Parametros inválidos', 400)
 
     email = body.get('email')
     password = body.get('password')
@@ -28,11 +24,7 @@ def lambda_handler(event, context):
         response = login_auth(email, password, secret)
         return response
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps(f'An error occurred: {str(e)}')
-        }
+        return handle_response(e, 'Ocurrió un error', 500)
 
 
 def login_auth(email, password, secret):
@@ -59,69 +51,42 @@ def login_auth(email, password, secret):
         return {
             'statusCode': 200,
             'headers': headers_cors,
-            'body': json.dumps({'response': response['AuthenticationResult'], 'role': role})
+            'body': json.dumps({
+                'statusCode': 200,
+                'response': response['AuthenticationResult'],
+                'role': role
+            })
         }
 
-    except client.exceptions.NotAuthorizedException as not_authorized:
-        return {
-            'statusCode': 408,
-            'headers': headers_cors,
-            'body': json.dumps({'message': 'Not authorized', 'error': str(not_authorized)})
-        }
-    except client.exceptions.UserNotConfirmedException as user_not_confirmed:
-        return {
-            'statusCode': 402,
-            'headers': headers_cors,
-            'body': json.dumps({'message': 'User not confirmed', 'error': str(user_not_confirmed)})
-        }
-    except client.exceptions.PasswordResetRequiredException as password_reset_required:
-        return {
-            'statusCode': 408,
-            'headers': headers_cors,
-            'body': json.dumps({'message': 'Password reset required', 'error': str(password_reset_required)})
-        }
-    except client.exceptions.UserNotFoundException as user_not_found:
-        return {
-            'statusCode': 408,
-            'headers': headers_cors,
-            'body': json.dumps({'message': 'User not found', 'error': str(user_not_found)})
-        }
-    except client.exceptions.TooManyRequestsException as too_many_requests:
-        return {
-            'statusCode': 408,
-            'headers': headers_cors,
-            'body': json.dumps({'message': 'Too many requests', 'error': str(too_many_requests)})
-        }
-    except client.exceptions.InvalidParameterException as invalid_parameter:
-        return {
-            'statusCode': 408,
-            'headers': headers_cors,
-            'body': json.dumps({'message': 'Invalid parameter', 'error': str(invalid_parameter)})
-        }
-    except client.exceptions.InternalErrorException as internal_error:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps({'message': 'Internal error', 'error': str(internal_error)})
-        }
-    except ClientError as client_error:
-        error_code = client_error.response['Error']['Code']
+    except client.exceptions.NotAuthorizedException as e:
+        return handle_response(e, 'No autorizado', 401)
+
+    except client.exceptions.UserNotConfirmedException as e:
+        return handle_response(e, 'Usuario no confirmado', 412)
+
+    except client.exceptions.PasswordResetRequiredException as e:
+        return handle_response(e, 'Se requiere restablecimiento de contraseña', 428)
+
+    except client.exceptions.UserNotFoundException as e:
+        return handle_response(e, 'Usuario no encontrado', 404)
+
+    except client.exceptions.TooManyRequestsException as e:
+        return handle_response(e, 'Demasiadas solicitudes', 429)
+
+    except client.exceptions.InvalidParameterException as e:
+        return handle_response(e, 'Parámetro inválido', 400)
+
+    except client.exceptions.InternalErrorException as e:
+        return handle_response(e, 'Error interno', 500)
+
+    except ClientError as e:
+        error_code = e.response['Error']['Code']
         if error_code in ('ForbiddenException', 'InvalidLambdaResponseException', 'InvalidSmsRoleAccessPolicyException',
                           'InvalidSmsRoleTrustRelationshipException', 'InvalidUserPoolConfigurationException',
                           'ResourceNotFoundException', 'UnexpectedLambdaException', 'UserLambdaValidationException'):
-            return {
-                'statusCode': 408,
-                'headers': headers_cors,
-                'body': json.dumps({'message': 'Invalid request', 'error': str(client_error)})
-            }
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps({'message': 'An unknown error occurred', 'error': str(client_error)})
-        }
-    except Exception as ex:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps({'message': 'An unknown error occurred', 'error': str(ex)})
-        }
+            return handle_response(e, 'Solicitud inválida', 400)
+        return handle_response(e, 'Ocurrió un error desconocido', 500)
+
+    except Exception as e:
+        return handle_response(e, 'Ocurrió un error desconocido', 500)
+

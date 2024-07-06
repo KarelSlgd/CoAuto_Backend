@@ -1,5 +1,5 @@
 import json
-from connection import get_connection
+from connection import get_connection, handle_response
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
@@ -12,21 +12,13 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError) as e:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': f'Invalid request body. Error: {str(e)}'
-        }
+        return handle_response(e, 'Parametros inválidos', 400)
 
     id_auto = body.get('id_auto')
     id_status = body.get('id_status')
 
     if id_auto is None or id_status is None:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Missing parameters.'
-        }
+        return handle_response(None, 'Faltan parámetros.', 400)
 
     response = delete_car(id_auto, id_status)
 
@@ -41,16 +33,16 @@ def delete_car(id_auto, id_status):
             cursor.execute("UPDATE auto SET id_status=%s WHERE id_auto=%s", (id_status, id_auto))
             connection.commit()
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': f'Failed to update auto: {str(e)}'
-        }
+        return handle_response(e, 'Error al actualizar auto.', 500)
+
     finally:
         connection.close()
 
     return {
         'statusCode': 200,
         'headers': headers_cors,
-        'body': 'Auto status updated successfully.'
+        'body': json.dumps({
+            'statusCode': 200,
+            'message': 'Auto actualizado.'
+        }),
     }

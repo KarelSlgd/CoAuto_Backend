@@ -1,5 +1,5 @@
 import json
-from connection import get_connection
+from connection import get_connection, handle_response
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
@@ -42,13 +42,7 @@ def lambda_handler(event, context):
                 users.append(user)
 
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps({
-                'message': f'An error occurred: {str(e)}'
-            })
-        }
+        return handle_response(e, 'Error al obtener usuarios', 500)
 
     finally:
         connection.close()
@@ -57,6 +51,8 @@ def lambda_handler(event, context):
         "statusCode": 200,
         'headers': headers_cors,
         "body": json.dumps({
-            "data": users
+            "data": users,
+            'statusCode': 200,
+            'message': 'Usuarios obtenidos correctamente'
         }),
     }

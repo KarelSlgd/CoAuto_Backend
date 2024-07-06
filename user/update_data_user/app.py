@@ -1,5 +1,5 @@
 import json
-from connection import get_connection
+from connection import get_connection, handle_response
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
@@ -11,29 +11,17 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError):
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Invalid request body.'
-        }
+        return handle_response(None, 'Cuerpo de la solicitud no válido.', 400)
 
     id_user = body.get('id_user')
     name = body.get('name')
     lastname = body.get('lastname')
 
     if not id_user or not name:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Missing parameters.'
-        }
+        return handle_response(None, 'Faltan parámetros.', 400)
 
     if len(name) > 50:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Name exceeds 50 characters.'
-        }
+        return handle_response(None, 'El nombre excede los 50 caracteres.', 400)
 
     response = update_user(id_user, name, lastname)
 
@@ -52,11 +40,7 @@ def update_user(id_user, name, lastname):
             connection.commit()
 
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': f'Failed to update user: {str(e)}'
-        }
+        return handle_response(e,'Ocurrió un error al actualizar usuario.', 500)
 
     finally:
         connection.close()
@@ -64,5 +48,8 @@ def update_user(id_user, name, lastname):
     return {
         'statusCode': 200,
         'headers': headers_cors,
-        'body': 'User updated successfully.'
+        'body': json.dumps({
+            'statusCode': 200,
+            'message': 'Usuario actualizado correctamente'
+        })
     }

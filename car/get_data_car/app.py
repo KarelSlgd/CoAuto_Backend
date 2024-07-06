@@ -1,7 +1,7 @@
 import json
 import base64
 
-from connection import get_connection
+from connection import get_connection, handle_response
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
@@ -16,28 +16,16 @@ def lambda_handler(event, context):
     token = headers.get('Authorization')
 
     if not token:
-        return {
-            'statusCode': 401,
-            'headers': headers_cors,
-            'body': json.dumps('Missing token.')
-        }
+        return handle_response('Missing token.', 'Faltan parámetros.', 401)
 
     try:
         decoded_token = get_jwt_claims(token)
         role = decoded_token.get('cognito:groups')
         if 'ClientUserGroup' in role:
-            return {
-                'statusCode': 403,
-                'headers': headers_cors,
-                'body': json.dumps('Access denied. Role cannot be client.')
-            }
+            return handle_response('Access denied. Role cannot be client.', 'Acceso denegado.', 403)
 
     except Exception as e:
-        return {
-            'statusCode': 401,
-            'headers': headers_cors,
-            'body': json.dumps(f'Invalid token: {str(e)}')
-        }
+        return handle_response(str(e), 'Error al decodificar token.', 401)
 
     cars = []
 
@@ -81,8 +69,9 @@ def lambda_handler(event, context):
         "statusCode": 200,
         'headers': headers_cors,
         "body": json.dumps({
-            "message": "get cars",
-            "data": cars
+            'statusCode': 200,
+            'message': 'get cars',
+            'data': cars
         }),
     }
 

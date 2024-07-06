@@ -1,10 +1,11 @@
 import json
+from connection import get_connection, handle_response
+import base64
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
 }
-from connection import get_connection
 
 
 def lambda_handler(event, context):
@@ -13,40 +14,24 @@ def lambda_handler(event, context):
     token = headers.get('Authorization')
 
     if not token:
-        return {
-            'statusCode': 401,
-            'headers': headers_cors,
-            'body': json.dumps('Missing token.')
-        }
+        return handle_response(None, 'Falta token.', 401)
 
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError):
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps({
-                'message': 'Invalid request body.'
-            })
-        }
+        return handle_response(None, 'Cuerpo de la solicitud no válido.', 400)
 
     profile_image = body.get('profile_image')
 
     if not profile_image:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps({
-                'message': 'Missing parameters.'
-            })
-        }
+        return handle_response(None, 'Faltan parámetros.', 400)
 
-    response = update_photo(profile_image)
+    response = update_photo(profile_image, token)
 
     return response
 
 
-def update_photo(profile_image):
+def update_photo(profile_image, token):
     connection = get_connection()
     decoded_token = get_jwt_claims(token)
     id_user = decoded_token.get('cognito:username')
@@ -59,19 +44,15 @@ def update_photo(profile_image):
             connection.commit()
 
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps({
-                'message': f'Failed to update user in Cognito: {str(e)}'
-            })
-        }
+        return handle_response(e, 'Ocurrió un error al actualizar usuario.', 500)
 
     return {
         'statusCode': 200,
         'headers': headers_cors,
         'body': json.dumps({
+            'statusCode': 200,
             'message': 'User updated successfully.'
+
         })
     }
 

@@ -1,5 +1,5 @@
 import json
-from connection import get_connection
+from connection import get_connection, handle_response
 
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
@@ -12,11 +12,7 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError):
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Invalid request body.'
-        }
+        return handle_response(None, 'Solicitud no válida.', 400)
 
     id_auto = body.get('id_auto')
     model = body.get('brand')
@@ -33,96 +29,50 @@ def lambda_handler(event, context):
     description = body.get('description')
     image_urls = body.get('image_urls', [])
 
-    # Validate mandatory parameters
     if not id_auto or not model or not brand or not year or not price or not type or not fuel or not doors or not engine or not height or not width or not length:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Missing parameters.'
-        }
+        return handle_response(None, 'Faltan parámetros.', 400)
 
-    # Perform necessary validations
     if len(model) > 30:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Model exceeds 30 characters'
-        }
+        return handle_response(None, 'El campo modelo excede los 30 caracteres.', 400)
 
     if len(brand) > 30:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Brand exceeds 30 characters'
-        }
+        return handle_response(None, 'El campo marca excede los 30 caracteres.', 400)
 
     if len(type) > 20:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Category exceeds 20 characters'
-        }
+        return handle_response(None, 'El campo tipo excede los 20 caracteres.', 400)
 
     if len(fuel) > 20:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Fuel exceeds 20 characters'
-        }
+        return handle_response(None, 'El campo combustible excede los 20 caracteres.', 400)
 
     try:
         year = int(year)
     except ValueError:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Year must be an integer.'
-        }
+        return handle_response(None, 'El año debe ser un entero.', 400)
 
     try:
         price = float(price)
     except ValueError:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Price must be a float.'
-        }
+        return handle_response(None, 'El precio debe ser un decimal.', 400)
 
     try:
         doors = int(doors)
     except ValueError:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Doors must be an integer.'
-        }
+        return handle_response(None, 'Las puertas deben ser un entero.', 400)
 
     try:
         height = float(height)
     except ValueError:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Height must be a float.'
-        }
+        return handle_response(None, 'La altura debe ser un decimal.', 400)
 
     try:
         width = float(width)
     except ValueError:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Width must be a float.'
-        }
+        return handle_response(None, 'El ancho debe ser un decimal.', 400)
 
     try:
         length = float(length)
     except ValueError:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Length must be a float.'
-        }
+        return handle_response(None, 'La longitud debe ser un decimal.', 400)
 
     response = update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length,
                           description, image_urls)
@@ -142,7 +92,6 @@ def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, he
 
             existing_image_urls = get_existing_image_urls(cursor, id_auto)
 
-            # Insert new images
             new_image_urls = set(image_urls) - set(existing_image_urls)
             for url in new_image_urls:
                 cursor.execute(
@@ -150,7 +99,6 @@ def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, he
                     (url, id_auto)
                 )
 
-            # Delete removed images
             removed_image_urls = set(existing_image_urls) - set(image_urls)
             for url in removed_image_urls:
                 cursor.execute(
@@ -161,11 +109,7 @@ def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, he
             connection.commit()
 
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': f'Failed to update car: {str(e)}'
-        }
+        return handle_response(e, f'Failed to update car: {str(e)}', 500)
 
     finally:
         connection.close()
@@ -173,7 +117,10 @@ def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, he
     return {
         'statusCode': 200,
         'headers': headers_cors,
-        'body': 'Car updated successfully.'
+        'body': json.dumps({
+            'statusCode': 200,
+            'message': 'Car updated successfully.'
+        })
     }
 
 

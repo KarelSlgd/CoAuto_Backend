@@ -1,5 +1,5 @@
 import json
-from connection import get_connection
+from connection import get_connection, handle_response
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
@@ -12,11 +12,8 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError):
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Invalid request body.'
-        }
+        return handle_response(None, 'Parametros inválidos', 400)
+
     # SELECT id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, a.description, s.value FROM auto a INNER JOIN status s ON a.id_status = s.id_status;
     model = body.get('model')
     brand = body.get('brand')
@@ -33,79 +30,43 @@ def lambda_handler(event, context):
     image_urls = body.get('image_urls', [])
 
     if not model or not brand or not year or not price or not type or not fuel or not doors or not engine or not height or not width or not length:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Missing parameters.'
-        }
+        return handle_response(None, 'Faltan parámetros.', 400)
 
     if len(model) > 30:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Model exceeds 50 characters.'
-        }
+        return handle_response(None, 'El campo modelo excede los 50 caracteres.', 400)
 
     if len(brand) > 30:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Brand exceeds 50 characters.'
-        }
+        return handle_response(None, 'El campo marca excede los 50 caracteres.', 400)
 
     try:
         year = int(year)
     except ValueError:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Year must be an integer.'
-        }
+        return handle_response(None, 'El campo año debe ser un entero.', 400)
 
     try:
         price = float(price)
     except ValueError:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Price must be a float.'
-        }
+        return handle_response(None, 'El campo precio debe ser un decimal.', 400)
 
     try:
         doors = int(doors)
     except ValueError:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Doors must be an integer.'
-        }
+        return handle_response(None, 'El campo puertas debe ser un entero.', 400)
 
     try:
         height = float(height)
     except ValueError:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Height must be a float.'
-        }
+        return handle_response(None, 'El campo altura debe ser un decimal.', 400)
 
     try:
         width = float(width)
     except ValueError:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Width must be a float.'
-        }
+        return handle_response(None, 'El campo ancho debe ser un decimal.', 400)
 
     try:
         length = float(length)
     except ValueError:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Length must be a float.'
-        }
+        return handle_response(None, 'El campo largo debe ser un decimal.', 400)
 
     response = insert_into_car(model, brand, year, price, type, fuel, doors, engine, height, width, length, description, image_urls)
 
@@ -129,11 +90,7 @@ def insert_into_car(model, brand, year, price, type, fuel, doors, engine, height
             connection.commit()
 
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': f'An error occurred: {str(e)}'
-        }
+        return handle_response(e, 'Error al insertar auto.', 500)
 
     finally:
         connection.close()
@@ -141,5 +98,8 @@ def insert_into_car(model, brand, year, price, type, fuel, doors, engine, height
     return {
         'statusCode': 200,
         'headers': headers_cors,
-        'body': 'Record inserted successfully.'
+        'body': json.dumps({
+            'statusCode': 200,
+            'message': 'Auto insertado.'
+        })
     }
