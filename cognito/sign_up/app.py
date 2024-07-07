@@ -63,10 +63,7 @@ def register_user(email, password, profile_image, name, lastname, secret):
     except Exception as e:
         return handle_response(e, 'Ocurrió un error al registrar el usuario.', 500)
 
-    response = insert_into_user(email, response['UserSub'], name, lastname, profile_image)
-
-    if response is not True:
-        return response
+    insert_into_user(email, response['UserSub'], name, lastname, profile_image)
 
     return {
         'statusCode': 200,
@@ -93,5 +90,3 @@ def insert_into_user(email, id_cognito, name, lastname, profile_image):
 
     finally:
         connection.close()
-
-    return True
