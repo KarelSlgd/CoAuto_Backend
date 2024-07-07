@@ -29,7 +29,7 @@ def update_rate_status(id_rate, id_status):
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM status WHERE id_status=%s AND name='to_rate'", (id_status,))
+            cursor.execute("SELECT * FROM status WHERE id_status=%s AND description='to_rate'", (id_status,))
             result = cursor.fetchone()
 
             if not result:
