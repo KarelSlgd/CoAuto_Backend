@@ -36,7 +36,8 @@ def lambda_handler(event, context):
                 'brand': row[4],
                 'name': row[5],
                 'lastname': row[6],
-                'id_auto': row[7]
+                'id_auto': row[7],
+                'status': row[8]
             }
             rates.append(rate)
 
