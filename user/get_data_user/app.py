@@ -19,7 +19,7 @@ def lambda_handler(event, context):
                         lastname, 
                         r.name AS nameRole,
                         s.value,
-                        profile_image
+                        profile_image AS profileImage
                     FROM user u
                     INNER JOIN role r 
                         ON u.id_role = r.id_role 
@@ -37,7 +37,7 @@ def lambda_handler(event, context):
                     'lastname': row[4],
                     'role': row[5],
                     'status': row[6],
-                    'profile_image': row[7]
+                    'profileImage': row[7]
                 }
                 users.append(user)
 

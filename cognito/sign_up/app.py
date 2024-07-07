@@ -39,8 +39,8 @@ def lambda_handler(event, context):
 
 
 def register_user(email, password, profile_image, name, lastname, secret):
+    client = boto3.client('cognito-idp')
     try:
-        client = boto3.client('cognito-idp')
         secret_hash = calculate_secret_hash(secret['COGNITO_CLIENT_ID'], secret['SECRET_KEY'], email)
         response = client.sign_up(
             ClientId=secret['COGNITO_CLIENT_ID'],
@@ -59,6 +59,54 @@ def register_user(email, password, profile_image, name, lastname, secret):
             Username=email,
             GroupName=secret['COGNITO_GROUP_NAME']
         )
+
+    except client.exceptions.CodeDeliveryFailureException as e:
+        return handle_response(e, 'Error en la entrega del código de verificación.', 400)
+
+    except client.exceptions.ForbiddenException as e:
+        return handle_response(e, 'Solicitud no permitida por AWS WAF.', 403)
+
+    except client.exceptions.InternalErrorException as e:
+        return handle_response(e, 'Error interno en Amazon Cognito.', 500)
+
+    except client.exceptions.InvalidEmailRoleAccessPolicyException as e:
+        return handle_response(e, 'No se permite usar la identidad de correo electrónico.', 403)
+
+    except client.exceptions.InvalidLambdaResponseException as e:
+        return handle_response(e, 'Respuesta inválida de AWS Lambda.', 400)
+
+    except client.exceptions.InvalidParameterException as e:
+        return handle_response(e, 'Parámetro inválido en la solicitud.', 400)
+
+    except client.exceptions.InvalidPasswordException as e:
+        return handle_response(e, 'Contraseña inválida.', 400)
+
+    except client.exceptions.InvalidSmsRoleAccessPolicyException as e:
+        return handle_response(e, 'El rol de SMS no tiene permiso para publicar usando Amazon SNS.', 403)
+
+    except client.exceptions.InvalidSmsRoleTrustRelationshipException as e:
+        return handle_response(e, 'Relación de confianza no válida para el rol de SMS.', 403)
+
+    except client.exceptions.LimitExceededException as e:
+        return handle_response(e, 'Se ha excedido el límite para el recurso solicitado.', 429)
+
+    except client.exceptions.NotAuthorizedException as e:
+        return handle_response(e, 'Usuario no autorizado.', 401)
+
+    except client.exceptions.ResourceNotFoundException as e:
+        return handle_response(e, 'Recurso no encontrado.', 404)
+
+    except client.exceptions.TooManyRequestsException as e:
+        return handle_response(e, 'Demasiadas solicitudes para la operación.', 429)
+
+    except client.exceptions.UnexpectedLambdaException as e:
+        return handle_response(e, 'Excepción inesperada con AWS Lambda.', 500)
+
+    except client.exceptions.UserLambdaValidationException as e:
+        return handle_response(e, 'Excepción de validación del usuario con AWS Lambda.', 400)
+
+    except client.exceptions.UsernameExistsException as e:
+        return handle_response(e, 'El nombre de usuario ya existe en el grupo de usuarios.', 409)
 
     except Exception as e:
         return handle_response(e, 'Ocurrió un error al registrar el usuario.', 500)

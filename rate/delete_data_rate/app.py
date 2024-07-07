@@ -13,13 +13,13 @@ def lambda_handler(event, context):
     except (TypeError, KeyError, json.JSONDecodeError) as e:
         return handle_response(e, 'Parametros inválidos', 400)
 
-    id_auto = body.get('id_auto')
+    id_rate = body.get('id_rate')
     id_status = body.get('id_status')
 
-    if id_auto is None or id_status is None:
+    if id_rate is None or id_status is None:
         return handle_response(None, 'Faltan parámetros.', 400)
 
-    response = delete_car(id_auto, id_status)
+    response = delete_car(id_rate, id_status)
 
     return response
 
@@ -29,17 +29,17 @@ def delete_car(id_auto, id_status):
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM status WHERE id_status=%s AND name='to_auto'", (id_status,))
+            cursor.execute("SELECT * FROM status WHERE id_status=%s AND name='to_rate'", (id_status,))
             result = cursor.fetchone()
 
             if not result:
-                return handle_response(None, 'El status no es válido para autos.', 400)
+                return handle_response(None, 'El status no es válido para las reseñas.', 400)
 
             cursor.execute("UPDATE auto SET id_status=%s WHERE id_auto=%s", (id_status, id_auto))
             connection.commit()
 
     except Exception as e:
-        return handle_response(e, 'Error al actualizar auto.', 500)
+        return handle_response(e, 'Error al actualizar las reseñas.', 500)
     finally:
         connection.close()
 
@@ -48,6 +48,6 @@ def delete_car(id_auto, id_status):
         'headers': headers_cors,
         'body': json.dumps({
             'statusCode': 200,
-            'message': 'Auto actualizado correctamente.'
+            'message': 'Reseña actualizada correctamente.'
         }),
     }

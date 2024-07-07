@@ -25,13 +25,48 @@ def lambda_handler(event, context):
 
 
 def change(previous_password, new_password, token):
+    client = boto3.client('cognito-idp')
     try:
-        client = boto3.client('cognito-idp')
         response = client.change_password(
             PreviousPassword=previous_password,
             ProposedPassword=new_password,
             AccessToken=token
         )
+
+    except client.exceptions.ForbiddenException as e:
+        return handle_response(e,
+                               'AWS WAF no permite tu solicitud basado en un ACL web asociado a tu grupo de usuarios.',
+                               403)
+
+    except client.exceptions.InternalErrorException as e:
+        return handle_response(e, 'Amazon Cognito encontró un error interno.', 500)
+
+    except client.exceptions.InvalidParameterException as e:
+        return handle_response(e, 'Amazon Cognito encontró un parámetro inválido.', 400)
+
+    except client.exceptions.InvalidPasswordException as e:
+        return handle_response(e, 'Amazon Cognito encontró una contraseña inválida.', 400)
+
+    except client.exceptions.LimitExceededException as e:
+        return handle_response(e, 'Se ha excedido el límite para un recurso solicitado de AWS.', 429)
+
+    except client.exceptions.NotAuthorizedException as e:
+        return handle_response(e, 'No estás autorizado.', 401)
+
+    except client.exceptions.PasswordResetRequiredException as e:
+        return handle_response(e, 'Se requiere un restablecimiento de contraseña.', 412)
+
+    except client.exceptions.ResourceNotFoundException as e:
+        return handle_response(e, 'Amazon Cognito no puede encontrar el recurso solicitado.', 404)
+
+    except client.exceptions.TooManyRequestsException as e:
+        return handle_response(e, 'Has realizado demasiadas solicitudes para una operación dada.', 429)
+
+    except client.exceptions.UserNotConfirmedException as e:
+        return handle_response(e, 'El usuario no fue confirmado exitosamente.', 412)
+
+    except client.exceptions.UserNotFoundException as e:
+        return handle_response(e, 'El usuario no fue encontrado.', 404)
 
     except Exception as e:
         return handle_response(e, 'Ocurrió un error al cambiar la contraseña.', 500)

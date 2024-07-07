@@ -48,12 +48,12 @@ def update_user_status(id_user, status, value):
 
         if value == 1:
             client.admin_enable_user(
-                UserPoolId=secrets['USER_POOL_ID'],
+                UserPoolId=secrets['COGNITO_USER_POOL_ID'],
                 Username=username
             )
         else:
             client.admin_disable_user(
-                UserPoolId=secrets['USER_POOL_ID'],
+                UserPoolId=secrets['COGNITO_USER_POOL_ID'],
                 Username=username
             )
 

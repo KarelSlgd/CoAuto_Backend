@@ -376,6 +376,42 @@ Resources:
             Auth:
               Authorizer: CarAuthorizer
 
+  GetOneDataCarFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: car/get_one_data_car/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Timeout: 60
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CarApi
+            Path: /get_data_one
+            Method: get
+
+  DeleteDataRateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: rate/delete_data_rate/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Timeout: 60
+      Events:
+        GetDataStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RateApi
+            Path: /delete_data
+            Method: delete
+
   RegisterUserFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -546,6 +582,9 @@ Outputs:
   DeleteDataCarApiUrl:
     Description: "API Gateway endpoint URL with path delete_data for Prod stage to Car Model"
     Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_data"
+  GetOneDataCarApiUrl:
+    Description: "API Gateway endpoint URL with path get_data_one for Prod stage to Car Model"
+    Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data_one"
 
   GetDataRateApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to Rate Model"
@@ -553,6 +592,12 @@ Outputs:
   InsertDataRateApiUrl:
     Description: "API Gateway endpoint URL with path insert_data for Prod stage to Rate Model"
     Value: !Sub "https://${RateApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/insert_data"
+  GetDataOneRateApiUrl:
+    Description: "API Gateway endpoint URL with path get_data_one for Prod stage to Rate Model"
+    Value: !Sub "https://${RateApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data_one"
+  DeleteDataRateApiUrl:
+    Description: "API Gateway endpoint URL with path delete_data for Prod stage to Rate Model"
+    Value: !Sub "https://${RateApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_data"
 
   SignUpUserApiUrl:
     Description: "API Gateway endpoint URL with path sign_up for Prod stage to Cognito Model"
@@ -604,6 +649,9 @@ Outputs:
   DeleteDataCarFunctionArn:
     Description: "Delete data car Lambda Function ARN"
     Value: !GetAtt DeleteDataCarFunction.Arn
+  GetOneDataCarFunctionArn:
+    Description: "Get one data car Lambda Function ARN"
+    Value: !GetAtt GetOneDataCarFunction.Arn
 
   GetDataRateFunctionArn:
     Description: "Get data rate Lambda Function ARN"
@@ -614,6 +662,9 @@ Outputs:
   InsertDataRateFunctionArn:
     Description: "Insert data rate Lambda Function ARN"
     Value: !GetAtt InsertDataRateFunction.Arn
+  DeleteDataRateFunctionArn:
+    Description: "Delete data rate Lambda Function ARN"
+    Value: !GetAtt DeleteDataRateFunction.Arn
 
   RegisterUserFunctionArn:
     Description: "Register user Lambda Function ARN"
