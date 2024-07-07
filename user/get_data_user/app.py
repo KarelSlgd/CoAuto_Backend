@@ -12,14 +12,14 @@ def lambda_handler(event, context):
     users = []
     try:
         query = """SELECT 
-                        id_user AS idUser,
-                        id_cognito AS idCognito,
+                        id_user,
+                        id_cognito,
                         email,
                         u.name AS nameUser,
                         lastname, 
                         r.name AS nameRole,
                         s.value,
-                        profile_image AS profileImage
+                        profile_image
                     FROM user u
                     INNER JOIN role r 
                         ON u.id_role = r.id_role 
@@ -30,14 +30,14 @@ def lambda_handler(event, context):
             result = cursor.fetchall()
             for row in result:
                 user = {
-                    'idUser': row[0],
-                    'idCognito': row[1],
+                    'id_user': row[0],
+                    'id_cognito': row[1],
                     'email': row[2],
                     'name': row[3],
                     'lastname': row[4],
                     'role': row[5],
                     'status': row[6],
-                    'profileImage': row[7]
+                    'profile_image': row[7]
                 }
                 users.append(user)
 

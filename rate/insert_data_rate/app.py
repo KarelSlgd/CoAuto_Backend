@@ -50,7 +50,7 @@ def lambda_handler(event, context):
         return handle_response(None, 'El auto no fue encontrado.', 400)
 
     if check_existing_review(id_user, id_auto):
-        return handle_response(None, 'El usuario ya ha revisado este auto.', 400)
+        return handle_response(None, 'El usuario ya ha reseñado este auto.', 400)
 
     response = insert_into_rate(value_n, comment, id_auto, id_user)
 

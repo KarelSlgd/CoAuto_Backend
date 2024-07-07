@@ -21,7 +21,7 @@ def lambda_handler(event, context):
         return handle_response(None, 'Falta un parametro.', 400)
 
     connection = get_connection()
-    query = f"SELECT id_rate, value, comment, a.model, a.brand, u.name, u.lastname FROM rate r INNER JOIN auto a ON r.id_auto=a.id_auto INNER JOIN user u ON r.id_user=u.id_user WHERE a.id_auto = {id_auto}"
+    query = f"SELECT id_rate, value, comment, a.model, a.brand, u.name, u.lastname, a.id_auto FROM rate r INNER JOIN auto a ON r.id_auto=a.id_auto INNER JOIN user u ON r.id_user=u.id_user WHERE a.id_auto = {id_auto}"
     rates = []
 
     try:
@@ -35,7 +35,8 @@ def lambda_handler(event, context):
                 'model': row[3],
                 'brand': row[4],
                 'name': row[5],
-                'lastname': row[6]
+                'lastname': row[6],
+                'id_auto': row[7]
             }
             rates.append(rate)
 
