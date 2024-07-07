@@ -1,6 +1,6 @@
 import json
 import base64
-from database import get_connection, close_connection
+from database import get_connection, close_connection, handle_response
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
@@ -13,11 +13,7 @@ def lambda_handler(event, context):
     token = headers.get('Authorization')
 
     if not token:
-        return {
-            'statusCode': 401,
-            'headers': headers_cors,
-            'body': json.dumps('Missing token.')
-        }
+        return handle_response(None, 'Se requiere un token de autorización.', 400)
 
     try:
         decoded_token = get_jwt_claims(token)
@@ -31,11 +27,7 @@ def lambda_handler(event, context):
             })
         }
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps(f'An error occurred: {str(e)}')
-        }
+        return handle_response(e, 'Ocurrió un error al obtener la información del usuario.', 500)
 
 
 def get_jwt_claims(token):
@@ -86,13 +78,7 @@ def get_into_user(token):
                 return None
 
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps({
-                'message': f'An error occurred: {str(e)}'
-            })
-        }
+        return handle_response(e, 'Ocurrió un error al obtener la información del usuario.', 500)
 
     finally:
         close_connection(connection)

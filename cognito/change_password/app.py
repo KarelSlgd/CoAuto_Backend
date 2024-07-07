@@ -11,11 +11,7 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError):
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Invalid request body.'
-        }
+        return handle_response(None, 'Cuerpo de la solicitud inválido.', 400)
 
     previous_password = body.get('previous_password')
     new_password = body.get('new_password')
@@ -25,10 +21,7 @@ def lambda_handler(event, context):
         response = change(previous_password, new_password, token)
         return response
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f'An error occurred: {str(e)}')
-        }
+        return handle_response(e, 'Ocurrió un error al cambiar la contraseña.', 500)
 
 
 def change(previous_password, new_password, token):
@@ -41,14 +34,26 @@ def change(previous_password, new_password, token):
         )
 
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps(f'An error occurred: {str(e)}')
-        }
+        return handle_response(e, 'Ocurrió un error al cambiar la contraseña.', 500)
 
     return {
         'statusCode': 200,
         'headers': headers_cors,
-        'body': json.dumps(response)
+        'body': json.dumps({
+            'statusCode': 200,
+            'message': 'Contraseña cambiada correctamente.',
+            'response': response
+        })
+    }
+
+
+def handle_response(error, message, status_code):
+    return {
+        'statusCode': status_code,
+        'headers': headers_cors,
+        'body': json.dumps({
+            'statusCode': status_code,
+            'message': message,
+            'error': str(error)
+        })
     }

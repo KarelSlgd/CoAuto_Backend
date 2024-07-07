@@ -28,10 +28,7 @@ def get_secret():
         )
         secret = get_secret_value_response['SecretString']
     except ClientError as e:
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f'An error occurred: {str(e)}')
-        }
+        return handle_response(e, 'Error al obtener el secreto', 500)
 
     return json.loads(secret)
 

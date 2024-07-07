@@ -1,6 +1,6 @@
 import json
 import boto3
-from database import get_secret, calculate_secret_hash
+from database import get_secret, calculate_secret_hash, handle_response
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
@@ -12,11 +12,7 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError):
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Invalid request body.'
-        }
+        return handle_response(None, 'Cuerpo de la solicitud inválido.', 400)
 
     email = body.get('email')
     code = body.get('code')
@@ -27,11 +23,7 @@ def lambda_handler(event, context):
         response = confirm_password(email, code, password, secret)
         return response
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps(f'An error occurred: {str(e)}')
-        }
+        return handle_response(e, 'Ocurrió un error al confirmar la contraseña.', 500)
 
 
 def confirm_password(email, code, password, secret):
@@ -47,14 +39,14 @@ def confirm_password(email, code, password, secret):
         )
 
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps(f'An error occurred: {str(e)}')
-        }
+        return handle_response(e, 'Ocurrió un error al confirmar la contraseña.', 500)
 
     return {
         'statusCode': 200,
         'headers': headers_cors,
-        'body': json.dumps(response)
+        'body': json.dumps({
+            'statusCode': 200,
+            'message': 'Contraseña confirmada correctamente.',
+            'response': response
+        })
     }

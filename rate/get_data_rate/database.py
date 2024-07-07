@@ -19,11 +19,7 @@ def get_connection():
             database=secrets['DB_NAME']
         )
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': f'Failed to connect to database: {str(e)}'
-        }
+        return handle_response(e, 'Ocurrió un error al conectar a la base de datos', 500)
 
     return connection
 
@@ -44,10 +40,18 @@ def get_secret():
         )
         secret = get_secret_value_response['SecretString']
     except ClientError as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': f'Failed to retrieve secret: {str(e)}'
-        }
+        return handle_response(e, 'Error al obtener el secreto', 500)
 
     return json.loads(secret)
+
+
+def handle_response(error, message, status_code):
+    return {
+        'statusCode': status_code,
+        'headers': headers_cors,
+        'body': json.dumps({
+            'statusCode': status_code,
+            'message': message,
+            'error': str(error)
+        })
+    }

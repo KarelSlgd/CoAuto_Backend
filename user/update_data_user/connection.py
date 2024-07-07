@@ -19,7 +19,7 @@ def get_connection():
             database=secrets['DB_NAME']
         )
     except Exception as e:
-        return handle_response(e, f'Failed to connect to database: {str(e)}', 500)
+        return handle_response(e, 'Ocurrió un error al conectar a la base de datos', 500)
 
     return connection
 

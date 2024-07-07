@@ -1,6 +1,6 @@
 import json
 import boto3
-from database import get_secret, calculate_secret_hash, get_connection
+from database import get_secret, calculate_secret_hash, get_connection, handle_response
 
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
@@ -13,11 +13,7 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError):
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps({'message': 'Invalid request body.'}),
-        }
+        return handle_response(None, 'Cuerpo de la solicitud inválido.', 400)
 
     password = body.get('password')
     email = body.get('email')
@@ -26,36 +22,20 @@ def lambda_handler(event, context):
     lastname = body.get('lastname')
 
     if not password or not email or not profile_image or not name or not lastname:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps({'message': 'Missing parameters.'})
-        }
+        return handle_response(None, 'Faltan parámetros.', 400)
 
     if len(name) > 50:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps({'message': 'Name exceeds 50 characters.'})
-        }
+        return handle_response(None, 'El nombre no puede exceder los 50 caracteres.', 400)
 
     if len(lastname) > 100:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps({'message': 'Lastname exceeds 100 characters.'})
-        }
+        return handle_response(None, 'El apellido no puede exceder los 100 caracteres.', 400)
 
     try:
         secret = get_secret()
         response = register_user(email, password, profile_image, name, lastname, secret)
         return response
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps({'message': f'An error occurred: {str(e)}'})
-        }
+        return handle_response(e, 'Ocurrió un error al registrar el usuario.', 500)
 
 
 def register_user(email, password, profile_image, name, lastname, secret):
@@ -86,18 +66,21 @@ def register_user(email, password, profile_image, name, lastname, secret):
         )
 
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps({'message': f'An error occurred: {str(e)}'})
-        }
+        return handle_response(e, 'Ocurrió un error al registrar el usuario.', 500)
 
-    insert_into_user(email, response['UserSub'], name, lastname, profile_image)
+    response = insert_into_user(email, response['UserSub'], name, lastname, profile_image)
+
+    if response is not True:
+        return response
 
     return {
         'statusCode': 200,
         'headers': headers_cors,
-        'body': json.dumps({'message': 'Send verification code', 'user': response['UserSub']})
+        'body': json.dumps({
+            'statusCode': 200,
+            'message': 'Se ha enviado un correo de confirmación.',
+            'response': response['UserSub']
+        })
     }
 
 
@@ -111,17 +94,9 @@ def insert_into_user(email, id_cognito, name, lastname, profile_image):
             connection.commit()
 
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps({'message': f'An error occurred: {str(e)}'})
-        }
+        return handle_response(e, 'Ocurrió un error al registrar el usuario.', 500)
 
     finally:
         connection.close()
 
-    return {
-        'statusCode': 200,
-        'headers': headers_cors,
-        'body': json.dumps({'message': 'Send verification code', 'user': email})
-    }
+    return True

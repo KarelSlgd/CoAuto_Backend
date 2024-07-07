@@ -1,5 +1,5 @@
 import json
-from database import get_connection
+from database import get_connection, handle_response
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
@@ -30,11 +30,7 @@ def lambda_handler(event, context):
                 users.append(user)
 
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': f'Failed to get rate: {str(e)}'
-        }
+        return handle_response(e, 'Ocurrió un error al obtener la reseña', 500)
 
     finally:
         connection.close()
@@ -43,6 +39,7 @@ def lambda_handler(event, context):
         "statusCode": 200,
         'headers': headers_cors,
         "body": json.dumps({
+            'statusCode': 200,
             "message": "get rate",
             "data": users
         }),

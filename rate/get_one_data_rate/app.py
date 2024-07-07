@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import json
-from database import get_connection, close_connection, execute_query
+from database import get_connection, close_connection, execute_query, handle_response
 
 load_dotenv()
 headers_cors = {
@@ -18,13 +18,7 @@ def lambda_handler(event, context):
         id_auto = body.get('id_auto')
 
     if not id_auto:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': json.dumps({
-                'message': 'Missing id_auto parameter.'
-            })
-        }
+        return handle_response(None, 'Falta un parametro.', 400)
 
     connection = get_connection()
     query = f"SELECT id_rate, value, comment, a.model, a.brand, u.name, u.lastname FROM rate r INNER JOIN auto a ON r.id_auto=a.id_auto INNER JOIN user u ON r.id_user=u.id_user WHERE a.id_auto = {id_auto}"
@@ -46,13 +40,7 @@ def lambda_handler(event, context):
             rates.append(rate)
 
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps({
-                'message': f'An error occurred: {str(e)}'
-            })
-        }
+        return handle_response(e, 'A ocurrido un error al obtener los datos.', 500)
 
     finally:
         close_connection(connection)
@@ -61,6 +49,7 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'headers': headers_cors,
         'body': json.dumps({
+            'statusCode': 200,
             'message': 'Rates retrieved successfully.',
             'data': rates
         })
