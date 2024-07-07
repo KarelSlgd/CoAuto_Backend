@@ -19,12 +19,12 @@ def lambda_handler(event, context):
     if id_rate is None or id_status is None:
         return handle_response(None, 'Faltan parámetros.', 400)
 
-    response = delete_car(id_rate, id_status)
+    response = update_rate_status(id_rate, id_status)
 
     return response
 
 
-def delete_car(id_auto, id_status):
+def update_rate_status(id_rate, id_status):
     connection = get_connection()
 
     try:
@@ -35,7 +35,7 @@ def delete_car(id_auto, id_status):
             if not result:
                 return handle_response(None, 'El status no es válido para las reseñas.', 400)
 
-            cursor.execute("UPDATE auto SET id_status=%s WHERE id_auto=%s", (id_status, id_auto))
+            cursor.execute("UPDATE rate SET id_status=%s WHERE id_rate=%s", (id_status, id_rate))
             connection.commit()
 
     except Exception as e:

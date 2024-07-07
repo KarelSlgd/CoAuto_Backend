@@ -21,7 +21,7 @@ def lambda_handler(event, context):
         return handle_response(None, 'Falta un parametro.', 400)
 
     connection = get_connection()
-    query = f"SELECT id_rate, value, comment, a.model, a.brand, u.name, u.lastname, a.id_auto FROM rate r INNER JOIN auto a ON r.id_auto=a.id_auto INNER JOIN user u ON r.id_user=u.id_user WHERE a.id_auto = {id_auto}"
+    query = f"SELECT id_rate, value, comment, a.model, a.brand, u.name, u.lastname, a.id_auto FROM rate r INNER JOIN auto a ON r.id_auto=a.id_auto INNER JOIN user u ON r.id_user=u.id_user WHERE r.id_auto = {id_auto}"
     rates = []
 
     try:
@@ -51,7 +51,7 @@ def lambda_handler(event, context):
         'headers': headers_cors,
         'body': json.dumps({
             'statusCode': 200,
-            'message': 'Rates retrieved successfully.',
+            'message': 'Reseñas obtenidas correctamente.',
             'data': rates
         })
     }
