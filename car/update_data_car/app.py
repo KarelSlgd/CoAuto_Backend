@@ -109,7 +109,7 @@ def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, he
             connection.commit()
 
     except Exception as e:
-        return handle_response(e, f'Failed to update car: {str(e)}', 500)
+        return handle_response(e, 'Error al actualizar auto.', 500)
 
     finally:
         connection.close()
@@ -119,7 +119,7 @@ def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, he
         'headers': headers_cors,
         'body': json.dumps({
             'statusCode': 200,
-            'message': 'Car updated successfully.'
+            'message': 'Auto actualizado correctamente.'
         })
     }
 

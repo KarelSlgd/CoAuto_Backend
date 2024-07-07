@@ -1,6 +1,5 @@
-import re
 import json
-from database import get_connection
+from database import get_connection, handle_response
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
@@ -33,11 +32,8 @@ def lambda_handler(event, context):
             'body': 'Invalid rate value format.'
         }
     if not value or not id_auto or not id_user:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Missing parameters.'
-        }
+        return handle_response(None, 'Faltan parámetros.', 400)
+
     if value_n > 5 or value_n < 1:
         return {
             'statusCode': 400,
@@ -45,29 +41,17 @@ def lambda_handler(event, context):
             'body': 'Rate value out of range.'
         }
     if len(comment) > 100:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Comment exceeds 100 characters.'
-        }
+        return handle_response(None, 'El comentario no debe exceder los 100 caracteres.', 400)
+
     if not (verify_user(id_user)):
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'User does not exist.'
-        }
+        return handle_response(None, 'El usuario no fue encontrado.', 400)
+
     if not (verify_auto(id_auto)):
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Auto does not exist.'
-        }
+        return handle_response(None, 'El auto no fue encontrado.', 400)
+
     if check_existing_review(id_user, id_auto):
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'User has already reviewed this auto.'
-        }
+        return handle_response(None, 'El usuario ya ha revisado este auto.', 400)
+
     response = insert_into_rate(value_n, comment, id_auto, id_user)
 
     return response
@@ -84,7 +68,10 @@ def insert_into_rate(value, comment, id_auto, id_user):
         return {
             'statusCode': 500,
             'headers': headers_cors,
-            'body': f'An error has occurred: {str(e)}'
+            'body': json.dumps({
+                'statusCode': 500,
+                'message': 'Error al insertar la reseña.'
+            })
         }
     finally:
         connection.close()
@@ -92,7 +79,10 @@ def insert_into_rate(value, comment, id_auto, id_user):
     return {
         'statusCode': 200,
         'headers': headers_cors,
-        'body': 'Rate inserted successfully.'
+        'body': json.dumps({
+            'statusCode': 200,
+            'message': 'Reseña insertada correctamente.'
+        })
     }
 
 
@@ -103,7 +93,7 @@ def verify_user(id_user):
             cursor.execute("SELECT id_user FROM user WHERE id_user = %s", id_user)
             result = cursor.fetchone()
             return result is not None
-    except Exception as e:
+    except Exception:
         return False
     finally:
         connection.close()
@@ -116,7 +106,7 @@ def verify_auto(id_auto):
             cursor.execute("SELECT id_auto FROM auto WHERE id_auto = %s", id_auto)
             result = cursor.fetchone()
             return result is not None
-    except Exception as e:
+    except Exception:
         return False
     finally:
         connection.close()
@@ -130,7 +120,7 @@ def check_existing_review(id_user, id_auto):
             cursor.execute(check_query, (id_user, id_auto))
             result = cursor.fetchone()
             return result is not None
-    except Exception as e:
+    except Exception:
         return False
     finally:
         connection.close()

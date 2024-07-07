@@ -40,7 +40,7 @@ def lambda_handler(event, context):
             rates.append(rate)
 
     except Exception as e:
-        return handle_response(e, 'A ocurrido un error al obtener los datos.', 500)
+        return handle_response(e, 'Ocurrió un error al obtener la reseña.', 500)
 
     finally:
         close_connection(connection)

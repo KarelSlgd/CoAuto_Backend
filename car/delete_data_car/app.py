@@ -8,7 +8,6 @@ headers_cors = {
 
 
 def lambda_handler(event, context):
-
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError) as e:
@@ -30,11 +29,17 @@ def delete_car(id_auto, id_status):
 
     try:
         with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM status WHERE id_status=%s AND name='to_auto'", (id_status,))
+            result = cursor.fetchone()
+
+            if not result:
+                return handle_response(None, 'El estado no es válido para to_auto.', 400)
+
             cursor.execute("UPDATE auto SET id_status=%s WHERE id_auto=%s", (id_status, id_auto))
             connection.commit()
+
     except Exception as e:
         return handle_response(e, 'Error al actualizar auto.', 500)
-
     finally:
         connection.close()
 
@@ -43,6 +48,6 @@ def delete_car(id_auto, id_status):
         'headers': headers_cors,
         'body': json.dumps({
             'statusCode': 200,
-            'message': 'Auto actualizado.'
+            'message': 'Auto actualizado correctamente.'
         }),
     }

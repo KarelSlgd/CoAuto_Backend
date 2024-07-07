@@ -51,12 +51,7 @@ def register_user(email, password, profile_image, name, lastname, secret):
                 {
                     'Name': 'email',
                     'Value': email
-                },
-                {
-                    'Name': 'name',
-                    'Value': name
                 }
-
             ]
         )
         client.admin_add_user_to_group(

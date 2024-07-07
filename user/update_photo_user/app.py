@@ -59,6 +59,7 @@ def update_photo(profile_image, token):
 
 def get_jwt_claims(token):
     try:
+
         parts = token.split(".")
         if len(parts) != 3:
             return None
