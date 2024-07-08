@@ -109,7 +109,6 @@ Resources:
         AllowHeaders: "'*'"
         AllowMethods: "'OPTIONS,POST,GET,PUT,DELETE'"
       Auth:
-         DefaultAuthorizer: UserAuthorizer
          Authorizers:
             UserAuthorizer:
               UserPoolArn: !GetAtt CognitoUserPool.Arn
@@ -123,7 +122,6 @@ Resources:
         AllowHeaders: "'*'"
         AllowMethods: "'OPTIONS,POST,GET,PUT,DELETE'"
       Auth:
-        DefaultAuthorizer: CarAuthorizer
         Authorizers:
           CarAuthorizer:
             UserPoolArn: !GetAtt CognitoUserPool.Arn
