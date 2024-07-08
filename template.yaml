@@ -166,10 +166,10 @@ Resources:
       ProviderARNs:
         - !GetAtt CognitoUserPool.Arn
 
-  OptionsFunctionUser:
+  SettingFunctionUser:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: options/
+      CodeUri: setting/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -183,10 +183,10 @@ Resources:
             Path: /{proxy+}
             Method: options
 
-  OptionsFunctionCar:
+  SettingFunctionCar:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: options/
+      CodeUri: setting/
       Handler: app.lambda_handler
       Runtime: python3.12
       Role: !GetAtt LambdaExecutionRole.Arn
