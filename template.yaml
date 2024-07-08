@@ -166,6 +166,41 @@ Resources:
       ProviderARNs:
         - !GetAtt CognitoUserPool.Arn
 
+  OptionsFunctionUser:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: options/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        InsertTask:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UserApi
+            Path: /{proxy+}
+            Method: options
+
+  OptionsFunctionCar:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: options/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        InsertTask:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CarApi
+            Path: /{proxy+}
+            Method: options
+
+
   GetDataCarFunction:
     Type: AWS::Serverless::Function
     Properties:
