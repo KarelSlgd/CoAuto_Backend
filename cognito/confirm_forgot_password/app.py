@@ -18,6 +18,9 @@ def lambda_handler(event, context):
     code = body.get('code')
     password = body.get('password')
 
+    if not email or not code or not password:
+        return handle_response(None, 'Faltan parámetros en la solicitud.', 400)
+
     try:
         secret = get_secret()
         response = confirm_password(email, code, password, secret)

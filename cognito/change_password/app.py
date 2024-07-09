@@ -17,6 +17,9 @@ def lambda_handler(event, context):
     new_password = body.get('new_password')
     token = body.get('access_token')
 
+    if not previous_password or not new_password or not token:
+        return handle_response(None, 'Faltan parámetros en la solicitud.', 400)
+
     try:
         response = change(previous_password, new_password, token)
         return response

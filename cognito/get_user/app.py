@@ -13,7 +13,7 @@ def lambda_handler(event, context):
     token = headers.get('Authorization')
 
     if not token:
-        return handle_response(None, 'Se requiere un token de autorización.', 400)
+        return handle_response(None, 'Se requiere un token de autorización.', 401)
 
     try:
         decoded_token = get_jwt_claims(token)

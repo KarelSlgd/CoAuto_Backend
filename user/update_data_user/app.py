@@ -17,11 +17,14 @@ def lambda_handler(event, context):
     name = body.get('name')
     lastname = body.get('lastname')
 
-    if not id_user or not name:
+    if not id_user:
         return handle_response(None, 'Faltan parámetros.', 400)
 
-    if len(name) > 50:
-        return handle_response(None, 'El nombre excede los 50 caracteres.', 400)
+    if name is not None and len(name) > 50:
+        return handle_response(None, 'El nombre no debe exceder los 50 caracteres.', 400)
+
+    if lastname is not None and len(lastname) > 100:
+        return handle_response(None, 'El apellido no debe exceder los 100 caracteres.', 400)
 
     response = update_user(id_user, name, lastname)
 

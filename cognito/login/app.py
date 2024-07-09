@@ -14,10 +14,13 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError) as e:
-        return handle_response(e, 'Parametros inválidos', 400)
+        return handle_response(e, 'Cuerpo de la solicitud inválido.', 400)
 
     email = body.get('email')
     password = body.get('password')
+
+    if not email or not password:
+        return handle_response(None, 'Faltan parámetros en la solicitud.', 400)
 
     try:
         secret = get_secret()

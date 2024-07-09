@@ -18,6 +18,9 @@ def lambda_handler(event, context):
 
     email = body.get('email')
 
+    if not email:
+        return handle_response(None, 'Faltan parámetros en la solicitud.', 400)
+
     try:
         secret = get_secret()
         response = resend_code(email, secret)

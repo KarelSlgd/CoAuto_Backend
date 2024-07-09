@@ -17,6 +17,9 @@ def lambda_handler(event, context):
     email = body.get('email')
     confirmation_code = body.get('confirmation_code')
 
+    if not email or not confirmation_code:
+        return handle_response(None, 'Faltan parámetros en la solicitud.', 400)
+
     try:
         secret = get_secret()
         response = confirmation_registration(email, confirmation_code, secret)

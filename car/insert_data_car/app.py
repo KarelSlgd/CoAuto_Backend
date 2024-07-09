@@ -32,11 +32,23 @@ def lambda_handler(event, context):
     if not model or not brand or not year or not price or not type or not fuel or not doors or not engine or not height or not width or not length:
         return handle_response(None, 'Faltan parámetros.', 400)
 
-    if len(model) > 30:
+    if len(model) > 50:
         return handle_response(None, 'El campo modelo excede los 50 caracteres.', 400)
 
-    if len(brand) > 30:
+    if len(brand) > 50:
         return handle_response(None, 'El campo marca excede los 50 caracteres.', 400)
+
+    if len(engine) > 30:
+        return handle_response(None, 'El campo motor excede los 30 caracteres.', 400)
+
+    if len(type) > 30:
+        return handle_response(None, 'El campo tipo excede los 30 caracteres.', 400)
+
+    if len(fuel) > 30:
+        return handle_response(None, 'El campo combustible excede los 30 caracteres.', 400)
+
+    if len(description) > 255:
+        return handle_response(None, 'El campo descripción excede los 255 caracteres.', 400)
 
     try:
         year = int(year)
@@ -100,6 +112,6 @@ def insert_into_car(model, brand, year, price, type, fuel, doors, engine, height
         'headers': headers_cors,
         'body': json.dumps({
             'statusCode': 200,
-            'message': 'Auto insertado.'
+            'message': 'Auto guardado correctamente.'
         })
     }

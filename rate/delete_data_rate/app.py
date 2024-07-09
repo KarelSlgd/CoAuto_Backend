@@ -11,7 +11,7 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError) as e:
-        return handle_response(e, 'Parametros inválidos', 400)
+        return handle_response(e, 'Cuerpo de la petición inválido.', 400)
 
     id_rate = body.get('id_rate')
     id_status = body.get('id_status')

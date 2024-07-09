@@ -14,17 +14,20 @@ def lambda_handler(event, context):
     token = headers.get('Authorization')
 
     if not token:
-        return handle_response(None, 'Falta token.', 401)
+        return handle_response(None, 'Falta token de autorización.', 401)
 
     try:
         body = json.loads(event['body'])
-    except (TypeError, KeyError, json.JSONDecodeError):
-        return handle_response(None, 'Cuerpo de la solicitud no válido.', 400)
+    except (TypeError, KeyError, json.JSONDecodeError) as e:
+        return handle_response(e, 'Cuerpo de la solicitud no válido.', 400)
 
     profile_image = body.get('profile_image')
 
     if not profile_image:
         return handle_response(None, 'Faltan parámetros.', 400)
+
+    if profile_image > 250:
+        return handle_response(None, 'La imagen no debe exceder los 250 caracteres.', 400)
 
     response = update_photo(profile_image, token)
 
@@ -51,7 +54,7 @@ def update_photo(profile_image, token):
         'headers': headers_cors,
         'body': json.dumps({
             'statusCode': 200,
-            'message': 'User updated successfully.'
+            'message': 'Usuario actualizado correctamente'
 
         })
     }

@@ -17,11 +17,10 @@ def lambda_handler(event, context):
 
     password = body.get('password')
     email = body.get('email')
-    profile_image = body.get('profile_image')
     name = body.get('name')
     lastname = body.get('lastname')
 
-    if not password or not email or not profile_image or not name or not lastname:
+    if not password or not email or not name or not lastname:
         return handle_response(None, 'Faltan parámetros.', 400)
 
     if len(name) > 50:
@@ -32,13 +31,13 @@ def lambda_handler(event, context):
 
     try:
         secret = get_secret()
-        response = register_user(email, password, profile_image, name, lastname, secret)
+        response = register_user(email, password, name, lastname, secret)
         return response
     except Exception as e:
         return handle_response(e, 'Ocurrió un error al registrar el usuario.', 500)
 
 
-def register_user(email, password, profile_image, name, lastname, secret):
+def register_user(email, password, name, lastname, secret):
     client = boto3.client('cognito-idp')
     try:
         secret_hash = calculate_secret_hash(secret['COGNITO_CLIENT_ID'], secret['SECRET_KEY'], email)
@@ -111,7 +110,7 @@ def register_user(email, password, profile_image, name, lastname, secret):
     except Exception as e:
         return handle_response(e, 'Ocurrió un error al registrar el usuario.', 500)
 
-    insert_into_user(email, response['UserSub'], name, lastname, profile_image)
+    insert_into_user(email, response['UserSub'], name, lastname)
 
     return {
         'statusCode': 200,
@@ -124,13 +123,13 @@ def register_user(email, password, profile_image, name, lastname, secret):
     }
 
 
-def insert_into_user(email, id_cognito, name, lastname, profile_image):
+def insert_into_user(email, id_cognito, name, lastname):
     connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
-            insert_query = "INSERT INTO user (email, id_cognito, name, lastname, id_role, id_status, profile_image) VALUES (%s, %s, %s, %s, 2, 1, %s)"
-            cursor.execute(insert_query, (email, id_cognito, name, lastname, profile_image))
+            insert_query = "INSERT INTO user (email, id_cognito, name, lastname, id_role, id_status) VALUES (%s, %s, %s, %s, 2, 1)"
+            cursor.execute(insert_query, (email, id_cognito, name, lastname))
             connection.commit()
 
     except Exception as e:

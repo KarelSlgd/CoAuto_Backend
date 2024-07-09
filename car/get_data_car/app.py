@@ -22,10 +22,10 @@ def lambda_handler(event, context):
         decoded_token = get_jwt_claims(token)
         role = decoded_token.get('cognito:groups')
         if 'ClientUserGroup' in role:
-            return handle_response('Access denied. Role cannot be client.', 'Acceso denegado.', 403)
+            return handle_response('Acceso denegado. El rol no puede ser cliente.', 'Acceso denegado.', 401)
 
     except Exception as e:
-        return handle_response(str(e), 'Error al decodificar token.', 401)
+        return handle_response(e, 'Error al decodificar token.', 401)
 
     cars = []
 

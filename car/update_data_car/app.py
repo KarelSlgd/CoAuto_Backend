@@ -12,7 +12,7 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError):
-        return handle_response(None, 'Solicitud no válida.', 400)
+        return handle_response(None, 'Cuerpo de la petición inválido.', 400)
 
     id_auto = body.get('id_auto')
     model = body.get('brand')
@@ -32,17 +32,23 @@ def lambda_handler(event, context):
     if not id_auto or not model or not brand or not year or not price or not type or not fuel or not doors or not engine or not height or not width or not length:
         return handle_response(None, 'Faltan parámetros.', 400)
 
-    if len(model) > 30:
-        return handle_response(None, 'El campo modelo excede los 30 caracteres.', 400)
+    if len(model) > 50:
+        return handle_response(None, 'El campo modelo excede los 50 caracteres.', 400)
 
-    if len(brand) > 30:
-        return handle_response(None, 'El campo marca excede los 30 caracteres.', 400)
+    if len(brand) > 50:
+        return handle_response(None, 'El campo marca excede los 50 caracteres.', 400)
 
-    if len(type) > 20:
-        return handle_response(None, 'El campo tipo excede los 20 caracteres.', 400)
+    if len(type) > 30:
+        return handle_response(None, 'El campo tipo excede los 30 caracteres.', 400)
 
-    if len(fuel) > 20:
-        return handle_response(None, 'El campo combustible excede los 20 caracteres.', 400)
+    if len(fuel) > 30:
+        return handle_response(None, 'El campo combustible excede los 30 caracteres.', 400)
+
+    if len(engine) > 30:
+        return handle_response(None, 'El campo motor excede los 30 caracteres.', 400)
+
+    if description is not None and len(description) > 255:
+        return handle_response(None, 'El campo descripción excede los 255 caracteres.', 400)
 
     try:
         year = int(year)
@@ -109,7 +115,7 @@ def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, he
             connection.commit()
 
     except Exception as e:
-        return handle_response(e, 'Error al actualizar auto.', 500)
+        return handle_response(e, 'Ocurrió un error al actualizar el auto.', 500)
 
     finally:
         connection.close()

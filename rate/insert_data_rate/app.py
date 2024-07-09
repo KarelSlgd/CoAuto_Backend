@@ -10,36 +10,26 @@ headers_cors = {
 def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
-    except (TypeError, KeyError, json.JSONDecodeError):
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Invalid request body.'
-        }
+    except (TypeError, KeyError, json.JSONDecodeError) as e:
+        return handle_response(e, 'Cuerpo de la petición inválido.', 400)
 
     value = body.get('value')
     comment = body.get('comment')
     id_auto = body.get('id_auto')
     id_user = body.get('id_user')
 
+    if not value or not id_auto or not id_user:
+        return handle_response(None, 'Faltan parámetros.', 400)
+
     value_n = 0
     try:
         value_n = int(value)
     except ValueError:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Invalid rate value format.'
-        }
-    if not value or not id_auto or not id_user:
-        return handle_response(None, 'Faltan parámetros.', 400)
+        return handle_response(None, 'El valor de la reseña debe ser un número entero.', 400)
 
-    if value_n > 5 or value_n < 1:
-        return {
-            'statusCode': 400,
-            'headers': headers_cors,
-            'body': 'Rate value out of range.'
-        }
+    if value_n >= 5 or value_n <= 1:
+        return handle_response(None, 'El valor de la reseña debe estar entre 1 y 5.', 400)
+
     if len(comment) > 100:
         return handle_response(None, 'El comentario no debe exceder los 100 caracteres.', 400)
 
@@ -65,14 +55,7 @@ def insert_into_rate(value, comment, id_auto, id_user):
             cursor.execute(insert_query, (value, comment, id_auto, id_user))
             connection.commit()
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': headers_cors,
-            'body': json.dumps({
-                'statusCode': 500,
-                'message': 'Error al insertar la reseña.'
-            })
-        }
+        return handle_response(e, 'Error al insertar la reseña.', 500)
     finally:
         connection.close()
 
@@ -81,7 +64,7 @@ def insert_into_rate(value, comment, id_auto, id_user):
         'headers': headers_cors,
         'body': json.dumps({
             'statusCode': 200,
-            'message': 'Reseña insertada correctamente.'
+            'message': 'Reseña guardada correctamente.'
         })
     }
 
