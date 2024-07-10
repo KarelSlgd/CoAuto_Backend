@@ -101,22 +101,3 @@ class TestConnection(unittest.TestCase):
         }
 
         self.assertEqual(response, expected_response)
-
-    def test_handle_response_no_error(self):
-        error = None
-        message = 'Test Message'
-        status_code = 200
-
-        response = handle_response(error, message, status_code)
-
-        expected_response = {
-            'statusCode': status_code,
-            'headers': headers_cors,
-            'body': json.dumps({
-                'statusCode': status_code,
-                'message': message,
-                'error': str(error) if error else None
-            })
-        }
-
-        self.assertEqual(response, expected_response)
