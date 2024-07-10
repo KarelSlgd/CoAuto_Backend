@@ -22,7 +22,7 @@ def get_connection():
             database=secrets['DB_NAME']
         )
     except Exception as e:
-        return handle_response(e, 'Ocurrió un error al conectar a la base de datos', 500)
+        raise e
 
     return connection
 
@@ -43,7 +43,7 @@ def get_secret():
         )
         secret = get_secret_value_response['SecretString']
     except ClientError as e:
-        return handle_response(e, 'Error al obtener el secreto', 500)
+        raise e
 
     return json.loads(secret)
 
@@ -55,8 +55,7 @@ def execute_query(connection, query):
             result = cursor.fetchall()
             return result
     except Exception as e:
-        logging.error(e)
-        return None
+        raise e
 
 
 def close_connection(connection):

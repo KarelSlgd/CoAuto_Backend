@@ -11,6 +11,7 @@ headers_cors = {
     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
 }
 
+
 def get_secret():
     secret_name = "COAUTO"
     region_name = "us-east-1"
@@ -27,7 +28,7 @@ def get_secret():
         )
         secret = get_secret_value_response['SecretString']
     except ClientError as e:
-        return handle_response(e, 'Error al obtener el secreto', 500)
+        raise e
 
     return json.loads(secret)
 
