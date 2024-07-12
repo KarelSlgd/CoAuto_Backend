@@ -84,8 +84,8 @@ def get_username_by_id(id_user):
                 return result[0]
             else:
                 return None
-    except Exception:
-        return None
+    except Exception as e:
+        raise e
     finally:
         connection.close()
 
@@ -100,7 +100,7 @@ def get_status_value(id_status):
                 return result[0]
             else:
                 return None
-    except Exception:
-        return None
+    except Exception as e:
+        raise e
     finally:
         connection.close()
