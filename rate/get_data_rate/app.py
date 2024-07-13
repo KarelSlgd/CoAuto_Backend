@@ -14,7 +14,7 @@ def lambda_handler(event, context):
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT r.id_rate, r.value, comment, a.model, a.brand, u.name, u.lastname, a.id_auto, a.profile_image, s.value AS status FROM rate r INNER JOIN auto a ON r.id_auto=a.id_auto INNER JOIN user u ON r.id_user=u.id_user INNER JOIN status s ON r.id_status=s.id_status;")
+            cursor.execute("SELECT r.id_rate, r.value, comment, a.model, a.brand, u.name, u.lastname, a.id_auto, u.profile_image, s.value AS status FROM rate r INNER JOIN auto a ON r.id_auto=a.id_auto INNER JOIN user u ON r.id_user=u.id_user INNER JOIN status s ON r.id_status=s.id_status;")
             result = cursor.fetchall()
 
             for rate in result:
