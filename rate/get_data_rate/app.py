@@ -27,7 +27,8 @@ def lambda_handler(event, context):
                     'name': rate[5],
                     'lastname': rate[6],
                     'id_auto': rate[7],
-                    'status': rate[8]
+                    'profile_image': rate[8],
+                    'status': rate[9]
                 }
                 rates.append(rate)
 
