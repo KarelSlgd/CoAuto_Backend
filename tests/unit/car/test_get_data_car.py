@@ -1,74 +1,77 @@
-from user.get_data_user import app
 import unittest
 from unittest.mock import patch, MagicMock
 import json
-
+from car.get_data_car.app import lambda_handler, get_jwt_claims
+from car.get_data_car.connection import get_connection, get_secret, handle_response, headers_cors
 from botocore.exceptions import ClientError
 
-from user.get_data_user.connection import get_connection, get_secret, handle_response
-headers_cors = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': '*',
-    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
-}
 
+class TestGetCar(unittest.TestCase):
 
-class TestGetUser(unittest.TestCase):
-
-    @patch('user.get_data_user.app.get_connection')
-    @patch('user.get_data_user.app.handle_response')
+    @patch('car.get_data_car.app.get_connection')
+    @patch('car.get_data_car.app.handle_response')
     def test_lambda_handler_success(self, mock_handle_response, mock_get_connection):
-        # Mockear la conexión y los resultados de la consulta
         mock_connection = MagicMock()
         mock_cursor = MagicMock()
+
         mock_get_connection.return_value = mock_connection
         mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
 
-        # Simular resultados de la consulta
-        mock_cursor.fetchall.return_value = [
-            (1, 'cognito_1', 'email1@example.com', 'John', 'Doe', 'Admin', 'Active', 'image1.jpg'),
-            (2, 'cognito_2', 'email2@example.com', 'Jane', 'Smith', 'User', 'Inactive', 'image2.jpg')
+        mock_cursor.fetchall.side_effect = [
+            [
+                (1, 'Model S', 'Tesla', 2020, 79999, 'Sedan', 'Electric', 4, 'Dual Motor', 1445, 1960, 4970,
+                 'A luxury electric car', 'Available'),
+            ],
+            [
+                ('http://example.com/image1.jpg',),
+                ('http://example.com/image2.jpg',)
+            ]
         ]
 
-        # Ejecutar la función
-        response = app.lambda_handler({}, {})
+        event = {}
+        context = {}
 
-        # Verificar el código de estado y la estructura de la respuesta
+        response = lambda_handler(event, context)
+
         self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(response['headers'], {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+        })
+
         body = json.loads(response['body'])
         self.assertEqual(body['statusCode'], 200)
-        self.assertEqual(body['message'], 'Usuarios obtenidos correctamente')
-        self.assertEqual(len(body['data']), 2)
-        self.assertEqual(body['data'][0]['name'], 'John')
+        self.assertEqual(body['message'], 'get cars')
+        self.assertTrue('data' in body)
+        self.assertEqual(len(body['data']), 1)
+        self.assertEqual(body['data'][0]['model'], 'Model S')
+        self.assertEqual(body['data'][0]['brand'], 'Tesla')
+        self.assertEqual(body['data'][0]['images'], [
+            'http://example.com/image1.jpg',
+            'http://example.com/image2.jpg'
+        ])
 
-    @patch('user.get_data_user.app.get_connection')
-    @patch('user.get_data_user.app.handle_response')
-    def test_lambda_handler_query_failure(self, mock_handle_response, mock_get_connection):
-        # Mockear la conexión y forzar una excepción
-        mock_connection = MagicMock()
-        mock_cursor = MagicMock()
-        mock_get_connection.return_value = mock_connection
-        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
-        mock_cursor.execute.side_effect = Exception('Database error')
-
-        # Simular respuesta de handle_response
-        mock_handle_response.return_value = {
-            "statusCode": 500,
-            "body": json.dumps({
-                "error": "Error al obtener usuarios"
-            }),
+    def test_get_jwt_claims_success(self):
+        token = "header.payload.signature"
+        payload = {
+            "cognito:groups": ["UserGroup"]
         }
+        with patch('base64.b64decode', return_value=json.dumps(payload).encode('utf-8')):
+            claims = get_jwt_claims(token)
+            self.assertEqual(claims['cognito:groups'], ["UserGroup"])
 
-        # Ejecutar la función
-        response = app.lambda_handler({}, {})
+    def test_get_jwt_claims_invalid_token(self):
+        token = "invalid.token"
 
-        # Verificar el código de estado y la estructura de la respuesta
-        self.assertEqual(response['statusCode'], 500)
-        body = json.loads(response['body'])
-        self.assertEqual(body['error'], 'Error al obtener usuarios')
+        with self.assertRaises(ValueError) as context:
+            get_jwt_claims(token)
 
+        self.assertEqual(str(context.exception), "Token inválido")
 
-    @patch('user.get_data_user.connection.boto3.session.Session')
+    # Test for connection.py
+
+    @patch('car.get_data_car.connection.boto3.session.Session')
     def test_get_secret(self, mock_session):
         mock_client = MagicMock()
         mock_session.return_value.client.return_value = mock_client
@@ -89,7 +92,7 @@ class TestGetUser(unittest.TestCase):
         self.assertEqual(secret['DB_NAME'], 'database')
         mock_client.get_secret_value.assert_called_with(SecretId='COAUTO')
 
-    @patch('user.get_data_user.connection.boto3.session.Session')
+    @patch('car.get_data_car.connection.boto3.session.Session')
     def test_get_secret_error(self, mock_session):
         mock_client = MagicMock()
         mock_session.return_value.client.return_value = mock_client
@@ -99,8 +102,8 @@ class TestGetUser(unittest.TestCase):
         with self.assertRaises(ClientError):
             get_secret()
 
-    @patch('user.get_data_user.connection.pymysql.connect')
-    @patch('user.get_data_user.connection.get_secret')
+    @patch('car.get_data_car.connection.pymysql.connect')
+    @patch('car.get_data_car.connection.get_secret')
     def test_get_connection(self, mock_get_secret, mock_connect):
         mock_get_secret.return_value = {
             'HOST': 'localhost',
@@ -121,8 +124,8 @@ class TestGetUser(unittest.TestCase):
             database='database'
         )
 
-    @patch('user.get_data_user.connection.pymysql.connect')
-    @patch('user.get_data_user.connection.get_secret')
+    @patch('car.get_data_car.connection.pymysql.connect')
+    @patch('car.get_data_car.connection.get_secret')
     def test_get_connection_error(self, mock_get_secret, mock_connect):
         mock_get_secret.return_value = {
             'HOST': 'localhost',

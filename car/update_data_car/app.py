@@ -15,7 +15,7 @@ def lambda_handler(event, context):
         return handle_response(None, 'Cuerpo de la petición inválido.', 400)
 
     id_auto = body.get('id_auto')
-    model = body.get('brand')
+    model = body.get('model')
     brand = body.get('brand')
     year = body.get('year')
     price = body.get('price')

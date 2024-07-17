@@ -26,7 +26,7 @@ def lambda_handler(event, context):
     if not profile_image:
         return handle_response(None, 'Faltan parámetros.', 400)
 
-    if profile_image > 250:
+    if len(profile_image) > 250:
         return handle_response(None, 'La imagen no debe exceder los 250 caracteres.', 400)
 
     response = update_photo(profile_image, token)
