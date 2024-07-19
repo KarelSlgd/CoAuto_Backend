@@ -1,8 +1,8 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, Mock
 import json
 from cognito.sign_up.app import lambda_handler, register_user, insert_into_user
-from cognito.sign_up.database import get_secret, get_connection
+from cognito.sign_up.database import get_secret, get_connection, handle_response
 from botocore.exceptions import ClientError
 from botocore.stub import Stubber
 import boto3
@@ -738,3 +738,4 @@ class TestSignUp(unittest.TestCase):
         self.assertEqual(called_args[1], 'Ocurrió un error al conectar a la base de datos')
         self.assertEqual(called_args[2], 500)
         self.assertEqual(result, 'mock_error_response')
+

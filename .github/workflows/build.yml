@@ -33,6 +33,7 @@ jobs:
           pip install -r car/update_data_car/requirements.txt
           pip install -r car/delete_data_car/requirements.txt
           pip install -r car/get_one_data_car/requirements.txt
+          pip install -r car/search_car_by/requirements.txt
 
       - name: Install dependencies for rate service
         run: |
@@ -87,6 +88,7 @@ jobs:
           pip install -r car/update_data_car/requirements.txt
           pip install -r car/delete_data_car/requirements.txt
           pip install -r car/get_one_data_car/requirements.txt
+          pip install -r car/search_car_by/requirements.txt
 
       - name: Install dependencies for rate service
         run: |

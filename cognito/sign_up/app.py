@@ -108,7 +108,7 @@ def register_user(email, password, name, lastname, secret):
         return handle_response(e, 'El nombre de usuario ya existe en el grupo de usuarios.', 409)
 
     except Exception as e:
-        return handle_response(e, 'Ocurrió un error al registrar el usuario.', 500)
+        return handle_response(e, 'Ocurrió un error.', 500)
 
     insert_into_user(email, response['UserSub'], name, lastname)
 

@@ -5,7 +5,6 @@ Description: >
 
   App CoAutoBackend para Desarrollo Web Integral
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 3
@@ -135,6 +134,10 @@ Resources:
         AllowOrigin: "'*'"
         AllowHeaders: "'*'"
         AllowMethods: "'OPTIONS,POST,GET,PUT,DELETE'"
+      Auth:
+        Authorizers:
+          RateAuthorizer:
+            UserPoolArn: !GetAtt CognitoUserPool.Arn
 
   CognitoApi:
     Type: AWS::Serverless::Api
@@ -162,6 +165,16 @@ Resources:
       Name: UserAuthorizerTest
       IdentitySource: method.request.header.Authorization
       RestApiId: !Ref UserApi
+      Type: COGNITO_USER_POOLS
+      ProviderARNs:
+        - !GetAtt CognitoUserPool.Arn
+
+  RateAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: RateAuthorizerTest
+      IdentitySource: method.request.header.Authorization
+      RestApiId: !Ref RateApi
       Type: COGNITO_USER_POOLS
       ProviderARNs:
         - !GetAtt CognitoUserPool.Arn
@@ -200,6 +213,22 @@ Resources:
             Path: /{proxy+}
             Method: options
 
+  SettingFunctionRate:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: setting/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        InsertTask:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RateApi
+            Path: /{proxy+}
+            Method: options
 
   GetDataCarFunction:
     Type: AWS::Serverless::Function
@@ -220,6 +249,24 @@ Resources:
             Method: get
             Auth:
               Authorizer: CarAuthorizer
+
+  SearchCarByFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: car/search_car_by/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Timeout: 60
+      Events:
+        SearchCarBy:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CarApi
+            Path: /search_car_by
+            Method: post
 
   GetDataUserFunction:
     Type: AWS::Serverless::Function
@@ -258,6 +305,8 @@ Resources:
             RestApiId: !Ref UserApi
             Path: /update_data
             Method: put
+            Auth:
+              Authorizer: UserAuthorizer
 
   DeleteDataUserFunction:
     Type: AWS::Serverless::Function
@@ -276,6 +325,8 @@ Resources:
             RestApiId: !Ref UserApi
             Path: /delete_data
             Method: delete
+            Auth:
+              Authorizer: UserAuthorizer
 
   UpdatePhotoUserFunction:
     Type: AWS::Serverless::Function
@@ -294,6 +345,8 @@ Resources:
             RestApiId: !Ref UserApi
             Path: /update_photo
             Method: put
+            Auth:
+              Authorizer: UserAuthorizer
 
   GetDataRateFunction:
     Type: AWS::Serverless::Function
@@ -312,6 +365,8 @@ Resources:
             RestApiId: !Ref RateApi
             Path: /get_data
             Method: get
+            Auth:
+              Authorizer: RateAuthorizer
 
   InsertDataRateFunction:
     Type: AWS::Serverless::Function
@@ -330,6 +385,8 @@ Resources:
             RestApiId: !Ref RateApi
             Path: /insert_data
             Method: post
+            Auth:
+              Authorizer: RateAuthorizer
 
   GetDataOneRateFunction:
     Type: AWS::Serverless::Function
@@ -348,6 +405,8 @@ Resources:
             RestApiId: !Ref RateApi
             Path: /get_data_one
             Method: get
+            Auth:
+              Authorizer: RateAuthorizer
 
   InsertDataCarFunction:
     Type: AWS::Serverless::Function
@@ -426,6 +485,8 @@ Resources:
             RestApiId: !Ref CarApi
             Path: /get_data_one
             Method: get
+            Auth:
+              Authorizer: CarAuthorizer
 
   DeleteDataRateFunction:
     Type: AWS::Serverless::Function
@@ -444,6 +505,8 @@ Resources:
             RestApiId: !Ref RateApi
             Path: /delete_data
             Method: delete
+            Auth:
+              Authorizer: RateAuthorizer
 
   RegisterUserFunction:
     Type: AWS::Serverless::Function
@@ -534,6 +597,8 @@ Resources:
             RestApiId: !Ref CognitoApi
             Path: /get_user
             Method: post
+            Auth:
+              Authorizer: UserAuthorizer
 
   ForgotPasswordFunction:
     Type: AWS::Serverless::Function
@@ -588,6 +653,8 @@ Resources:
             RestApiId: !Ref CognitoApi
             Path: /change_password
             Method: post
+            Auth:
+              Authorizer: UserAuthorizer
 
 Outputs:
   GetDataUserApiUrl:
@@ -618,6 +685,9 @@ Outputs:
   GetOneDataCarApiUrl:
     Description: "API Gateway endpoint URL with path get_data_one for Prod stage to Car Model"
     Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data_one"
+  SearchCarByApiUrl:
+    Description: "API Gateway endpoint URL with path search_car_by for Prod stage to Car Model"
+    Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/search_car_by"
 
   GetDataRateApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to Rate Model"
@@ -685,6 +755,9 @@ Outputs:
   GetOneDataCarFunctionArn:
     Description: "Get one data car Lambda Function ARN"
     Value: !GetAtt GetOneDataCarFunction.Arn
+  SearchCarByFunctionArn:
+    Description: "Search car by Lambda Function ARN"
+    Value: !GetAtt SearchCarByFunction.Arn
 
   GetDataRateFunctionArn:
     Description: "Get data rate Lambda Function ARN"
