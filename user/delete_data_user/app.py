@@ -1,7 +1,7 @@
 import json
 import boto3
 from botocore.exceptions import ClientError
-from connection import get_connection, handle_response, get_secret
+from .connection import get_connection, handle_response, get_secret
 
 headers_cors = {
     'Access-Control-Allow-Origin': '*',

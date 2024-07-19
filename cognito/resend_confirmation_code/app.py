@@ -1,6 +1,6 @@
 import json
 import boto3
-from database import get_secret, calculate_secret_hash, handle_response
+from .database import get_secret, calculate_secret_hash, handle_response
 from botocore.exceptions import ClientError
 
 headers_cors = {
