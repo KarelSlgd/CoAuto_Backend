@@ -28,7 +28,7 @@ def lambda_handler(event, context):
     except ValueError:
         return handle_response(None, 'El valor de la reseña debe ser un número entero.', 400)
 
-    if value_n >= 5 or value_n <= 1:
+    if value_n < 0 or value_n > 6:
         return handle_response(None, 'El valor de la reseña debe estar entre 1 y 5.', 400)
 
     if len(comment) > 100:

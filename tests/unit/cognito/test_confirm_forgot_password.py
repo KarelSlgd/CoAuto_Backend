@@ -1,15 +1,384 @@
 import unittest
 from unittest.mock import patch, Mock, MagicMock
-import json
 from cognito.confirm_forgot_password.app import lambda_handler, confirm_password
 from cognito.confirm_forgot_password.database import get_secret, calculate_secret_hash, handle_response
 from botocore.exceptions import ClientError
 import hmac
 import hashlib
 import base64
+import json
+import boto3
+from botocore.stub import Stubber
 
 
 class TestConfirmForgotPassword(unittest.TestCase):
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_generic_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'ServiceError')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 500)
+        self.assertIn('Ocurrió un error al confirmar la contraseña.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_user_not_found_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'UserNotFoundException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 404)
+        self.assertIn('Usuario no encontrado.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_user_not_confirmed_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'UserNotConfirmedException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertIn('Usuario no confirmado.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_user_lambda_validation_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'UserLambdaValidationException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertIn('Excepción de validación de usuario con AWS Lambda.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_unexpected_lambda_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'UnexpectedLambdaException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 502)
+        self.assertIn('Excepción inesperada con AWS Lambda.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_too_many_requests_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'TooManyRequestsException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 429)
+        self.assertIn('Demasiadas solicitudes.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_too_many_failed_attempts_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'TooManyFailedAttemptsException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 429)
+        self.assertIn('Demasiados intentos fallidos.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_resource_not_found_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'ResourceNotFoundException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 404)
+        self.assertIn('Recurso no encontrado.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_not_authorized_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'NotAuthorizedException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 401)
+        self.assertIn('No autorizado.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_limit_exceeded_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'LimitExceededException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 429)
+        self.assertIn('Se excedió el límite para el recurso solicitado.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_invalid_password_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'InvalidPasswordException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertIn('Contraseña inválida.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_invalid_parameter_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'InvalidParameterException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertIn('Parámetro inválido.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_invalid_lambda_response_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'InvalidLambdaResponseException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 502)
+        self.assertIn('Respuesta inválida de AWS Lambda.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_internal_error_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'InternalErrorException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 500)
+        self.assertIn('Error interno en Amazon Cognito.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_expired_code(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'expiredcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'ExpiredCodeException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertIn('El código ha expirado.', json.loads(response['body'])['message'])
+
+    @patch('cognito.confirm_forgot_password.app.get_secret')
+    def test_confirm_password_forbidden_exception(self, mock_get_secret):
+        email = 'test@example.com'
+        code = 'validcode'
+        password = 'newpassword'
+        secret = {
+            'COGNITO_CLIENT_ID': 'test_client_id',
+            'SECRET_KEY': 'test_secret_key'
+        }
+
+        client = boto3.client('cognito-idp')
+        stubber = Stubber(client)
+        stubber.add_client_error('confirm_forgot_password', 'ForbiddenException')
+        stubber.activate()
+
+        mock_get_secret.return_value = secret
+
+        with patch('cognito.confirm_forgot_password.app.boto3.client', return_value=client):
+            response = confirm_password(email, code, password, secret)
+
+        self.assertEqual(response['statusCode'], 403)
+        self.assertIn('Solicitud no permitida por AWS WAF.', json.loads(response['body'])['message'])
 
     @patch('cognito.confirm_forgot_password.app.get_secret')
     @patch('cognito.confirm_forgot_password.app.calculate_secret_hash')

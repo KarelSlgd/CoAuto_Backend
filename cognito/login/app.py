@@ -91,5 +91,5 @@ def login_auth(email, password, secret):
         return handle_response(e, 'Ocurrió un error desconocido', 500)
 
     except Exception as e:
-        return handle_response(e, 'Ocurrió un error desconocido', 500)
+        return handle_response(e, 'Ocurrió un error', 500)
 
