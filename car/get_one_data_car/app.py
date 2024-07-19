@@ -1,5 +1,8 @@
 import json
-from connection import get_connection, close_connection, handle_response
+try:
+    from connection import get_connection, handle_response, close_connection
+except ImportError:
+    from .connection import get_connection, handle_response, close_connection
 
 headers_cors = {
     'Access-Control-Allow-Origin': '*',

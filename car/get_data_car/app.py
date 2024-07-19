@@ -1,7 +1,11 @@
 import json
 import base64
 
-from connection import get_connection
+try:
+    from connection import get_connection, handle_response
+except ImportError:
+    from .connection import get_connection, handle_response
+
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
