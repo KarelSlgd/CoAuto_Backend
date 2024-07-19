@@ -1,5 +1,5 @@
 import json
-from .connection import get_connection
+from connection import get_connection
 
 
 def build_query(filters):

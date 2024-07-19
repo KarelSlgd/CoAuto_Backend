@@ -1,5 +1,5 @@
 import json
-from .database import get_connection, handle_response
+from database import get_connection, handle_response
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',

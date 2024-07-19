@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import json
-from .database import get_connection, close_connection, execute_query, handle_response
+from database import get_connection, close_connection, execute_query, handle_response
 
 load_dotenv()
 headers_cors = {
