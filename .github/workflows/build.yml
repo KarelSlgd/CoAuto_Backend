@@ -54,6 +54,9 @@ jobs:
           pip install -r cognito/change_password/requirements.txt
           pip install coverage pytest
 
+      - name: Configure AWS Region
+        run: aws configure set region us-east-1
+
       - name: Run tests and generate coverage report
         run: |
           coverage run -m pytest
@@ -116,6 +119,10 @@ jobs:
           pip install -r cognito/forgot_password/requirements.txt
           pip install -r cognito/confirm_forgot_password/requirements.txt
           pip install -r cognito/change_password/requirements.txt
+          pip install coverage pytest
+
+      - name: Configure AWS Region
+        run: aws configure set region us-east-1
 
       - name: Install AWS CLI
         run: |
