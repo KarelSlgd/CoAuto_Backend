@@ -1,5 +1,5 @@
 import json
-from car.search_car_by.connection import get_connection
+from connection import get_connection
 
 
 def build_query(filters):
@@ -74,12 +74,12 @@ def lambda_handler(event, context):
         "statusCode": 200,
         'headers': {
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type'
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
         },
         "body": json.dumps({
             'statusCode': 200,
-            'message': 'get cars',
+            'message': 'Carros encontrados',
             'data': cars
         }),
     }

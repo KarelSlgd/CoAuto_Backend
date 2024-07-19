@@ -266,7 +266,7 @@ Resources:
           Properties:
             RestApiId: !Ref CarApi
             Path: /search_car_by
-            Method: post
+            Method: get
 
   GetDataUserFunction:
     Type: AWS::Serverless::Function
