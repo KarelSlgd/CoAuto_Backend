@@ -597,8 +597,6 @@ Resources:
             RestApiId: !Ref CognitoApi
             Path: /get_user
             Method: post
-            Auth:
-              Authorizer: UserAuthorizer
 
   ForgotPasswordFunction:
     Type: AWS::Serverless::Function
@@ -653,8 +651,6 @@ Resources:
             RestApiId: !Ref CognitoApi
             Path: /change_password
             Method: post
-            Auth:
-              Authorizer: UserAuthorizer
 
 Outputs:
   GetDataUserApiUrl:
