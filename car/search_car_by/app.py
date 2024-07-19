@@ -1,5 +1,9 @@
 import json
-from connection import get_connection
+try:
+    from connection import get_connection
+except ImportError:
+    from .connection import get_connection
+
 
 
 def build_query(filters):

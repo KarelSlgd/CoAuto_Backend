@@ -1,6 +1,9 @@
 import json
 import boto3
-from database import get_secret, calculate_secret_hash, get_connection, handle_response
+try:
+    from database import get_secret, calculate_secret_hash, get_connection, handle_response
+except ImportError:
+    from .database import get_secret, calculate_secret_hash, get_connection, handle_response
 
 headers_cors = {
     'Access-Control-Allow-Origin': '*',

@@ -1,6 +1,9 @@
 from dotenv import load_dotenv
 import json
-from database import get_connection, close_connection, execute_query, handle_response
+try:
+    from database import get_connection, close_connection, execute_query, handle_response
+except ImportError:
+    from .database import get_connection, close_connection, execute_query, handle_response
 
 load_dotenv()
 headers_cors = {
