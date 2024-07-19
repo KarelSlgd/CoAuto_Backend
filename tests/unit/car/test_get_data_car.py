@@ -9,8 +9,7 @@ from botocore.exceptions import ClientError
 class TestGetCar(unittest.TestCase):
 
     @patch('car.get_data_car.app.get_connection')
-    @patch('car.get_data_car.app.handle_response')
-    def test_lambda_handler_success(self, mock_handle_response, mock_get_connection):
+    def test_lambda_handler_success(self, mock_get_connection):
         mock_connection = MagicMock()
         mock_cursor = MagicMock()
 

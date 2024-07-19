@@ -33,22 +33,20 @@ class TestLambdaFunction(unittest.TestCase):
         response = lambda_handler(event, context)
         mock_handle_response.assert_called_with(None, 'El valor de la reseña debe ser un número entero.', 400)
 
-    @patch('rate.insert_data_rate.app.get_connection')
-    @patch('rate.insert_data_rate.app.handle_response')
-    def test_lambda_handler_value_out_of_range(self, mock_handle_response, mock_get_connection):
-        event = {'body': json.dumps({'value': '6', 'comment': 'test', 'id_auto': 1, 'id_user': 1})}
+    def test_value_out_of_range(self):
+        event = {
+            'body': json.dumps({
+                'value': '7',
+                'comment': 'Buen servicio',
+                'id_auto': '123',
+                'id_user': '456'
+            })
+        }
         context = {}
         response = lambda_handler(event, context)
-        mock_handle_response.assert_called_with(None, 'El valor de la reseña debe estar entre 1 y 5.', 400)
-
-    @patch('rate.insert_data_rate.app.get_connection')
-    @patch('rate.insert_data_rate.app.handle_response')
-    def test_lambda_handler_comment_too_long(self, mock_handle_response, mock_get_connection):
-        long_comment = 'a' * 101
-        event = {'body': json.dumps({'value': '4', 'comment': long_comment, 'id_auto': 1, 'id_user': 1})}
-        context = {}
-        response = lambda_handler(event, context)
-        mock_handle_response.assert_called_with(None, 'El comentario no debe exceder los 100 caracteres.', 400)
+        body = json.loads(response['body'])
+        self.assertEqual(response['statusCode'], 400)
+        self.assertIn('El valor de la reseña debe estar entre 1 y 5.', body['message'])
 
     @patch('rate.insert_data_rate.app.verify_user')
     @patch('rate.insert_data_rate.app.get_connection')
@@ -72,6 +70,20 @@ class TestLambdaFunction(unittest.TestCase):
         context = {}
         response = lambda_handler(event, context)
         mock_handle_response.assert_called_with(None, 'El auto no fue encontrado.', 400)
+
+    def test_comment_too_long(self):
+        event = {
+            'body': json.dumps({
+                'value': '4',
+                'comment': 'a' * 101,
+                'id_auto': '123',
+                'id_user': '456'
+            })
+        }
+        context = {}
+        response = lambda_handler(event, context)
+        self.assertEqual(response['statusCode'], 400)
+        self.assertIn('El comentario no debe exceder los 100 caracteres.', response['body'])
 
     @patch('rate.insert_data_rate.app.get_connection')
     @patch('rate.insert_data_rate.app.handle_response')
