@@ -1,9 +1,9 @@
 import json
 import base64
 try:
-    from database import get_secret, calculate_secret_hash, handle_response
+    from database import get_secret, calculate_secret_hash, handle_response, get_connection, close_connection
 except ImportError:
-    from .database import get_secret, calculate_secret_hash, handle_response
+    from .database import get_secret, calculate_secret_hash, handle_response, get_connection, close_connection
 
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
