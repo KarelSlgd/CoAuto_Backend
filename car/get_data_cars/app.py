@@ -29,7 +29,7 @@ def lambda_handler(event, context):
                     'model': row[1],
                     'brand': row[2],
                     'year': row[3],
-                    'price': row[4],
+                    'price': "${:,.2f}".format(row[4]),
                     'type': row[5],
                     'fuel': row[6],
                     'doors': row[7],
