@@ -71,4 +71,3 @@ def lambda_handler(event, context):
             'data': cars
         }),
     }
-
