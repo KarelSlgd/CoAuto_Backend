@@ -1,4 +1,6 @@
 import json
+import base64
+
 try:
     from database import get_connection, handle_response
 except ImportError:
@@ -12,6 +14,15 @@ headers_cors = {
 
 
 def lambda_handler(event, context):
+    headers = event.get('headers', {})
+    token = headers.get('Authorization')
+    id_cognito = ''
+    try:
+        decoded_token = get_jwt_claims(token)
+        id_cognito = decoded_token.get('cognito:username')
+    except Exception as e:
+        return handle_response(e, 'Error al decodificar token.', 401)
+
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError) as e:
@@ -20,9 +31,9 @@ def lambda_handler(event, context):
     value = body.get('value')
     comment = body.get('comment')
     id_auto = body.get('id_auto')
-    id_user = body.get('id_user')
+    id_user = ''
 
-    if not value or not id_auto or not id_user:
+    if not value or not id_auto:
         return handle_response(None, 'Faltan parámetros.', 400)
 
     value_n = 0
@@ -37,8 +48,18 @@ def lambda_handler(event, context):
     if len(comment) > 100:
         return handle_response(None, 'El comentario no debe exceder los 100 caracteres.', 400)
 
-    if not (verify_user(id_user)):
+    if not (verify_user(id_cognito)):
         return handle_response(None, 'El usuario no fue encontrado.', 400)
+    else:
+        connection = get_connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT id_user FROM user WHERE id_cognito = %s", id_cognito)
+                id_user = cursor.fetchone()[0]
+        except Exception as e:
+            return handle_response(e, 'Error al obtener el id del usuario.', 500)
+        finally:
+            connection.close()
 
     if not (verify_auto(id_auto)):
         return handle_response(None, 'El auto no fue encontrado.', 400)
@@ -77,7 +98,7 @@ def verify_user(id_user):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id_user FROM user WHERE id_user = %s", id_user)
+            cursor.execute("SELECT id_user FROM user WHERE id_cognito = %s", id_user)
             result = cursor.fetchone()
             return result is not None
     except Exception:
@@ -111,3 +132,19 @@ def check_existing_review(id_user, id_auto):
         return False
     finally:
         connection.close()
+
+
+def get_jwt_claims(token):
+    try:
+        parts = token.split(".")
+        if len(parts) != 3:
+            raise ValueError("Token inválido")
+
+        payload_encoded = parts[1]
+        payload_decoded = base64.b64decode(payload_encoded + "==")
+        claims = json.loads(payload_decoded)
+
+        return claims
+
+    except ValueError as e:
+        raise e
