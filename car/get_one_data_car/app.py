@@ -58,7 +58,7 @@ def lambda_handler(event, context):
                 cars.append(car)
 
     except Exception as e:
-        return handle_response(e, 'Ocurrió un error al obtener la reseña.', 500)
+        return handle_response(e, 'Ocurrió un error al obtener la información del auto.', 500)
 
     finally:
         close_connection(connection)

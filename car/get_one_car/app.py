@@ -1,9 +1,8 @@
 import json
-
 try:
-    from connection import get_connection, handle_response
+    from connection import get_connection, handle_response, close_connection
 except ImportError:
-    from .connection import get_connection, handle_response
+    from .connection import get_connection, handle_response, close_connection
 
 headers_cors = {
     'Access-Control-Allow-Origin': '*',
@@ -13,14 +12,22 @@ headers_cors = {
 
 
 def lambda_handler(event, context):
-    connection = get_connection()
+    if 'queryStringParameters' in event:
+        id_auto = event['queryStringParameters'].get('id_auto')
+    else:
+        body = json.loads(event.get('body', '{}'))
+        id_auto = body.get('id_auto')
 
+    if not id_auto:
+        return handle_response(None, 'Falta un parametro.', 400)
+
+    connection = get_connection()
+    query = f"SELECT id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, a.description, s.value FROM auto a INNER JOIN status s ON a.id_status = s.id_status WHERE id_auto = {id_auto}"
     cars = []
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, a.description, s.value FROM auto a INNER JOIN status s ON a.id_status = s.id_status")
+            cursor.execute(query)
             result = cursor.fetchall()
 
             for row in result:
@@ -59,15 +66,18 @@ def lambda_handler(event, context):
 
                 cars.append(car)
 
+    except Exception as e:
+        return handle_response(e, 'Ocurrió un error al obtener la información del auto.', 500)
+
     finally:
-        connection.close()
+        close_connection(connection)
 
     return {
-        "statusCode": 200,
+        'statusCode': 200,
         'headers': headers_cors,
-        "body": json.dumps({
+        'body': json.dumps({
             'statusCode': 200,
-            'message': 'get cars',
+            'message': 'Informacion del auto obtenida correctamente.',
             'data': cars
-        }),
+        })
     }
