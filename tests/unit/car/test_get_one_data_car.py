@@ -172,7 +172,7 @@ class TestGetOneCar(unittest.TestCase):
         response = lambda_handler(event, context)
 
         mock_handle_response.assert_called_once_with(mock_cursor.execute.side_effect,
-                                                     'Ocurrió un error al obtener la reseña.', 500)
+                                                     'Ocurrió un error al obtener la información del auto.', 500)
 
     # Test for connection.py
 

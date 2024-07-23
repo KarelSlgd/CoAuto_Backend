@@ -544,6 +544,24 @@ Resources:
             Path: /get_data_cars
             Method: get
 
+  GetOneCarFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: car/get_one_car/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Timeout: 60
+      Events:
+        GetOneCar:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CarApi
+            Path: /get_one_car
+            Method: get
+
   ConfirmSignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -705,6 +723,9 @@ Outputs:
   GetDataCarsApiUrl:
     Description: "API Gateway endpoint URL with path get_data_cars for Prod stage to Car Model"
     Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_data_cars"
+  GetOneCarApiUrl:
+    Description: "API Gateway endpoint URL with path get_one_car for Prod stage to Car Model"
+    Value: !Sub "https://${CarApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_one_car"
 
   GetDataRateApiUrl:
     Description: "API Gateway endpoint URL with path get_data for Prod stage to Rate Model"
@@ -778,6 +799,9 @@ Outputs:
   GetDataCarsFunctionArn:
     Description: "Get data cars Lambda Function ARN"
     Value: !GetAtt GetDataCarsFunction.Arn
+  GetOneCarFunctionArn:
+    Description: "Get one car Lambda Function ARN"
+    Value: !GetAtt GetOneCarFunction.Arn
 
   GetDataRateFunctionArn:
     Description: "Get data rate Lambda Function ARN"
