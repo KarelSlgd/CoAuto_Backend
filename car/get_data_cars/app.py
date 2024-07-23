@@ -55,7 +55,10 @@ def lambda_handler(event, context):
 
                 if rate_results:
                     average_rating = sum(rate[0] for rate in rate_results) / len(rate_results)
-                    car['average_rating'] = average_rating
+                else:
+                    average_rating = 0
+
+                car['average_rating'] = average_rating
 
                 cars.append(car)
 
