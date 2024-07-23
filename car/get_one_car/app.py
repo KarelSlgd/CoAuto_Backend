@@ -12,7 +12,8 @@ headers_cors = {
 
 
 def lambda_handler(event, context):
-    if 'queryStringParameters' in event:
+    id_auto = None
+    if 'queryStringParameters' in event and event['queryStringParameters'] is not None:
         id_auto = event['queryStringParameters'].get('id_auto')
     else:
         body = json.loads(event.get('body', '{}'))
