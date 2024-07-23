@@ -562,6 +562,24 @@ Resources:
             Path: /get_one_car
             Method: get
 
+  SearchOneCarByFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: car/search_one_by/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Timeout: 60
+      Events:
+        SearchOneCarBy:
+            Type: Api
+            Properties:
+              RestApiId: !Ref CarApi
+              Path: /search_one_by
+              Method: get
+
   ConfirmSignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
