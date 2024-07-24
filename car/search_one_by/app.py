@@ -27,9 +27,9 @@ def lambda_handler(event, context):
         return handle_response(None, 'Faltan parámetros.', 400)
 
     col = {
-        'year': 'año',
-        'model': 'modelo',
-        'brand': 'marca'
+        'año': 'year',
+        'modelo': 'model',
+        'marca': 'brand'
     }.get(attribute_type.lower())
 
     if not col:
