@@ -580,6 +580,24 @@ Resources:
               Path: /search_one_by
               Method: get
 
+  SearchRateByFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: rate/search_rate_by/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Timeout: 60
+      Events:
+        SearchRateBy:
+            Type: Api
+            Properties:
+              RestApiId: !Ref RateApi
+              Path: /search_rate_by
+              Method: get
+
   ConfirmSignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -757,6 +775,9 @@ Outputs:
   DeleteDataRateApiUrl:
     Description: "API Gateway endpoint URL with path delete_data for Prod stage to Rate Model"
     Value: !Sub "https://${RateApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete_data"
+  SearchRateByApiUrl:
+    Description: "API Gateway endpoint URL with path search_rate_by for Prod stage to Rate Model"
+    Value: !Sub "https://${RateApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/search_rate_by"
 
   SignUpUserApiUrl:
     Description: "API Gateway endpoint URL with path sign_up for Prod stage to Cognito Model"
@@ -833,6 +854,9 @@ Outputs:
   DeleteDataRateFunctionArn:
     Description: "Delete data rate Lambda Function ARN"
     Value: !GetAtt DeleteDataRateFunction.Arn
+  SearchRateByFunctionArn:
+    Description: "Search rate by Lambda Function ARN"
+    Value: !GetAtt SearchRateByFunction.Arn
 
   RegisterUserFunctionArn:
     Description: "Register user Lambda Function ARN"

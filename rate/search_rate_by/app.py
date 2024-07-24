@@ -39,7 +39,7 @@ def lambda_handler(event, context):
     try:
         with connection.cursor() as cursor:
             sql = f"""
-                SELECT r.id_rate, r.value, comment, a.model, a.brand, u.name, u.lastname, a.id_auto, u.profile_image, s.value AS status
+                SELECT r.id_rate, r.value, comment, a.model, a.brand, u.name, u.lastname, a.id_auto, u.profile_image, s.value, a.year, u.email AS status
                 FROM rate r
                 INNER JOIN auto a ON r.id_auto=a.id_auto
                 INNER JOIN user u ON r.id_user=u.id_user
