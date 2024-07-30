@@ -258,22 +258,6 @@ Resources:
             Auth:
               Authorizer: CarAuthorizer
 
-  GetDataCarFunctionUrl:
-    Type: AWS::Lambda::Url
-    Properties:
-      AuthType: NONE
-      TargetFunctionArn: !GetAtt GetDataCarFunction.Arn
-      Cors:
-        AllowOrigins:
-          - "*"
-        AllowMethods:
-          - GET
-          - POST
-          - PUT
-          - DELETE
-        AllowHeaders:
-          - "*"
-
   SearchCarByFunction:
     Type: AWS::Serverless::Function
     Properties:
