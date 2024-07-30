@@ -126,12 +126,7 @@ Resources:
       Cors:
         AllowOrigin: "'*'"
         AllowHeaders: "'*'"
-        AllowMethods:
-          - OPTIONS
-          - POST
-          - GET
-          - PUT
-          - DELETE
+        AllowMethods: "'OPTIONS,POST,GET,PUT,DELETE'"
         MaxAge: 600
       Auth:
         Authorizers:
@@ -262,6 +257,23 @@ Resources:
             Method: get
             Auth:
               Authorizer: CarAuthorizer
+
+  GetDataCarFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      AuthType: NONE
+      TargetFunctionArn: !GetAtt GetDataCarFunction.Arn
+      Cors:
+        AllowOrigins:
+          - "*"
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        AllowHeaders:
+          - "*"
 
   SearchCarByFunction:
     Type: AWS::Serverless::Function
