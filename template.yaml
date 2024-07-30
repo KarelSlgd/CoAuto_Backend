@@ -120,7 +120,13 @@ Resources:
       Cors:
         AllowOrigin: "'*'"
         AllowHeaders: "'*'"
-        AllowMethods: "'OPTIONS,POST,GET,PUT,DELETE'"
+        AllowMethods:
+          - OPTIONS
+          - POST
+          - GET
+          - PUT
+          - DELETE
+        MaxAge: 600
       Auth:
         Authorizers:
           CarAuthorizer:
