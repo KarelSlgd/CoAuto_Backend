@@ -72,6 +72,7 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 200,
+        "headers": headers_cors,
         "body": json.dumps({
             'statusCode': 200,
             'message': 'get cars',
