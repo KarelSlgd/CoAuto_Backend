@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import json
 from car.delete_data_car.app import lambda_handler, delete_car
 from car.delete_data_car.connection import get_secret, get_connection, handle_response, headers_cors
@@ -8,18 +8,17 @@ from botocore.exceptions import ClientError
 
 class TestDeleteCar(unittest.TestCase):
 
+    @patch('car.delete_data_car.connection.pymysql.connect')
     @patch('car.delete_data_car.app.get_connection')
     @patch('car.delete_data_car.app.handle_response')
-    def test_lambda_handler_success(self, mock_handle_response, mock_get_connection):
+    def test_lambda_handler_success(self, mock_handle_response, mock_get_connection, mock_connection):
         event = {
             'body': json.dumps({'id_auto': 1, 'id_status': 2})
         }
         context = {}
 
-        mock_connection = MagicMock()
-        mock_cursor = MagicMock()
+        mock_cursor = mock_connection.cursor.return_value.__enter__.return_value
         mock_get_connection.return_value = mock_connection
-        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
         mock_cursor.fetchone.return_value = {'id_status': 2, 'name': 'to_auto'}
 
         response = lambda_handler(event, context)
@@ -53,26 +52,24 @@ class TestDeleteCar(unittest.TestCase):
             unittest.mock.ANY, 'Parametros inválidos', 400
         )
 
+    @patch('car.delete_data_car.connection.pymysql.connect')
     @patch('car.delete_data_car.app.get_connection')
     @patch('car.delete_data_car.app.handle_response')
-    def test_delete_car_invalid_status(self, mock_handle_response, mock_get_connection):
-        mock_connection = MagicMock()
-        mock_cursor = MagicMock()
+    def test_delete_car_invalid_status(self, mock_handle_response, mock_get_connection, mock_connection):
+        mock_cursor = mock_connection.cursor.return_value.__enter__.return_value
         mock_get_connection.return_value = mock_connection
-        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
         mock_cursor.fetchone.return_value = None
 
         response = delete_car(1, 2)
 
         mock_handle_response.assert_called_once_with(None, 'El status no es válido para autos.', 400)
 
+    @patch('car.delete_data_car.connection.pymysql.connect')
     @patch('car.delete_data_car.app.get_connection')
     @patch('car.delete_data_car.app.handle_response')
-    def test_delete_car_success(self, mock_handle_response, mock_get_connection):
-        mock_connection = MagicMock()
-        mock_cursor = MagicMock()
+    def test_delete_car_success(self, mock_handle_response, mock_get_connection, mock_connection):
+        mock_cursor = mock_connection.cursor.return_value.__enter__.return_value
         mock_get_connection.return_value = mock_connection
-        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
         mock_cursor.fetchone.return_value = {'id_status': 2, 'name': 'to_auto'}
 
         response = delete_car(1, 2)
@@ -80,13 +77,12 @@ class TestDeleteCar(unittest.TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertIn('Auto actualizado correctamente', response['body'])
 
+    @patch('car.delete_data_car.connection.pymysql.connect')
     @patch('car.delete_data_car.app.get_connection')
     @patch('car.delete_data_car.app.handle_response')
-    def test_delete_car_exception(self, mock_handle_response, mock_get_connection):
-        mock_connection = MagicMock()
-        mock_cursor = MagicMock()
+    def test_delete_car_exception(self, mock_handle_response, mock_get_connection, mock_connection):
+        mock_cursor = mock_connection.cursor.return_value.__enter__.return_value
         mock_get_connection.return_value = mock_connection
-        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
         mock_cursor.fetchone.side_effect = Exception("Database error")
 
         response = delete_car(1, 2)
@@ -97,8 +93,7 @@ class TestDeleteCar(unittest.TestCase):
 
     @patch('car.delete_data_car.connection.boto3.session.Session')
     def test_get_secret(self, mock_session):
-        mock_client = MagicMock()
-        mock_session.return_value.client.return_value = mock_client
+        mock_client = mock_session.return_value.client.return_value
         mock_client.get_secret_value.return_value = {
             'SecretString': json.dumps({
                 'HOST': 'localhost',
@@ -118,8 +113,7 @@ class TestDeleteCar(unittest.TestCase):
 
     @patch('car.delete_data_car.connection.boto3.session.Session')
     def test_get_secret_error(self, mock_session):
-        mock_client = MagicMock()
-        mock_session.return_value.client.return_value = mock_client
+        mock_client = mock_session.return_value.client.return_value
         mock_client.get_secret_value.side_effect = ClientError(
             {'Error': {'Code': 'ResourceNotFoundException'}}, 'GetSecretValue')
 
@@ -135,8 +129,7 @@ class TestDeleteCar(unittest.TestCase):
             'PASSWORD': 'pass',
             'DB_NAME': 'database'
         }
-        connection = MagicMock()
-        mock_connect.return_value = connection
+        connection = mock_connect.return_value
 
         result = get_connection()
 
