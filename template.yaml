@@ -250,12 +250,6 @@ Resources:
             Method: get
             Auth:
               Authorizer: CarAuthorizer
-        OptionsEvent:
-          Type: Api
-          Properties:
-            RestApiId: !Ref CarApi
-            Path: /get_data
-            Method: options
 
   SearchCarByFunction:
     Type: AWS::Serverless::Function

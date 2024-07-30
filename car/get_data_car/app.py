@@ -6,6 +6,12 @@ try:
 except ImportError:
     from .connection import get_connection, handle_response
 
+headers_cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+}
+
 
 def lambda_handler(event, context):
     connection = get_connection()
@@ -66,6 +72,7 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 200,
+        'headers': headers_cors,
         "body": json.dumps({
             'statusCode': 200,
             'message': 'get cars',
