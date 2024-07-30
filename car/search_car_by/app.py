@@ -5,7 +5,6 @@ except ImportError:
     from .connection import get_connection
 
 
-
 def build_query(filters):
     base_query = "SELECT id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, a.description, s.value FROM auto a INNER JOIN status s ON a.id_status = s.id_status"
     conditions = []
