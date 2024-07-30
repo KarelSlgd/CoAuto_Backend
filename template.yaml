@@ -271,7 +271,6 @@ Resources:
           - POST
           - PUT
           - DELETE
-          - OPTIONS
         AllowHeaders:
           - "*"
 
