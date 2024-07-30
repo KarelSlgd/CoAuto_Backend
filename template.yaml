@@ -7,7 +7,13 @@ Description: >
 
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 120
+    MemorySize: 256
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+      AllowHeaders: "'*'"
+      AllowOrigin: "'*'"
 
 Resources:
   LambdaExecutionRole:
