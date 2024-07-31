@@ -56,7 +56,7 @@ def lambda_handler(event, context):
         'headers': headers_cors,
         'body': json.dumps({
             'statusCode': 200,
-            'message': 'Reseñas por auto obtenidas correctamente.',
+            'message': 'Reseñas obtenidas correctamente.',
             'data': rates
         })
     }

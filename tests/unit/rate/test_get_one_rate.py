@@ -17,7 +17,7 @@ class TestGetOneRate(unittest.TestCase):
         mock_connection = MagicMock()
         mock_get_connection.return_value = mock_connection
         mock_execute_query.return_value = [
-            (1, 5, 'Great car!', 'Model X', 'Brand Y', 'John', 'Doe',"20213tn076@utez.edu.mx", 1, 'Active')
+            (1, 5, 'Great car!', 'Model X', 'Brand Y', 'John', 'Doe','20213tn076@utez.edu.mx', 1, 'Active')
         ]
 
         event = {
