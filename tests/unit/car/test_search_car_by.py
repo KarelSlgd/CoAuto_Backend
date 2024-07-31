@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import json
 import pymysql
 from car.search_car_by.app import build_query, lambda_handler
@@ -8,6 +8,126 @@ from botocore.exceptions import ClientError
 
 
 class TestSearchCarBy(unittest.TestCase):
+    def test_build_query_with_filters(self):
+        filters = {
+            'year': 2020,
+            'price': 15000,
+            'model': 'Model X',
+            'brand': 'Brand Y',
+            'doors': 4
+        }
+        expected_query = (
+            "SELECT id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, a.description, s.value FROM auto a INNER JOIN status s ON a.id_status = s.id_status"
+            " WHERE year = %s AND price <= %s AND model = %s AND brand = %s AND doors = %s"
+        )
+        expected_params = [2020, 15000, 'Model X', 'Brand Y', 4]
+
+        query, params = build_query(filters)
+
+        self.assertEqual(query, expected_query)
+        self.assertEqual(params, expected_params)
+
+    def test_build_query_no_filters(self):
+        filters = {}
+        expected_query = "SELECT id_auto, model, brand, year, price, type, fuel, doors, engine, height, width, length, a.description, s.value FROM auto a INNER JOIN status s ON a.id_status = s.id_status"
+        expected_params = []
+
+        query, params = build_query(filters)
+
+        self.assertEqual(query, expected_query)
+        self.assertEqual(params, expected_params)
+
+    @patch('car.search_car_by.app.get_connection')
+    @patch('car.search_car_by.app.handle_response_success')
+    def test_lambda_handler(self, mock_handle_response_success, mock_get_connection):
+        mock_connection = mock_get_connection.return_value
+        mock_cursor = mock_connection.cursor.return_value.__enter__.return_value
+
+        mock_cursor.fetchall.side_effect = [
+            [
+                (1, 'Model X', 'Brand Y', 2020, 15000, 'SUV', 'Gasoline', 4, 'V8', 1.5, 2.0, 3.0, 'A nice car',
+                 'Available')
+            ],
+            [
+                ('http://example.com/image1.jpg',),
+                ('http://example.com/image2.jpg',)
+            ]
+        ]
+
+        event = {
+            'queryStringParameters': {
+                'year': '2020',
+                'price': '15000'
+            }
+        }
+
+        expected_response = {
+            'statusCode': 200,
+            'body': json.dumps({
+                'message': 'Carros encontrados',
+                'data': [
+                    {
+                        'id_auto': 1,
+                        'model': 'Model X',
+                        'brand': 'Brand Y',
+                        'year': 2020,
+                        'price': 15000,
+                        'type': 'SUV',
+                        'fuel': 'Gasoline',
+                        'doors': 4,
+                        'engine': 'V8',
+                        'height': 1.5,
+                        'width': 2.0,
+                        'length': 3.0,
+                        'description': 'A nice car',
+                        'status': 'Available',
+                        'images': ['http://example.com/image1.jpg', 'http://example.com/image2.jpg']
+                    }
+                ]
+            })
+        }
+
+        mock_handle_response_success.return_value = expected_response
+
+        response = lambda_handler(event, None)
+
+        self.assertEqual(response, expected_response)
+        mock_handle_response_success.assert_called_once_with(200, 'Carros encontrados',
+                                                             json.loads(expected_response['body'])['data'])
+
+    @patch('car.search_car_by.app.get_connection')
+    @patch('car.search_car_by.app.handle_response_success')
+    def test_lambda_handler_no_data(self, mock_handle_response_success, mock_get_connection):
+        mock_connection = mock_get_connection.return_value
+        mock_cursor = mock_connection.cursor.return_value.__enter__.return_value
+
+        mock_cursor.fetchall.side_effect = [
+            [],
+            []
+        ]
+
+        event = {
+            'queryStringParameters': {
+                'year': '2020',
+                'price': '15000'
+            }
+        }
+
+        expected_response = {
+            'statusCode': 200,
+            'body': json.dumps({
+                'message': 'Carros encontrados',
+                'data': []
+            })
+        }
+
+        mock_handle_response_success.return_value = expected_response
+
+        response = lambda_handler(event, None)
+
+        self.assertEqual(response, expected_response)
+        mock_handle_response_success.assert_called_once_with(200, 'Carros encontrados', [])
+
     # Test for connection.py
 
     @patch('car.search_car_by.connection.boto3.session.Session.client')
