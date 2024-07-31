@@ -55,3 +55,15 @@ def handle_response(error, message, status_code):
             'error': str(error)
         })
     }
+
+
+def handle_response_success(status_code, message, data):
+    return {
+        'statusCode': status_code,
+        'headers': headers_cors,
+        'body': json.dumps({
+            'statusCode': status_code,
+            'message': message,
+            'data': data
+        })
+    }

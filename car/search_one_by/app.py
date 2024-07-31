@@ -1,14 +1,9 @@
 import json
-try:
-    from connection import get_connection, handle_response, close_connection
-except ImportError:
-    from .connection import get_connection, handle_response, close_connection
 
-headers_cors = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': '*',
-    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
-}
+try:
+    from connection import get_connection, handle_response, handle_response_success
+except ImportError:
+    from .connection import get_connection, handle_response, handle_response_success
 
 
 def lambda_handler(event, context):
@@ -75,14 +70,6 @@ def lambda_handler(event, context):
         return handle_response(e, 'Ocurrió un error al obtener la información del auto.', 500)
 
     finally:
-        close_connection(connection)
+        connection.close()
 
-    return {
-        'statusCode': 200,
-        'headers': headers_cors,
-        'body': json.dumps({
-            'statusCode': 200,
-            'message': 'Información del auto obtenida correctamente.',
-            'data': cars
-        })
-    }
+    return handle_response_success(200, 'Consulta exitosa.', cars)

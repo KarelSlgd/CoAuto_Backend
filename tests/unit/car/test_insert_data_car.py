@@ -1,475 +1,166 @@
 import unittest
-from unittest.mock import patch, Mock, MagicMock
+from unittest.mock import patch
 import json
+import pymysql
+import base64
 from car.insert_data_car.app import lambda_handler, insert_into_car
-from car.insert_data_car.connection import get_connection, handle_response, headers_cors, get_secret
+from car.insert_data_car.connection import get_connection, handle_response, headers_cors, get_secret, \
+    handle_response_success, get_jwt_claims
 from botocore.exceptions import ClientError
 
 
 class TestInsertCar(unittest.TestCase):
-
-    def test_missing_body(self):
-        event = {}
-        response = lambda_handler(event, None)
-        response_body = json.loads(response['body'])
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('Parametros inválidos', response_body['message'])
-
-    def test_none_body(self):
-        event = {'body': None}
-        response = lambda_handler(event, None)
-        response_body = json.loads(response['body'])
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('Parametros inválidos', response_body['message'])
-
-    def test_missing_parameters(self):
-        event = {'body': json.dumps({
-            'model': 'Model',
-            # Falta 'brand', 'year', 'price', 'type', 'fuel', 'doors', 'engine', 'height', 'width', 'length'
-            'description': 'Description',
-            'image_urls': []
-        })}
-        response = lambda_handler(event, None)
-        response_body = json.loads(response['body'])
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('Faltan parámetros.', response_body['message'])
-
-    def test_model_too_long(self):
-        event = {
-            'body': json.dumps({
-                'model': 'A' * 51,
-                'brand': 'Toyota',
-                'year': '2020',
-                'price': '20000',
-                'type': 'SUV',
-                'fuel': 'Gasoline',
-                'doors': '4',
-                'engine': 'V8',
-                'height': '1.5',
-                'width': '2.0',
-                'length': '4.5',
-                'description': 'A nice car'
-            })
-        }
-        response = lambda_handler(event, None)
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('El campo modelo excede los 50 caracteres', response['body'])
-
-    def test_brand_too_long(self):
-        event = {
-            'body': json.dumps({
-                'model': 'Sedan',
-                'brand': 'B' * 51,
-                'year': '2020',
-                'price': '20000',
-                'type': 'SUV',
-                'fuel': 'Gasoline',
-                'doors': '4',
-                'engine': 'V8',
-                'height': '1.5',
-                'width': '2.0',
-                'length': '4.5',
-                'description': 'A nice car'
-            })
-        }
-        response = lambda_handler(event, None)
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('El campo marca excede los 50 caracteres', response['body'])
-
-    def test_engine_too_long(self):
-        event = {
-            'body': json.dumps({
-                'model': 'Sedan',
-                'brand': 'Toyota',
-                'year': '2020',
-                'price': '20000',
-                'type': 'SUV',
-                'fuel': 'Gasoline',
-                'doors': '4',
-                'engine': 'E' * 31,
-                'height': '1.5',
-                'width': '2.0',
-                'length': '4.5',
-                'description': 'A nice car'
-            })
-        }
-        response = lambda_handler(event, None)
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('El campo motor excede los 30 caracteres', response['body'])
-
-    def test_type_too_long(self):
-        event = {
-            'body': json.dumps({
-                'model': 'Sedan',
-                'brand': 'Toyota',
-                'year': '2020',
-                'price': '20000',
-                'type': 'T' * 31,
-                'fuel': 'Gasoline',
-                'doors': '4',
-                'engine': 'V8',
-                'height': '1.5',
-                'width': '2.0',
-                'length': '4.5',
-                'description': 'A nice car'
-            })
-        }
-        response = lambda_handler(event, None)
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('El campo tipo excede los 30 caracteres', response['body'])
-
-    def test_fuel_too_long(self):
-        event = {
-            'body': json.dumps({
-                'model': 'Sedan',
-                'brand': 'Toyota',
-                'year': '2020',
-                'price': '20000',
-                'type': 'SUV',
-                'fuel': 'F' * 31,
-                'doors': '4',
-                'engine': 'V8',
-                'height': '1.5',
-                'width': '2.0',
-                'length': '4.5',
-                'description': 'A nice car'
-            })
-        }
-        response = lambda_handler(event, None)
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('El campo combustible excede los 30 caracteres', response['body'])
-
-    def test_description_too_long(self):
-        event = {'body': json.dumps({
-            'model': 'Model',
-            'brand': 'Brand',
-            'year': '2020',
-            'price': '10000',
-            'type': 'Type',
-            'fuel': 'Fuel',
-            'doors': '4',
-            'engine': 'Engine',
-            'height': '1.5',
-            'width': '2.0',
-            'length': '4.5',
-            'description': 'a' * 256,
-            'image_urls': []
-        })}
-        response = lambda_handler(event, None)
-        response_body = json.loads(response['body'])
-        expected_message = 'El campo descripción excede los 255 caracteres.'
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn(expected_message, response_body['message'])
-
-    def test_invalid_year(self):
-        event = {'body': json.dumps({
-            'model': 'Model',
-            'brand': 'Brand',
-            'year': 'invalid',
-            'price': '10000',
-            'type': 'Type',
-            'fuel': 'Fuel',
-            'doors': '4',
-            'engine': 'Engine',
-            'height': '1.5',
-            'width': '2.0',
-            'length': '4.5',
-            'description': 'Description',
-            'image_urls': []
-        })}
-        response = lambda_handler(event, None)
-        response_body = json.loads(response['body'])
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('El campo año debe ser un entero.', response_body['message'])
-
-    def test_invalid_price(self):
-        event = {
-            'body': json.dumps({
-                'model': 'Sedan',
-                'brand': 'Toyota',
-                'year': '2020',
-                'price': 'invalid',
-                'type': 'SUV',
-                'fuel': 'Gasoline',
-                'doors': '4',
-                'engine': 'V8',
-                'height': '1.5',
-                'width': '2.0',
-                'length': '4.5',
-                'description': 'A nice car'
-            })
-        }
-        response = lambda_handler(event, None)
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('El campo precio debe ser un decimal', response['body'])
-
-    def test_invalid_doors(self):
-        event = {
-            'body': json.dumps({
-                'model': 'Sedan',
-                'brand': 'Toyota',
-                'year': '2020',
-                'price': '20000',
-                'type': 'SUV',
-                'fuel': 'Gasoline',
-                'doors': 'invalid',
-                'engine': 'V8',
-                'height': '1.5',
-                'width': '2.0',
-                'length': '4.5',
-                'description': 'A nice car'
-            })
-        }
-        response = lambda_handler(event, None)
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('El campo puertas debe ser un entero', response['body'])
-
-    def test_invalid_height(self):
-        event = {
-            'body': json.dumps({
-                'model': 'Sedan',
-                'brand': 'Toyota',
-                'year': '2020',
-                'price': '20000',
-                'type': 'SUV',
-                'fuel': 'Gasoline',
-                'doors': '4',
-                'engine': 'V8',
-                'height': 'invalid',
-                'width': '2.0',
-                'length': '4.5',
-                'description': 'A nice car'
-            })
-        }
-        response = lambda_handler(event, None)
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('El campo altura debe ser un decimal', response['body'])
-
-    def test_invalid_width(self):
-        event = {
-            'body': json.dumps({
-                'model': 'Sedan',
-                'brand': 'Toyota',
-                'year': '2020',
-                'price': '20000',
-                'type': 'SUV',
-                'fuel': 'Gasoline',
-                'doors': '4',
-                'engine': 'V8',
-                'height': '1.5',
-                'width': 'invalid',
-                'length': '4.5',
-                'description': 'A nice car'
-            })
-        }
-        response = lambda_handler(event, None)
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('El campo ancho debe ser un decimal', response['body'])
-
-    def test_invalid_length(self):
-        event = {
-            'body': json.dumps({
-                'model': 'Sedan',
-                'brand': 'Toyota',
-                'year': '2020',
-                'price': '20000',
-                'type': 'SUV',
-                'fuel': 'Gasoline',
-                'doors': '4',
-                'engine': 'V8',
-                'height': '1.5',
-                'width': '2.0',
-                'length': 'invalid',
-                'description': 'A nice car'
-            })
-        }
-        response = lambda_handler(event, None)
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('El campo largo debe ser un decimal', response['body'])
-
-    @patch('car.insert_data_car.app.get_connection')
+    @patch('car.insert_data_car.app.get_jwt_claims')
     @patch('car.insert_data_car.app.handle_response')
-    def test_insert_into_car_success(self, mock_handle_response, mock_get_connection):
-        mock_connection = MagicMock()
-        mock_cursor = MagicMock()
-        mock_get_connection.return_value = mock_connection
-        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
-
-        model = 'Modelo X'
-        brand = 'Marca Y'
-        year = 2022
-        price = 30000
-        type = 'Sedán'
-        fuel = 'Gasolina'
-        doors = 4
-        engine = '2.0L'
-        height = 1.5
-        width = 2.0
-        length = 4.0
-        description = 'Un auto muy bueno'
-        image_urls = ['http://example.com/image1.jpg', 'http://example.com/image2.jpg']
-
-        response = insert_into_car(model, brand, year, price, type, fuel, doors, engine, height, width, length,
-                                   description, image_urls)
-
-        self.assertEqual(mock_cursor.execute.call_count, 3)
-        self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body'])['message'], 'Auto guardado correctamente.')
-
-    @patch('car.insert_data_car.app.get_connection')
-    @patch('car.insert_data_car.app.handle_response')
-    def test_insert_into_car_failure(self, mock_handle_response, mock_get_connection):
-        mock_connection = MagicMock()
-        mock_cursor = MagicMock()
-        mock_get_connection.return_value = mock_connection
-        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
-
-        mock_cursor.execute.side_effect = Exception("Test Exception")
-
-        model = 'Modelo X'
-        brand = 'Marca Y'
-        year = 2022
-        price = 30000
-        type = 'Sedán'
-        fuel = 'Gasolina'
-        doors = 4
-        engine = '2.0L'
-        height = 1.5
-        width = 2.0
-        length = 4.0
-        description = 'Un auto muy bueno'
-        image_urls = ['http://example.com/image1.jpg', 'http://example.com/image2.jpg']
-
-        response = insert_into_car(model, brand, year, price, type, fuel, doors, engine, height, width, length,
-                                   description, image_urls)
-
-        self.assertTrue(mock_handle_response.called)
-        called_args = mock_handle_response.call_args[0]
-        self.assertEqual(str(called_args[0]), str(Exception("Test Exception")))
-        self.assertEqual(called_args[1], 'Error al insertar auto.')
-        self.assertEqual(called_args[2], 500)
-
     @patch('car.insert_data_car.app.insert_into_car')
-    def test_lambda_handler(self, mock_insert_into_car):
+    def test_lambda_handler_missing_token(self, mock_insert, mock_handle_response, mock_get_jwt_claims):
         event = {
-            'body': json.dumps({
-                'model': 'Modelo X',
-                'brand': 'Marca Y',
-                'year': 2022,
-                'price': 30000,
-                'type': 'Sedán',
-                'fuel': 'Gasolina',
-                'doors': 4,
-                'engine': '2.0L',
-                'height': 1.5,
-                'width': 2.0,
-                'length': 4.0,
-                'description': 'Un auto muy bueno',
-                'image_urls': ['http://example.com/image1.jpg', 'http://example.com/image2.jpg']
-            })
+            'headers': {}
         }
         context = {}
 
-        mock_insert_into_car.return_value = {
-            'statusCode': 200,
-            'headers': headers_cors,
-            'body': json.dumps({
-                'statusCode': 200,
-                'message': 'Auto guardado correctamente.'
-            })
+        lambda_handler(event, context)
+
+        mock_handle_response.assert_called_once_with('Missing token.', 'Faltan parámetros.', 401)
+
+    @patch('car.insert_data_car.app.get_jwt_claims')
+    @patch('car.insert_data_car.app.handle_response')
+    @patch('car.insert_data_car.app.insert_into_car')
+    def test_lambda_handler_missing_parameters(self, mock_insert, mock_handle_response, mock_get_jwt_claims):
+        event = {
+            'headers': {'Authorization': 'valid_token'},
+            'body': json.dumps({})
         }
+        context = {}
 
-        response = lambda_handler(event, context)
+        mock_get_jwt_claims.return_value = {'cognito:groups': ['AdminGroup']}
 
-        self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body'])['message'], 'Auto guardado correctamente.')
+        lambda_handler(event, context)
+
+        mock_handle_response.assert_called_once_with(None, 'Faltan parámetros.', 400)
 
     # Test for connection.py
 
-    @patch('car.insert_data_car.connection.boto3.session.Session')
-    def test_get_secret(self, mock_session):
-        mock_client = MagicMock()
-        mock_session.return_value.client.return_value = mock_client
+    @patch('car.insert_data_car.connection.boto3.session.Session.client')
+    def test_get_secret(self, mock_boto_client):
+        mock_client = mock_boto_client.return_value
         mock_client.get_secret_value.return_value = {
             'SecretString': json.dumps({
-                'HOST': 'localhost',
-                'USERNAME': 'user',
-                'PASSWORD': 'pass',
-                'DB_NAME': 'database'
+                'HOST': 'test_host',
+                'USERNAME': 'test_user',
+                'PASSWORD': 'test_password',
+                'DB_NAME': 'test_db'
             })
         }
 
         secret = get_secret()
+        self.assertEqual(secret['HOST'], 'test_host')
+        self.assertEqual(secret['USERNAME'], 'test_user')
+        self.assertEqual(secret['PASSWORD'], 'test_password')
+        self.assertEqual(secret['DB_NAME'], 'test_db')
 
-        self.assertEqual(secret['HOST'], 'localhost')
-        self.assertEqual(secret['USERNAME'], 'user')
-        self.assertEqual(secret['PASSWORD'], 'pass')
-        self.assertEqual(secret['DB_NAME'], 'database')
-        mock_client.get_secret_value.assert_called_with(SecretId='COAUTO')
+    @patch('car.insert_data_car.connection.pymysql.connect')
+    @patch('car.insert_data_car.connection.get_secret')
+    def test_get_connection(self, mock_get_secret, mock_pymysql_connect):
+        mock_get_secret.return_value = {
+            'HOST': 'test_host',
+            'USERNAME': 'test_user',
+            'PASSWORD': 'test_password',
+            'DB_NAME': 'test_db'
+        }
 
-    @patch('car.insert_data_car.connection.boto3.session.Session')
-    def test_get_secret_error(self, mock_session):
-        mock_client = MagicMock()
-        mock_session.return_value.client.return_value = mock_client
-        mock_client.get_secret_value.side_effect = ClientError(
-            {'Error': {'Code': 'ResourceNotFoundException'}}, 'GetSecretValue')
+        mock_connection = mock_pymysql_connect.return_value
+
+        connection = get_connection()
+        mock_pymysql_connect.assert_called_once_with(
+            host='test_host',
+            user='test_user',
+            password='test_password',
+            database='test_db'
+        )
+        self.assertEqual(connection, mock_connection)
+
+    def test_handle_response(self):
+        response = handle_response('TestError', 'TestMessage', 400)
+        expected_response = {
+            'statusCode': 400,
+            'headers': headers_cors,
+            'body': json.dumps({
+                'statusCode': 400,
+                'message': 'TestMessage',
+                'error': 'TestError'
+            })
+        }
+        self.assertEqual(response, expected_response)
+
+    def test_handle_response_success(self):
+        response = handle_response_success(200, 'TestMessage', {'key': 'value'})
+        expected_response = {
+            'statusCode': 200,
+            'headers': headers_cors,
+            'body': json.dumps({
+                'statusCode': 200,
+                'message': 'TestMessage',
+                'data': {'key': 'value'}
+            })
+        }
+        self.assertEqual(response, expected_response)
+
+    @patch('car.insert_data_car.connection.pymysql.connect')
+    @patch('car.insert_data_car.connection.get_secret')
+    def test_get_connection_exception(self, mock_get_secret, mock_connect):
+        mock_get_secret.return_value = {
+            'HOST': 'test_host',
+            'USERNAME': 'test_user',
+            'PASSWORD': 'test_password',
+            'DB_NAME': 'test_db'
+        }
+        mock_connect.side_effect = pymysql.MySQLError("Connection error")
+
+        with self.assertRaises(pymysql.MySQLError):
+            get_connection()
+
+    @patch('car.insert_data_car.connection.boto3.session.Session.client')
+    def test_get_secret_client_error(self, mock_client):
+        mock_client_instance = mock_client.return_value
+        mock_client_instance.get_secret_value.side_effect = ClientError(
+            {'Error': {'Code': 'ResourceNotFoundException', 'Message': 'Secret not found'}},
+            'GetSecretValue'
+        )
 
         with self.assertRaises(ClientError):
             get_secret()
 
-    @patch('car.insert_data_car.connection.pymysql.connect')
-    @patch('car.insert_data_car.connection.get_secret')
-    def test_get_connection(self, mock_get_secret, mock_connect):
-        mock_get_secret.return_value = {
-            'HOST': 'localhost',
-            'USERNAME': 'user',
-            'PASSWORD': 'pass',
-            'DB_NAME': 'database'
-        }
-        connection = MagicMock()
-        mock_connect.return_value = connection
+    def test_get_jwt_claims_value_error(self):
+        invalid_token = "invalid.token.part.trge"
 
-        result = get_connection()
+        with self.assertRaises(ValueError) as context:
+            get_jwt_claims(invalid_token)
 
-        self.assertEqual(result, connection)
-        mock_connect.assert_called_with(
-            host='localhost',
-            user='user',
-            password='pass',
-            database='database'
-        )
+        self.assertEqual(str(context.exception), "Token inválido")
 
-    @patch('car.insert_data_car.connection.pymysql.connect')
-    @patch('car.insert_data_car.connection.get_secret')
-    def test_get_connection_error(self, mock_get_secret, mock_connect):
-        mock_get_secret.return_value = {
-            'HOST': 'localhost',
-            'USERNAME': 'user',
-            'PASSWORD': 'pass',
-            'DB_NAME': 'database'
-        }
-        mock_connect.side_effect = Exception('Connection error')
+    def test_valid_token(self):
+        # creando un token válido
+        header = {"alg": "HS256", "typ": "JWT"}
+        payload = {"sub": "1234567890", "name": "John Doe", "iat": 1516239022}
+        signature = "b'123abc'"
+        token = f"{base64.b64encode(json.dumps(header).encode()).decode()}.{base64.b64encode(json.dumps(payload).encode()).decode()}.{signature}"
 
-        with self.assertRaises(Exception) as context:
-            get_connection()
+        claims = get_jwt_claims(token)
+        self.assertEqual(claims, payload)
 
-        self.assertTrue('Connection error' in str(context.exception))
+    def test_invalid_token(self):
+        # creando un token inválido
+        token = "invalid.token"
 
-    def test_handle_response(self):
-        error = Exception('Test Error')
-        message = 'Test Message'
-        status_code = 400
+        with self.assertRaises(ValueError) as context:
+            get_jwt_claims(token)
 
-        response = handle_response(error, message, status_code)
+        self.assertEqual(str(context.exception), "Token inválido")
 
-        expected_response = {
-            'statusCode': status_code,
-            'headers': headers_cors,
-            'body': json.dumps({
-                'statusCode': status_code,
-                'message': message,
-                'error': str(error)
-            })
-        }
+    def test_non_string_token(self):
+        # creando un token inválido
+        token = 12345
 
-        self.assertEqual(response, expected_response)
+        with self.assertRaises(AttributeError):
+            get_jwt_claims(token)

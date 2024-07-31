@@ -46,21 +46,6 @@ def get_secret():
     return json.loads(secret)
 
 
-def execute_query(connection, query):
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute(query)
-            result = cursor.fetchall()
-            return result
-    except Exception:
-        return None
-
-
-def close_connection(connection):
-    if connection:
-        connection.close()
-
-
 def handle_response(error, message, status_code):
     return {
         'statusCode': status_code,
@@ -69,5 +54,17 @@ def handle_response(error, message, status_code):
             'statusCode': status_code,
             'message': message,
             'error': str(error)
+        })
+    }
+
+
+def handle_response_success(status_code, message, data):
+    return {
+        'statusCode': status_code,
+        'headers': headers_cors,
+        'body': json.dumps({
+            'statusCode': status_code,
+            'message': message,
+            'data': data
         })
     }

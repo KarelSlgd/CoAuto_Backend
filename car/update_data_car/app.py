@@ -1,17 +1,26 @@
 import json
 try:
-    from connection import get_connection, handle_response
+    from connection import get_connection, handle_response, handle_response_success, get_jwt_claims
 except ImportError:
-    from .connection import get_connection, handle_response
-
-headers_cors = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': '*',
-    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
-}
+    from .connection import get_connection, handle_response, handle_response_success, get_jwt_claims
 
 
 def lambda_handler(event, context):
+    headers = event.get('headers', {})
+    token = headers.get('Authorization')
+
+    if not token:
+        return handle_response('Missing token.', 'Faltan parámetros.', 401)
+
+    try:
+        decoded_token = get_jwt_claims(token)
+        role = decoded_token.get('cognito:groups')
+        if 'ClientUserGroup' in role:
+            return handle_response('Acceso denegado. El rol no puede ser cliente.', 'Acceso denegado.', 401)
+
+    except Exception as e:
+        return handle_response(e, 'Error al decodificar token.', 401)
+
     try:
         body = json.loads(event['body'])
     except (TypeError, KeyError, json.JSONDecodeError):
@@ -123,14 +132,7 @@ def update_car(id_auto, model, brand, year, price, type, fuel, doors, engine, he
     finally:
         connection.close()
 
-    return {
-        'statusCode': 200,
-        'headers': headers_cors,
-        'body': json.dumps({
-            'statusCode': 200,
-            'message': 'Auto actualizado correctamente.'
-        })
-    }
+    return handle_response_success(200, 'Auto actualizado correctamente.', None)
 
 
 def get_existing_image_urls(cursor, id_auto):

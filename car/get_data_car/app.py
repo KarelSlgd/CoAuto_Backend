@@ -1,36 +1,12 @@
-import json
-import base64
 
 try:
-    from connection import get_connection, handle_response
+    from connection import get_connection, handle_response, handle_response_success
 except ImportError:
-    from .connection import get_connection, handle_response
-
-headers_cors = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': '*',
-    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
-}
+    from .connection import get_connection, handle_response, handle_response_success
 
 
 def lambda_handler(event, context):
     connection = get_connection()
-
-    #headers = event.get('headers', {})
-    #token = headers.get('Authorization')
-
-    #if not token:
-    #    return handle_response('Missing token.', 'Faltan parámetros.', 401)
-
-    #try:
-    #    decoded_token = get_jwt_claims(token)
-    #    role = decoded_token.get('cognito:groups')
-    #    if 'ClientUserGroup' in role:
-    #        return handle_response('Acceso denegado. El rol no puede ser cliente.', 'Acceso denegado.', 401)
-
-
-    #except Exception as e:
-    #    return handle_response(e, 'Error al decodificar token.', 401)
 
     cars = []
 
@@ -70,28 +46,5 @@ def lambda_handler(event, context):
     finally:
         connection.close()
 
-    return {
-        "statusCode": 200,
-        "headers": headers_cors,
-        "body": json.dumps({
-            'statusCode': 200,
-            'message': 'get cars',
-            'data': cars
-        }),
-    }
+    return handle_response_success(200, 'Todos los autos obtenidos correctamente.', cars)
 
-
-def get_jwt_claims(token):
-    try:
-        parts = token.split(".")
-        if len(parts) != 3:
-            raise ValueError("Token inválido")
-
-        payload_encoded = parts[1]
-        payload_decoded = base64.b64decode(payload_encoded + "==")
-        claims = json.loads(payload_decoded)
-
-        return claims
-
-    except ValueError as e:
-        raise e

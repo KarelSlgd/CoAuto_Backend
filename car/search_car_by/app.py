@@ -1,8 +1,7 @@
-import json
 try:
-    from connection import get_connection
+    from connection import get_connection, handle_response_success
 except ImportError:
-    from .connection import get_connection
+    from .connection import get_connection, handle_response_success
 
 
 def build_query(filters):
@@ -73,16 +72,4 @@ def lambda_handler(event, context):
     finally:
         connection.close()
 
-    return {
-        "statusCode": 200,
-        'headers': {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
-        },
-        "body": json.dumps({
-            'statusCode': 200,
-            'message': 'Carros encontrados',
-            'data': cars
-        }),
-    }
+    return handle_response_success(200, 'Carros encontrados', cars)
